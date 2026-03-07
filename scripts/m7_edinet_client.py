@@ -92,7 +92,10 @@ def download_pdf(doc_id: str, output_dir: str) -> str:
         raise ValueError(f"無効な書類管理番号: '{doc_id}'（S + 7桁英数字が必要）")
 
     if USE_MOCK_EDINET:
-        sample = _SAMPLES_DIR / "company_a.pdf"
+        # OSS公開用架空企業サンプルPDF（tests/fixtures/sample_yuho.pdf）を優先使用
+        sample_yuho = Path(__file__).parent.parent / "tests" / "fixtures" / "sample_yuho.pdf"
+        sample_legacy = _SAMPLES_DIR / "company_a.pdf"
+        sample = sample_yuho if sample_yuho.exists() else sample_legacy
         if sample.exists():
             return str(sample)
         raise FileNotFoundError(f"モック用サンプルPDFが見つかりません: {sample}")

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "yaml_path": "/path/to/disclosure-multiagent/10_Research/law_entries_human_capital.yaml",
+    "yaml_path": "10_Research/law_entries_human_capital.yaml",
     "total_entries": 7,
     "unconfirmed_count": 2,
     "candidates_found": 2,

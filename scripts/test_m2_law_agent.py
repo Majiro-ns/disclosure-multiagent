@@ -494,11 +494,11 @@ class TestLawsDirectoryLoading(unittest.TestCase):
         )
 
     def test_laws_dir_has_three_yamls(self):
-        """laws/ 配下に3件のYAMLが存在すること"""
+        """laws/ 配下に4件のYAMLが存在すること（banking_2025.yaml追加済み）"""
         yaml_files = list(LAW_YAML_DIR.glob("*.yaml"))
         self.assertEqual(
-            len(yaml_files), 3,
-            f"laws/*.yaml が3件ではありません: {[f.name for f in yaml_files]}"
+            len(yaml_files), 4,
+            f"laws/*.yaml が4件ではありません: {[f.name for f in yaml_files]}"
         )
 
     def test_load_all_from_dir_returns_all_entries(self):
@@ -506,7 +506,7 @@ class TestLawsDirectoryLoading(unittest.TestCase):
         if not LAW_YAML_DIR.exists():
             self.skipTest(f"laws/ ディレクトリが存在しません: {LAW_YAML_DIR}")
         all_entries, _ = _load_all_from_dir(LAW_YAML_DIR)
-        # 3ファイル結合（human_capital + ssbj + shareholder_notice）で40件超を期待
+        # 4ファイル結合（human_capital + ssbj + shareholder_notice + banking_2025）で40件超を期待
         self.assertGreater(len(all_entries), 40,
                            f"laws/ 全YAML結合エントリ数が少なすぎます: {len(all_entries)}件")
 

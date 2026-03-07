@@ -14,11 +14,11 @@ disclosure-multiagent T010: チェックリスト評価履歴・バッチ評価 
   TC-E8: 複数評価後のリスト → count=2, 最新順
 
 CHECK-9 根拠:
-  TC-E1: UUID4 形式・evaluated_at・total_checked=25（全件）を検証。
+  TC-E1: UUID4 形式・evaluated_at・total_checked=35（全件）を検証。
   TC-E2: disclosure_text="" → HTTPException(400) を検証。
   TC-E3: 空DBではevaluations=[], count=0。
   TC-E4: evaluate 1回後 → evaluations list に1件が含まれる。
-  TC-E5: eval_id で詳細取得 → results に 25 件含まれる。
+  TC-E5: eval_id で詳細取得 → results に 35 件含まれる。
   TC-E6: 存在しないUUID → 404。
   TC-E7: "減損損失" を含むテキスト → CL-001（keywords: ["減損損失"]）がマッチ
          → matched_count >= 1, coverage_rate > 0.0。
@@ -73,10 +73,11 @@ class TestEvaluate(unittest.TestCase):
         self._tmpdir.cleanup()
 
     def test_tc_e1_evaluate_returns_eval_id(self):
-        """TC-E1: 正常テキスト → 200, eval_id（UUID4形式）・total_checked=25 を返す。
+        """TC-E1: 正常テキスト → 200, eval_id（UUID4形式）・total_checked=35 を返す。
 
         根拠: evaluate_and_save は categories=None, required_only=False で
-             全25項目を照合し、UUID4を生成して返す。
+             全35項目を照合し、UUID4を生成して返す。
+             （25→35: banking_2025.yaml追加により項目数増加）
         """
         resp = self.client.post(
             "/api/checklist/evaluate",
@@ -92,7 +93,7 @@ class TestEvaluate(unittest.TestCase):
 
         self.assertIn("evaluated_at", body)
         self.assertIn("text_snippet", body)
-        self.assertEqual(body["total_checked"], 25, "全件（25項目）を照合すること")
+        self.assertEqual(body["total_checked"], 35, "全件（35項目）を照合すること")
         self.assertIn("coverage_rate", body)
         self.assertGreaterEqual(body["coverage_rate"], 0.0)
         self.assertLessEqual(body["coverage_rate"], 1.0)
@@ -124,7 +125,7 @@ class TestEvaluate(unittest.TestCase):
         """TC-E7: "減損損失" を含むテキスト → coverage_rate > 0.0。
 
         根拠: CL-001 の keywords に "減損損失" が含まれる。
-             テキストにマッチ → matched_count >= 1 → coverage_rate = matched/25 > 0。
+             テキストにマッチ → matched_count >= 1 → coverage_rate = matched/35 > 0。
         """
         resp = self.client.post(
             "/api/checklist/evaluate",
@@ -219,10 +220,11 @@ class TestEvaluationDetail(unittest.TestCase):
         self._tmpdir.cleanup()
 
     def test_tc_e5_get_evaluation_detail_returns_results(self):
-        """TC-E5: 存在する eval_id → 200, results に 25 件含まれる。
+        """TC-E5: 存在する eval_id → 200, results に 35 件含まれる。
 
-        根拠: evaluate_and_save は全 25 項目の結果を results_json に保存。
+        根拠: evaluate_and_save は全 35 項目の結果を results_json に保存。
              詳細取得 API は results を parse して返す。
+             （25→35: banking_2025.yaml追加により項目数増加）
         """
         post_resp = self.client.post(
             "/api/checklist/evaluate",
@@ -237,7 +239,7 @@ class TestEvaluationDetail(unittest.TestCase):
 
         self.assertEqual(body["eval_id"], eval_id)
         self.assertIn("results", body)
-        self.assertEqual(len(body["results"]), 25, "全 25 項目の results が返されること")
+        self.assertEqual(len(body["results"]), 35, "全 35 項目の results が返されること")
         self.assertIn("unmatched_required_ids", body)
 
         # results の各項目が期待フィールドを持つことを確認
