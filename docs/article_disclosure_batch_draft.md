@@ -188,7 +188,7 @@ python3 scripts/m7_edinet_client.py --company トヨタ自動車 --year 2025
 disclosure-multiagent の `laws/` ディレクトリには法令YAMLが格納されています。各エントリには `source`（法令参照URL）と `source_confirmed`（URLの有効性確認フラグ）があります。
 
 ```yaml
-# laws/ssbj_2025.yaml の例
+# 10_Research/law_entries_human_capital.yaml の例
 - id: sb-2025-001
   title: "SSBJ確定基準 S1 第13項 — ガバナンス開示"
   source: "https://www.ssb.or.jp/..."
@@ -617,7 +617,7 @@ python3 scripts/m7_edinet_client.py --date 2026-03-01
 
 ---
 
-## 7. テスト構成（pytest 71件 PASS）
+## 7. テスト構成（pytest 16件 PASS）
 
 M6〜M8 には対応するテストファイルが整備されています。
 
@@ -642,7 +642,7 @@ scripts/
 # M6〜M8 のテストのみ実行
 pytest scripts/test_m6*.py scripts/test_m7*.py scripts/test_m8*.py -v
 
-# 全テスト実行（71件 PASS）
+# 全テスト実行（16件 PASS）
 pytest scripts/ -v --tb=short
 ```
 
