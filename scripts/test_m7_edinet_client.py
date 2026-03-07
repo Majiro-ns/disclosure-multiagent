@@ -122,11 +122,17 @@ def test_tc10_fetch_document_list_real_api_no_key(monkeypatch):
 
 # ── TC-11〜12: download_pdf ───────────────────────────────────────────────
 
-def test_tc11_download_pdf_mock_returns_existing_file():
-    """モック: 既存 company_a.pdf のパスを返す"""
-    path = download_pdf("S100A001", "/tmp/test_edinet_out")
-    assert path.endswith(".pdf")
+def test_tc11_download_pdf_mock_returns_existing_file(tmp_path, monkeypatch):
+    """モック: 存在するPDFのパスを返す（tmp_pathで自己完結）"""
     import os
+    fake_pdf = tmp_path / "company_a.pdf"
+    fake_pdf.write_bytes(b"%PDF-1.4 fake")
+
+    import m7_edinet_client as m7
+    monkeypatch.setattr(m7, "_SAMPLES_DIR", tmp_path)
+
+    path = m7.download_pdf("S100A001", str(tmp_path / "output"))
+    assert path.endswith(".pdf")
     assert os.path.exists(path)
 
 
