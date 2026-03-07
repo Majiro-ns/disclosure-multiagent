@@ -163,6 +163,7 @@ Open in browser:
 | Service | URL | Description |
 |---------|-----|-------------|
 | **Web UI** | http://localhost:3010 | PDF upload → report in browser |
+| **Sample** | http://localhost:3010/sample | Interactive sample report — no PDF needed |
 | REST API | http://localhost:8010 | JSON API for automation |
 | API Docs | http://localhost:8010/docs | Swagger UI |
 
@@ -203,6 +204,7 @@ Running `disclosure-check` produces a Markdown report. Here is a representative 
 ```
 
 → **[Full sample report (JSON)](web/public/sample_report.json)**
+→ **Interactive version**: `docker compose up` 後 http://localhost:3010/sample でギャップ一覧・提案・全文レポートをブラウザで確認できます
 
 ---
 
