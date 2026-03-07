@@ -26,61 +26,90 @@
 
 ---
 
+## Three Ways to Use It
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Layer 1 │  OSS Library     pip install disclosure-multiagent       │
+│          │  Use M1-M9 agents directly in your Python code           │
+├─────────────────────────────────────────────────────────────────────┤
+│  Layer 2 │  CLI Tool        disclosure-check your_yuho.pdf          │
+│          │  One command → Markdown report (no server needed)        │
+├─────────────────────────────────────────────────────────────────────┤
+│  Layer 3 │  Web UI          docker compose up                       │
+│          │  Full stack: browser UI + REST API + PDF upload          │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Quick Start
 
-### Option 1: Python (mock mode — no API key required)
+### Layer 1 — OSS Library (Python API)
+
+```bash
+pip install disclosure-multiagent
+```
+
+```python
+from scripts.m1_pdf_agent import extract_report
+from scripts.m2_law_agent import load_law_context
+from scripts.m3_gap_analysis_agent import analyze_gaps
+from scripts.m4_proposal_agent import generate_proposals
+from scripts.m5_report_agent import generate_report
+import os
+
+os.environ["USE_MOCK_LLM"] = "true"  # No API key needed
+
+# Full pipeline in 5 lines
+report    = extract_report("your_yuho.pdf", company_name="株式会社A", fiscal_year=2025)
+law_ctx   = load_law_context()
+gap_result = analyze_gaps(report, law_ctx)
+proposals = [generate_proposals(g) for g in gap_result.gaps if g.has_gap]
+markdown  = generate_report(report, law_ctx, gap_result, proposals, level="竹")
+
+print(markdown)
+```
+
+### Layer 2 — CLI Tool (one command)
 
 ```bash
 # Install
-pip install pymupdf pyyaml
+pip install disclosure-multiagent
 
-# Run with mock LLM (no API key needed)
-cd scripts/
-USE_MOCK_LLM=true python3 run_e2e.py \
-    ../tests/fixtures/sample_yuho.pdf \
-    --company-name "Sample Corp" \
+# Run (mock mode — no API key needed)
+USE_MOCK_LLM=true disclosure-check your_yuho.pdf \
+    --company-name "株式会社A" \
     --fiscal-year 2025 \
     --level 竹
+
+# → Markdown report saved to scripts/reports/
 ```
 
-A Markdown report is generated in `scripts/reports/`.
-
-### Option 2: Docker (full stack — Web UI + API)
+With real LLM (Claude API):
 
 ```bash
-# Clone
+export ANTHROPIC_API_KEY=sk-ant-xxx
+disclosure-check your_yuho.pdf --company-name "株式会社A" --fiscal-year 2025 --level 松
+```
+
+### Layer 3 — Web UI (full stack)
+
+```bash
 git clone https://github.com/Majiro-ns/disclosure-multiagent.git
 cd disclosure-multiagent
-
-# Configure
-cp .env.example .env
-# Set ANTHROPIC_API_KEY if using real LLM (optional — mock works without it)
-
-# Launch
+cp .env.example .env          # ANTHROPIC_API_KEY is optional (mock works without it)
 docker compose up --build
 ```
 
 | Service | URL |
 |---------|-----|
-| Web UI | http://localhost:3010 |
+| Web UI (PDF upload) | http://localhost:3010 |
 | REST API | http://localhost:8010 |
-| API Docs | http://localhost:8010/docs |
+| API Docs (Swagger) | http://localhost:8010/docs |
 
 ```bash
-# Stop
-docker compose down
-```
-
-### Option 3: Real LLM mode
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-xxx
-cd scripts/
-USE_MOCK_LLM=false python3 run_e2e.py \
-    path/to/your_yuho.pdf \
-    --company-name "Your Company" \
-    --fiscal-year 2025 \
-    --level 竹
+docker compose down   # Stop
 ```
 
 ---

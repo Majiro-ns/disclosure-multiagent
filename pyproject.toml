@@ -71,6 +71,10 @@ all = [
     "disclosure-multiagent[llm,api,export,ui,dev]",
 ]
 
+[project.scripts]
+# CLI entrypoint: disclosure-check your_yuho.pdf --company-name "株式会社A" --fiscal-year 2025 --level 竹
+disclosure-check = "scripts.run_pipeline:main"
+
 [project.urls]
 Homepage = "https://github.com/Majiro-ns/disclosure-multiagent"
 Repository = "https://github.com/Majiro-ns/disclosure-multiagent"
