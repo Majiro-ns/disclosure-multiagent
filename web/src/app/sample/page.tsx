@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, FlaskConical } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Download, FileText, FlaskConical, Upload } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import sampleData from '../../../public/sample_report.json';
 
@@ -29,9 +29,56 @@ export default function SamplePage() {
           <FlaskConical className="size-4 mt-0.5 shrink-0" />
           <div>
             <span className="font-semibold">サンプルデータです。</span>
-            架空の企業データを使用しています。実際の分析は有報PDFをアップロードして行ってください。
+            架空の企業「株式会社テスト商事」のデータを使用しています。実際の分析は有報PDFをアップロードして行ってください。
           </div>
         </div>
+
+        {/* 今すぐ試してみよう — 初回ユーザー向けガイド */}
+        <Card className="border-primary/40 bg-primary/3">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="size-4 text-primary" />
+              このサンプルPDFで今すぐ試せます（APIキー不要）
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              下のサンプルPDFは分析デモ用の架空有報です。ダウンロードしてトップページにドロップするだけで、分析フルフローを体験できます。
+            </p>
+            <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
+              <li>
+                <span className="font-medium text-foreground">PDFをダウンロード</span>
+                （株式会社テスト商事 2024年度 有価証券報告書・架空）
+              </li>
+              <li>
+                <span className="font-medium text-foreground">トップページへ移動</span>してPDFをドロップ
+              </li>
+              <li>「分析開始」ボタンをクリック — <span className="font-medium text-foreground">約5秒</span>で結果表示</li>
+            </ol>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                variant="default"
+                size="sm"
+                className="gap-1.5"
+                asChild
+              >
+                <a href="/sample_yuho.pdf" download="sample_yuho_テスト商事.pdf">
+                  <Download className="size-3.5" />
+                  サンプルPDFをダウンロード
+                </a>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => router.push('/')}
+              >
+                <Upload className="size-3.5" />
+                PDFをアップロードして分析
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* ヘッダー */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -47,9 +94,9 @@ export default function SamplePage() {
           </div>
           <div className="flex gap-2 flex-wrap">
             <ExportButtons markdown={result.report_markdown} companyName={result.company_name} />
-            <Button variant="outline" size="sm" onClick={() => router.push('/company')}>
+            <Button variant="outline" size="sm" onClick={() => router.push('/')}>
               <ArrowLeft className="size-3" />
-              実際に分析する
+              トップへ戻る
             </Button>
           </div>
         </div>
@@ -127,9 +174,16 @@ export default function SamplePage() {
               <p className="text-sm text-muted-foreground">
                 PDFをアップロードするだけ。APIキー不要のモックモードで即試せます。
               </p>
-              <Button size="lg" onClick={() => router.push('/company')}>
-                企業検索から分析を開始
-              </Button>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button size="lg" onClick={() => router.push('/')} className="gap-1.5">
+                  <Upload className="size-4" />
+                  PDFをアップロードして分析
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => router.push('/company')} className="gap-1.5">
+                  証券コードで検索
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

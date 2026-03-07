@@ -353,7 +353,7 @@ export default function HomePage() {
 
               <div className="flex flex-wrap items-center justify-center gap-2 pb-4">
                 <Badge variant="secondary">Phase 2 完了</Badge>
-                <Badge variant="outline">272テストPASS</Badge>
+                <Badge variant="outline">408テストPASS</Badge>
               </div>
             </div>
           )}

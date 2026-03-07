@@ -29,7 +29,8 @@
 ⑤ レポート生成 — Markdown レポートとして出力
 ```
 
-→ **[サンプルレポートを見る](web/public/sample_report.json)** — 架空企業データで成果物イメージを即確認
+→ **Web UI起動後** ブラウザで `/sample` を開くと架空企業データの分析結果（ギャップ5件・松竹梅提案・全文レポート）を即確認できます
+→ **CLIで試したい場合** は `tests/fixtures/sample_yuho.pdf`（架空有報）をそのまま使えます（[サンプルデータ詳細](web/public/sample_report.json)）
 
 ---
 
