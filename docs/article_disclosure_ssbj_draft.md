@@ -480,7 +480,7 @@ import sys
 sys.path.insert(0, "scripts")
 
 from m7_edinet_client import download_pdf
-from m1_pdf_agent import extract_sections_from_pdf
+from m1_pdf_agent import extract_report
 from m2_law_agent import load_law_context
 from m3_gap_analysis_agent import analyze_gaps
 
@@ -489,7 +489,7 @@ DOC_ID = "S100VHUZ"  # トヨタ自動車 2024年度有報
 pdf_path = download_pdf(DOC_ID, output_dir="downloads/pdf")
 
 # Step 2: PDF からサステナビリティ関連セクションを抽出
-report = extract_sections_from_pdf(pdf_path)
+report = extract_report(pdf_path)
 ssbj_sections = [
     s for s in report.sections
     if any(kw in s.heading + s.text[:200] for kw in ["気候変動", "GHG", "SSBJ", "サステナビリティ"])
@@ -550,7 +550,7 @@ curl -H "X-API-Key: your-key" \
   -X POST http://localhost:8000/api/analyze \
   -d '{
     "company_name": "トヨタ自動車株式会社",
-    "edinet_code": "E02144",
+    "edinet_code": "E02142",
     "fiscal_year": 2024,
     "fiscal_month_end": 3,
     "doc_type_code": "yuho",
