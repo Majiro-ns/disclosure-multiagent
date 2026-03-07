@@ -56,3 +56,16 @@ htmlcov/
 
 # ─── Docker ────────────────────────────────────────────
 docker-data/
+
+# ─── 内部開発ドキュメント（OSS公開対象外） ───────────────
+reviews/
+10_Research/
+!10_Research/samples/
+!10_Research/samples/.gitkeep
+articles/
+00_Charter.md
+21_*.md
+22_*.md
+23_*.md
+_INDEX.md
+DEMO.md
