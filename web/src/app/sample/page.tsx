@@ -9,7 +9,8 @@ import { ExportButtons } from '@/components/report/ExportButtons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Download, FileText, FlaskConical, Upload } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
@@ -56,17 +57,14 @@ export default function SamplePage() {
               <li>「分析開始」ボタンをクリック — <span className="font-medium text-foreground">約5秒</span>で結果表示</li>
             </ol>
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                variant="default"
-                size="sm"
-                className="gap-1.5"
-                asChild
+              <a
+                href="/sample_yuho.pdf"
+                download="sample_yuho_テスト商事.pdf"
+                className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'gap-1.5')}
               >
-                <a href="/sample_yuho.pdf" download="sample_yuho_テスト商事.pdf">
-                  <Download className="size-3.5" />
-                  サンプルPDFをダウンロード
-                </a>
-              </Button>
+                <Download className="size-3.5" />
+                サンプルPDFをダウンロード
+              </a>
               <Button
                 variant="outline"
                 size="sm"
