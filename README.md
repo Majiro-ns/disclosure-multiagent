@@ -45,71 +45,105 @@
 
 ## Quick Start
 
-### Layer 1 — OSS Library (Python API)
+> **Mock mode** (`USE_MOCK_LLM=true`): runs the full M1→M5 pipeline with a built-in fake LLM.
+> PDF parsing, law loading, gap detection, and report generation all work — **no API key, no cost**.
+> Switch to real LLM any time by setting `ANTHROPIC_API_KEY`.
+
+---
+
+### Layer 1 — OSS Library (Python, 3 lines)
 
 ```bash
 pip install disclosure-multiagent
 ```
 
 ```python
+# Minimum working example — copy and paste as-is
+from scripts.run_pipeline import main
+result = main("your_report.pdf")
+print(result)
+```
+
+> `USE_MOCK_LLM` defaults to `true` — no API key needed.
+> Pass `company_name` and `fiscal_year` for a richer report:
+
+```python
+from scripts.run_pipeline import main
+result = main("your_report.pdf", company_name="株式会社A", fiscal_year=2025, level="竹")
+print(result)
+# → Markdown report with 松竹梅 gap analysis printed to stdout
+```
+
+Full pipeline (M1→M5 individually):
+
+```python
+import os
+os.environ["USE_MOCK_LLM"] = "true"  # remove this line when using real Claude API
+
 from scripts.m1_pdf_agent import extract_report
 from scripts.m2_law_agent import load_law_context
 from scripts.m3_gap_analysis_agent import analyze_gaps
 from scripts.m4_proposal_agent import generate_proposals
 from scripts.m5_report_agent import generate_report
-import os
 
-os.environ["USE_MOCK_LLM"] = "true"  # No API key needed
-
-# Full pipeline in 5 lines
-report    = extract_report("your_yuho.pdf", company_name="株式会社A", fiscal_year=2025)
-law_ctx   = load_law_context()
+report     = extract_report("your_report.pdf", company_name="株式会社A", fiscal_year=2025)
+law_ctx    = load_law_context()
 gap_result = analyze_gaps(report, law_ctx)
-proposals = [generate_proposals(g) for g in gap_result.gaps if g.has_gap]
-markdown  = generate_report(report, law_ctx, gap_result, proposals, level="竹")
-
+proposals  = [generate_proposals(g) for g in gap_result.gaps if g.has_gap]
+markdown   = generate_report(report, law_ctx, gap_result, proposals, level="竹")
 print(markdown)
 ```
+
+---
 
 ### Layer 2 — CLI Tool (one command)
 
 ```bash
-# Install
 pip install disclosure-multiagent
-
-# Run (mock mode — no API key needed)
-USE_MOCK_LLM=true disclosure-check your_yuho.pdf \
-    --company-name "株式会社A" \
-    --fiscal-year 2025 \
-    --level 竹
-
-# → Markdown report saved to scripts/reports/
 ```
-
-With real LLM (Claude API):
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-xxx
-disclosure-check your_yuho.pdf --company-name "株式会社A" --fiscal-year 2025 --level 松
+# Mock mode — no API key needed (USE_MOCK_LLM=true is the default)
+disclosure-check your_report.pdf --level 竹
+
+# With company name and fiscal year
+disclosure-check your_report.pdf --company-name "株式会社A" --fiscal-year 2025 --level 竹
+
+# → Markdown report saved to scripts/reports/report_株式会社A_2025_<timestamp>.md
 ```
 
-### Layer 3 — Web UI (full stack)
+```bash
+# Real LLM mode — requires Claude API key
+export ANTHROPIC_API_KEY=sk-ant-xxx
+USE_MOCK_LLM=false disclosure-check your_report.pdf --level 松
+```
+
+---
+
+### Layer 3 — Web UI (Docker, full stack)
 
 ```bash
 git clone https://github.com/Majiro-ns/disclosure-multiagent.git
 cd disclosure-multiagent
-cp .env.example .env          # ANTHROPIC_API_KEY is optional (mock works without it)
-docker compose up --build
+
+# Configure (API key optional — mock works without it)
+cp .env.example .env
+
+# Start (docker-compose v1) or (docker compose v2)
+docker-compose up --build
+# docker compose up --build   ← use this if docker-compose v1 is not installed
 ```
 
-| Service | URL |
-|---------|-----|
-| Web UI (PDF upload) | http://localhost:3010 |
-| REST API | http://localhost:8010 |
-| API Docs (Swagger) | http://localhost:8010/docs |
+Open in browser:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Web UI** | http://localhost:3010 | PDF upload → report in browser |
+| REST API | http://localhost:8010 | JSON API for automation |
+| API Docs | http://localhost:8010/docs | Swagger UI |
 
 ```bash
-docker compose down   # Stop
+docker-compose down   # Stop all services
 ```
 
 ---
