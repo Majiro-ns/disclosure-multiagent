@@ -35,11 +35,11 @@ from api.models.schemas import (
 logger = logging.getLogger(__name__)
 
 PIPELINE_STEPS = [
-    "M1: PDF解析",
-    "M2: 法令取得",
-    "M3: ギャップ分析",
-    "M4: 提案生成",
-    "M5: レポート統合",
+    "PDF読取",
+    "法令確認",
+    "ギャップ分析",
+    "改善提案",
+    "レポート生成",
 ]
 
 # In-memory task store

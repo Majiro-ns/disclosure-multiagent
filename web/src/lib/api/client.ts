@@ -62,6 +62,33 @@ export async function startAnalysis(params: {
   });
 }
 
+export async function uploadPdfAnalysis(params: {
+  file: File;
+  company_name?: string;
+  fiscal_year?: number;
+  fiscal_month_end?: number;
+  level?: string;
+  use_mock?: boolean;
+}): Promise<{ task_id: string; status: string; message: string }> {
+  const form = new FormData();
+  form.append('file', params.file);
+  form.append('company_name', params.company_name ?? '');
+  form.append('fiscal_year', String(params.fiscal_year ?? 2025));
+  form.append('fiscal_month_end', String(params.fiscal_month_end ?? 3));
+  form.append('level', params.level ?? '竹');
+  form.append('use_mock', String(params.use_mock ?? true));
+
+  const res = await fetch(`${API_BASE}/api/analyze/upload`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API error ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
 export async function getTaskStatus(taskId: string): Promise<PipelineStatus> {
   return fetchJson(`/api/status/${taskId}`);
 }

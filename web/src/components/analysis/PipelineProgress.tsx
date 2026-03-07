@@ -16,6 +16,18 @@ const STEP_ICONS = {
   error: XCircle,
 };
 
+const STEP_LABEL_MAP: Record<string, string> = {
+  'M1: PDF解析': '読取中',
+  'M2: 法令取得': '照合中',
+  'M3: ギャップ分析': '分析中',
+  'M4: 提案生成': '提案作成中',
+  'M5: レポート統合': 'レポート生成中',
+};
+
+function toDisplayLabel(name: string): string {
+  return STEP_LABEL_MAP[name] ?? name;
+}
+
 export function PipelineProgress({ steps, currentStep }: Props) {
   return (
     <div className="space-y-3">
@@ -44,8 +56,7 @@ export function PipelineProgress({ steps, currentStep }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-sm">Step {step.step}</span>
-                <span className="text-sm">{step.name}</span>
+                <span className="font-medium text-sm">{toDisplayLabel(step.name)}</span>
               </div>
               {step.detail && <p className="text-xs text-muted-foreground mt-0.5">{step.detail}</p>}
             </div>
