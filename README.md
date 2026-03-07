@@ -158,7 +158,7 @@ docker-compose up --build
 # docker compose up --build   ← use this if docker-compose v1 is not installed
 ```
 
-Open in browser:
+Open in browser (ready in ~30–60 seconds after first build):
 
 | Service | URL | Description |
 |---------|-----|-------------|
