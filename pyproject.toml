@@ -78,6 +78,7 @@ disclosure-check = "scripts.run_pipeline:main"
 [project.urls]
 Homepage = "https://github.com/Majiro-ns/disclosure-multiagent"
 Repository = "https://github.com/Majiro-ns/disclosure-multiagent"
+Documentation = "https://github.com/Majiro-ns/disclosure-multiagent#readme"
 Issues = "https://github.com/Majiro-ns/disclosure-multiagent/issues"
 
 [tool.setuptools.packages.find]
