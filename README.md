@@ -13,6 +13,26 @@
 
 ---
 
+## 30秒で何ができるか
+
+```
+あなたの有報PDF を入力
+        ↓
+① PDF読取   — 有報のセクションを自動抽出
+        ↓
+② 法令確認  — 最新の開示規制YAMLと照合
+        ↓
+③ ギャップ分析 — 「何が足りないか」を検出
+        ↓
+④ 改善提案  — 梅・竹・松 3段階の記載文案を生成
+        ↓
+⑤ レポート生成 — Markdown レポートとして出力
+```
+
+→ **[サンプルレポートを見る](web/public/sample_report.json)** — 架空企業データで成果物イメージを即確認
+
+---
+
 ## What is this?
 
 `disclosure-multiagent` is an open-source AI pipeline that analyzes Japanese corporate disclosure documents (有価証券報告書 / 株主総会招集通知) and generates a **松竹梅 (3-tier) improvement plan** showing exactly what to add, fix, or enhance.
@@ -46,9 +66,9 @@
 
 ## Quick Start
 
-> **Mock mode** (`USE_MOCK_LLM=true`): runs the full M1→M5 pipeline with a built-in fake LLM.
-> PDF parsing, law loading, gap detection, and report generation all work — **no API key, no cost**.
-> Switch to real LLM any time by setting `ANTHROPIC_API_KEY`.
+> **APIキー不要で今すぐ試せます。** `USE_MOCK_LLM=true`（デフォルト）でモックLLMが起動し、
+> PDF読取 → 法令確認 → ギャップ分析 → 改善提案 → レポート生成 が全て動きます。
+> 本番LLMに切り替えるには `ANTHROPIC_API_KEY` を設定するだけです。
 
 ---
 
@@ -148,6 +168,40 @@ Open in browser:
 ```bash
 docker-compose down   # Stop all services
 ```
+
+---
+
+## Sample Output
+
+Running `disclosure-check` produces a Markdown report. Here is a representative excerpt:
+
+```markdown
+# 開示ギャップ分析レポート — 株式会社サンプル商事（2024年度）
+
+**提案レベル**: 竹（業界標準水準）　**ギャップ数**: 3件検出
+
+## ギャップ概要
+
+| # | 項目 | 判定 | 優先度 |
+|---|------|------|--------|
+| 1 | 従業員エンゲージメント指標 | 修正必須（義務規定） | 高 |
+| 2 | 人材育成投資額（数値開示） | 強化推奨 | 中 |
+| 3 | 温室効果ガス排出量 Scope1/2 | 強化推奨 | 中 |
+
+## 改善提案（竹水準 — 業界標準）
+
+### GAP-001: 従業員エンゲージメント指標の開示
+
+**現状**: 記載なし（義務規定・対応必須）
+
+**改善案（竹）**:
+当社は、従業員エンゲージメントを経営の重要指標と位置づけ、年1回の全社サーベイを実施しております。
+直近のエンゲージメントスコアは[数値]点であり、前年度比[増減]点の[改善／低下]となりました。
+
+*根拠: 内閣官房「人的資本可視化指針」§4（2022年8月）*
+```
+
+→ **[Full sample report (JSON)](web/public/sample_report.json)**
 
 ---
 
@@ -296,7 +350,7 @@ Upload a PDF → M1–M5 full pipeline runs in browser.
 |----------|---------|-------------|
 | `USE_MOCK_LLM` | `true` | `true` = no API key needed |
 | `ANTHROPIC_API_KEY` | — | Required when `USE_MOCK_LLM=false` |
-| `EDINET_SUBSCRIPTION_KEY` | — | Optional — for EDINET search API (M7-2) |
+| `EDINET_SUBSCRIPTION_KEY` | — | Optional — for EDINET search API (M7-2). [Apply here →](https://disclosure2.edinet-fsa.go.jp/WZEK0010.aspx) |
 | `LAW_YAML_DIR` | `laws/` | Custom law YAML directory |
 
 Copy `.env.example` to `.env` to get started.
@@ -336,9 +390,9 @@ See [LICENSE](LICENSE) for full text.
 
 ### なぜこれを作ったか
 
-「100点の開示事例は金融庁が教えてくれる。60点で確実に法令を超える方法は、誰も教えてくれない。」
+> 「**松の事例は国も教えてくれるが、竹や梅は決して教えてくれない。**」
 
-コンサルを呼ばなくても、自社の開示担当者が自力で改善点を把握できるツールを目指しています。
+100点（松）の開示事例は金融庁も教えてくれる。60点（梅）で確実に法令を超える方法・80点（竹）の業界標準水準は、誰も教えてくれない。コンサルを呼ばなくても、自社の開示担当者が自力で改善点を把握できるツールを目指しています。
 
 ### EDINET から有報PDFを取得する方法
 
