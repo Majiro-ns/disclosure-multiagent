@@ -3,7 +3,7 @@
 [![CI](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml/badge.svg)](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-318%2B%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-408%2B%20passing-brightgreen)](tests/)
 [![Mock Mode](https://img.shields.io/badge/mock%20mode-no%20API%20key%20needed-orange)](docs/)
 
 **Drop your annual securities report PDF. Get a 3-tier improvement plan — no consulting required.**
@@ -60,19 +60,21 @@ pip install disclosure-multiagent
 
 ```python
 # Minimum working example — copy and paste as-is
-from scripts.run_pipeline import main
-result = main("your_report.pdf")
-print(result)
+import os; os.environ.setdefault("USE_MOCK_LLM", "true")
+from scripts.m1_pdf_agent import extract_report
+report = extract_report("your_report.pdf")
+print(report.company_name, "—", len(report.sections), "sections extracted")
 ```
 
 > `USE_MOCK_LLM` defaults to `true` — no API key needed.
 > Pass `company_name` and `fiscal_year` for a richer report:
 
 ```python
-from scripts.run_pipeline import main
-result = main("your_report.pdf", company_name="株式会社A", fiscal_year=2025, level="竹")
-print(result)
-# → Markdown report with 松竹梅 gap analysis printed to stdout
+import os; os.environ.setdefault("USE_MOCK_LLM", "true")
+from scripts.m1_pdf_agent import extract_report
+report = extract_report("your_report.pdf", company_name="株式会社A", fiscal_year=2025)
+print(report.company_name, "—", len(report.sections), "sections")
+# → For the full 松竹梅 gap analysis pipeline, see example below
 ```
 
 Full pipeline (M1→M5 individually):
@@ -188,7 +190,7 @@ Annual Report PDF
 | `m8_multiyear_agent.py` | Multi-year comparison | 15 |
 | `m9_document_exporter.py` | Word / Excel export | 12 |
 
-**Total: 318+ tests, all passing**
+**Total: 408+ tests, all passing**
 
 ---
 
