@@ -39,6 +39,7 @@ web/dist/
 web/.next/
 web/out/
 web/.nuxt/
+web/tsconfig.tsbuildinfo
 
 # ─── IDE・OS ─────────────────────────────────────────────
 .vscode/
@@ -56,6 +57,11 @@ htmlcov/
 
 # ─── Docker ────────────────────────────────────────────
 docker-data/
+
+# ─── ランタイムデータ（DB・SQLite） ────────────────────
+data/
+*.db
+*.sqlite
 
 # ─── 内部開発ドキュメント（OSS公開対象外） ───────────────
 reviews/
