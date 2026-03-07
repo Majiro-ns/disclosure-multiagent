@@ -11,7 +11,7 @@
 
 ### M1: CHANGELOG.md L33付近 — human_capital_2024.yaml の記述
 
-**確認対象**: `/path/to/disclosure-multiagent/docs/CHANGELOG.md`
+**確認対象**: `docs/CHANGELOG.md`
 
 **実際のL33記述（直接読み込み確認）**:
 ```

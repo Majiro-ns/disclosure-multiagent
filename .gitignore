@@ -1,0 +1,58 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# ─── 環境変数・シークレット ────────────────────────────────
+.env
+.env.*
+!.env.example
+*.secret
+
+# ─── 有報PDF（実企業・社外秘） ────────────────────────────
+10_Research/samples/*.pdf
+scripts/reports/report_イオン*
+scripts/reports/report_トヨタ*
+scripts/reports/report_ソフトバンク*
+scripts/reports/report_三菱*
+scripts/reports/report_リクルート*
+scripts/reports/report_日立*
+
+# ─── 生成物・実行時ファイル ────────────────────────────────
+scripts/reports/report_*.md
+*.log
+*.tmp
+
+# ─── 本番専用スクリプト（APIキー必要） ───────────────────
+scripts/run_real_llm_via_claude_code.py
+
+# ─── Web関連ビルド成果物 ────────────────────────────────
+web/node_modules/
+web/dist/
+web/.next/
+web/out/
+web/.nuxt/
+
+# ─── IDE・OS ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── テスト・カバレッジ ────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ─── Docker ────────────────────────────────────────────
+docker-data/

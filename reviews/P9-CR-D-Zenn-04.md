@@ -5,7 +5,7 @@
 - **作成者**: 足軽8（D-Zenn-04）
 - **レビュー日時**: 2026-03-09
 - **親コマンド**: cmd_344k_2
-- **レビュー対象**: `/path/to/disclosure-multiagent/docs/article_disclosure_ssbj_draft.md`
+- **レビュー対象**: `docs/article_disclosure_ssbj_draft.md`
 - **参照実ファイル**:
   - `laws/ssbj_2025.yaml`（全件読了・YAML実データで照合）
   - `scripts/m3_gap_analysis_agent.py`（全件読了・SSBJ_KEYWORDS照合）
