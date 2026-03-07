@@ -47,10 +47,25 @@ _tasks: dict[str, PipelineStatus] = {}
 
 
 def get_task(task_id: str) -> Optional[PipelineStatus]:
+    """タスクIDに対応するパイプライン状態を返す。
+
+    Args:
+        task_id: create_task() が返す8文字の識別子。
+
+    Returns:
+        PipelineStatus: タスクが存在する場合。タスク不在時は None。
+    """
     return _tasks.get(task_id)
 
 
 def create_task() -> str:
+    """新規パイプラインタスクをインメモリストアに登録し、タスクIDを返す。
+
+    M1〜M5 の各ステップを "pending" 状態で初期化する。
+
+    Returns:
+        str: 8文字のランダムなタスクID（UUID v4 の先頭8文字）。
+    """
     task_id = str(uuid.uuid4())[:8]
     steps = [
         PipelineStep(step=i + 1, name=name, status="pending")

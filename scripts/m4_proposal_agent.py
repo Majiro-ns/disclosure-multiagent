@@ -129,6 +129,17 @@ class ProposalSet:
     ume: Proposal       # 梅
 
     def get_proposal(self, level: str) -> Proposal:
+        """開示レベルに対応する Proposal を返す。
+
+        Args:
+            level: "松"（詳細）/"竹"（標準）/"梅"（簡潔）のいずれか。
+
+        Returns:
+            Proposal: 指定レベルの改善提案オブジェクト。
+
+        Raises:
+            ValueError: level が "松"/"竹"/"梅" 以外の場合。
+        """
         if level == "松":
             return self.matsu
         elif level == "竹":
@@ -138,6 +149,11 @@ class ProposalSet:
         raise ValueError(f"無効なレベル: {level}。'松'/'竹'/'梅' のいずれかを指定してください。")
 
     def all_passed(self) -> bool:
+        """全レベル（松・竹・梅）が pass または warn 状態かを判定する。
+
+        Returns:
+            bool: 全レベルが "pass" or "warn" の場合 True、いずれかが "fail" なら False。
+        """
         return all(p.status in ("pass", "warn") for p in [self.matsu, self.take, self.ume])
 
 

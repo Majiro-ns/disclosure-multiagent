@@ -75,6 +75,18 @@ def _match(law_name: str, laws: list[dict]) -> Optional[dict]:
 
 
 def collect(yaml_path: Path, output_path: Path) -> dict:
+    """e-Gov API を使い、法令 YAML の未確認エントリに正式 URL を自動付与する。
+
+    source_confirmed: false のエントリのみを対象に e-Gov 法令リスト API を照合し、
+    一致した場合に proposed_url を生成する。結果は JSON 形式で output_path に保存される。
+
+    Args:
+        yaml_path: 法令エントリが記述された YAML ファイルのパス。
+        output_path: 照合結果を書き出す JSON ファイルのパス。
+
+    Returns:
+        dict: metadata / candidates / skipped を含む照合結果辞書。
+    """
     data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     entries = data.get("entries", [])
     unconfirmed = [e for e in entries if not e.get("source_confirmed", False)]
@@ -126,6 +138,11 @@ def collect(yaml_path: Path, output_path: Path) -> dict:
 
 
 def main() -> None:
+    """コマンドライン引数を解析して collect() を実行するエントリポイント。
+
+    --yaml: 対象の法令 YAML ファイルパス（デフォルト: scripts/data/law_sources.yaml）
+    --output: 結果 JSON の出力先パス（デフォルト: scripts/data/law_url_candidates.json）
+    """
     p = argparse.ArgumentParser()
     p.add_argument("--yaml", type=Path, default=_DEFAULT_YAML)
     p.add_argument("--output", type=Path, default=_DEFAULT_OUTPUT)

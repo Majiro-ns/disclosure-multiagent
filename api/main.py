@@ -52,4 +52,9 @@ app.include_router(scoring.router)
 
 @app.get("/api/health")
 async def health():
+    """サービス稼働確認エンドポイント。
+
+    Returns:
+        dict: {"status": "ok", "service": "disclosure-multiagent"}
+    """
     return {"status": "ok", "service": "disclosure-multiagent"}
