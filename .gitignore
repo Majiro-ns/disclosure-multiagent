@@ -75,3 +75,8 @@ articles/
 23_*.md
 _INDEX.md
 DEMO.md
+
+# ─── 殿判断による除外（2026-03-11） ─────────────────────
+docs/article_*.md
+00_Requirements_Definition.md
+samples/70_Samples_MatsuTakeUme.md
