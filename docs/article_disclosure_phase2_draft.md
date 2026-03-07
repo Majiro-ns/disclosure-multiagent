@@ -305,11 +305,13 @@ class YearDiff:
 ```python
 CHANGE_RATE_THRESHOLD: float = 0.20  # 本文変化率 > 20% → changed
 
-def _calc_change_rate(text_a: str, text_b: str) -> float:
-    """difflib.SequenceMatcher で変化率を計算（0.0〜1.0）"""
-    if not text_a and not text_b:
+def _text_change_rate(old_text: str, new_text: str) -> float:
+    """difflib.SequenceMatcher で変化率を計算（0.0〜1.0）。片方が空なら 1.0 を返す。"""
+    if not old_text and not new_text:
         return 0.0
-    matcher = difflib.SequenceMatcher(None, text_a, text_b)
+    if not old_text or not new_text:
+        return 1.0
+    matcher = difflib.SequenceMatcher(None, old_text, new_text)
     return 1.0 - matcher.ratio()
 ```
 
@@ -320,10 +322,10 @@ def _calc_change_rate(text_a: str, text_b: str) -> float:
 2年分の有報を比較してトレンドを把握できる。
 
 ```python
-from m8_multiyear_agent import compare_years
+from m8_multiyear_agent import compare_years, YearlyReport
 
-# 2023年度 vs 2024年度 の比較
-diff = compare_years(yearly_2023, yearly_2024)
+# 2023年度 vs 2024年度 の比較（compare_years はリストを受け取る）
+diff = compare_years([yearly_2023, yearly_2024])
 
 print(f"追加セクション: {diff.added_sections}")
 print(f"削除セクション: {diff.removed_sections}")
@@ -344,13 +346,17 @@ M4の松竹梅提案セット（`ProposalSet`）をWord（.docx）またはExcel
 ```python
 from m9_document_exporter import export_to_word, export_to_excel
 
-# Word出力
-word_path = export_to_word(proposal_set, output_dir="outputs/")
-# → outputs/disclosure_proposals_2026-03-09.docx
+# Word出力（proposal_sets はリスト、output_path はファイルパスを直接指定）
+word_path = export_to_word(
+    proposal_sets=[proposal_set],
+    output_path="outputs/report.docx",
+)
 
 # Excel出力
-excel_path = export_to_excel(proposal_set, output_dir="outputs/")
-# → outputs/disclosure_proposals_2026-03-09.xlsx
+excel_path = export_to_excel(
+    proposal_sets=[proposal_set],
+    output_path="outputs/report.xlsx",
+)
 ```
 
 ### Excelの列構成
@@ -395,6 +401,7 @@ EXCEL_HEADERS = [
 
 ```python
 import os
+from datetime import datetime
 from pathlib import Path
 from m7_edinet_client import search_by_company, download_pdf
 from m1_pdf_agent import analyze_pdf
@@ -447,7 +454,10 @@ def run_full_pipeline(
     proposals = generate_proposals(gap_result, law_ctx)
 
     print("[Step7] M9 Excel出力")
-    excel_path = export_to_excel(proposals, output_dir=output_dir)
+    excel_path = export_to_excel(
+        proposal_sets=proposals,
+        output_path=f"{output_dir}/disclosure_proposals_{datetime.now().strftime('%Y-%m-%d')}.xlsx",
+    )
     print(f"[Step7] 出力完了: {excel_path}")
 
     return excel_path
