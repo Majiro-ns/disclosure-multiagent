@@ -366,8 +366,10 @@ print(f"銀行業エントリ: {len(law_ctx.applicable_entries)}件")
 # STEP 2: 有報を StructuredReport として読み込む（M1エージェント担当）
 # （本デモでは省略 — 実際は M1: m1_pdf_agent.py でPDFを解析）
 demo_report = StructuredReport(
-    company="○○銀行株式会社",
-    fiscal_year="2025年3月期",
+    document_id="BANK_DEMO_001",
+    company_name="○○銀行株式会社",
+    fiscal_year=2025,
+    fiscal_month_end=3,
     sections=[],  # M1出力をここに渡す
 )
 
