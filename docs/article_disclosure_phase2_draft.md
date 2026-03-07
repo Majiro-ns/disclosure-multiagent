@@ -114,6 +114,7 @@ def fetch_document_list(date: str, doc_type_code: str = "120") -> list[dict]:
 
 ```python
 EDINET_DL_BASE = "https://disclosure2dl.edinet-fsa.go.jp/searchdocument/pdf"
+REQUEST_DELAY: float = 3.0  # DOS対策: 実APIアクセス時の最低待機秒数
 
 def download_pdf(doc_id: str, output_dir: str) -> str:
     """EDINET直接DL（認証不要）でPDFを取得。"""
@@ -126,7 +127,7 @@ def download_pdf(doc_id: str, output_dir: str) -> str:
             return str(sample)
         raise FileNotFoundError(f"モック用サンプルPDFが見つかりません: {sample}")
 
-    time.sleep(1)  # EDINETサーバー負荷軽減（マナー）
+    time.sleep(REQUEST_DELAY)  # EDINET サーバー負荷軽減（DOS対策）
     resp = requests.get(f"{EDINET_DL_BASE}/{doc_id}.pdf", timeout=60, stream=True)
     if resp.status_code == 404:
         raise FileNotFoundError(f"書類が見つかりません: docID={doc_id}")
@@ -168,13 +169,13 @@ def search_by_company(company_name: str, year: int) -> list[dict]:
         try:
             docs = fetch_document_list(f"{year}-{month:02d}-01")
             results.extend(d for d in docs if company_name in d.get("filerName", ""))
-            time.sleep(0.5)
+            time.sleep(REQUEST_DELAY)  # DOS対策
         except Exception:
             continue
     return results
 ```
 
-月次でAPIを呼び出して全年度分の有報を収集する。`time.sleep(0.5)` でレート制限を回避している。
+月次でAPIを呼び出して全年度分の有報を収集する。`time.sleep(REQUEST_DELAY)`（3.0秒）でレート制限を回避している。
 
 ### モック動作確認（USE_MOCK_EDINET=true）
 
@@ -404,7 +405,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from m7_edinet_client import search_by_company, download_pdf
-from m1_pdf_agent import analyze_pdf
+from m1_pdf_agent import extract_report
 from m2_law_agent import load_law_context
 from m3_gap_analysis_agent import analyze_gaps
 from m4_proposal_agent import generate_proposals
@@ -441,7 +442,8 @@ def run_full_pipeline(
     print(f"[Step2] 保存完了: {pdf_path}")
 
     print("[Step3] M1 PDF解析")
-    structured_report = analyze_pdf(pdf_path)
+    structured_report = extract_report(pdf_path,
+        company_name=company_name, fiscal_year=fiscal_year)
 
     print("[Step4] M2 法令コンテキスト取得")
     law_ctx = load_law_context(fiscal_year=fiscal_year, fiscal_month_end=3)
@@ -451,7 +453,7 @@ def run_full_pipeline(
     print(f"[Step5] 検出ギャップ数: {len(gap_result.gaps)}")
 
     print("[Step6] M4 提案生成（松竹梅）")
-    proposals = generate_proposals(gap_result, law_ctx)
+    proposals = [generate_proposals(g) for g in gap_result.gaps if g.has_gap]
 
     print("[Step7] M9 Excel出力")
     excel_path = export_to_excel(
@@ -640,7 +642,7 @@ Phase3では実LLM検証・EDINET書類検索API（M7-2）・決算期拡張（M
 - M7のEDINET直接DLは `disclosure2dl.edinet-fsa.go.jp` の公式エンドポイントを使用
 - デフォルト `USE_MOCK_EDINET=true` のため、Subscription-Keyなしで動作確認可能
 - e-Gov法令API（M6）は政府提供の公式APIのみを使用（スクレイピング不実施）
-- `time.sleep(1)` でサーバー負荷を考慮した実装
+- `REQUEST_DELAY = 3.0` 秒のウェイトでサーバー負荷を考慮した実装（DOS対策）
 - 実APIを使う際は利用規約を確認してください
 :::
 
