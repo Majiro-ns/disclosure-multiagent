@@ -20,6 +20,13 @@ TC-12: download_pdf — 不正 doc_id → ValueError
 TC-13: search_by_company — モック: 部分一致
 TC-14: search_by_company — モック: 不一致 → 空リスト
 TC-15: MOCK_DOCUMENTS の件数・フィールド確認
+TC-16: REQUEST_DELAY — 定数が 3.0 秒以上
+TC-17: BatchCompanyResult — フィールド・success プロパティ確認
+TC-18: batch_fetch_companies — モック 3社（全ヒット）
+TC-19: batch_fetch_companies — モック 一致なし企業含む混在
+TC-20: batch_fetch_companies — 空リスト入力 → 空リスト返す
+TC-21: batch_fetch_companies — 入力順保持
+TC-22: batch_fetch_companies — company_name/year フィールド確認
 """
 import os
 import pytest
@@ -30,6 +37,9 @@ os.environ.pop("EDINET_SUBSCRIPTION_KEY", None)
 
 from m7_edinet_client import (
     MOCK_DOCUMENTS,
+    REQUEST_DELAY,
+    BatchCompanyResult,
+    batch_fetch_companies,
     download_pdf,
     fetch_document_list,
     search_by_company,
@@ -153,3 +163,100 @@ def test_tc15_mock_documents_structure():
         assert required_keys.issubset(doc.keys()), f"フィールド不足: {doc}"
         assert validate_edinetcode(doc["edinetCode"]), f"EDINETコード形式不正: {doc['edinetCode']}"
         assert validate_doc_id(doc["docID"]), f"書類管理番号形式不正: {doc['docID']}"
+
+
+# ── TC-16〜22: REQUEST_DELAY / BatchCompanyResult / batch_fetch_companies ──
+
+def test_tc16_request_delay_ge_3():
+    """REQUEST_DELAY 定数が 3.0 秒以上（DOS対策要件）"""
+    assert REQUEST_DELAY >= 3.0
+
+
+def test_tc17_batch_company_result_fields():
+    """BatchCompanyResult フィールド・success プロパティの動作確認"""
+    # 書類あり・エラーなし → success=True
+    r_ok = BatchCompanyResult(
+        company_name="テスト社", year=2023,
+        docs=[{"docID": "S100A001"}], downloaded_paths=[]
+    )
+    assert r_ok.success is True
+
+    # 書類ゼロ → success=False
+    r_empty = BatchCompanyResult(company_name="テスト社", year=2023, docs=[])
+    assert r_empty.success is False
+
+    # エラーあり → success=False
+    r_err = BatchCompanyResult(
+        company_name="テスト社", year=2023,
+        docs=[{"docID": "S100A001"}], error="接続失敗"
+    )
+    assert r_err.success is False
+
+
+def test_tc18_batch_fetch_companies_mock_3_companies():
+    """モック: 3社指定・全社ヒット → BatchCompanyResult リスト返却"""
+    companies = [
+        {"company_name": "サンプル社A", "year": 2023},
+        {"company_name": "サンプル社B", "year": 2023},
+        {"company_name": "サンプル社C", "year": 2023},
+    ]
+    results = batch_fetch_companies(companies)
+    assert len(results) == 3
+    for r in results:
+        assert isinstance(r, BatchCompanyResult)
+        assert len(r.docs) >= 1, f"{r.company_name} の書類が0件"
+        assert r.error == ""
+        assert r.success is True
+
+
+def test_tc19_batch_fetch_companies_mixed():
+    """モック: ヒットあり企業・ヒットなし企業の混在"""
+    companies = [
+        {"company_name": "サンプル社A", "year": 2023},
+        {"company_name": "存在しない会社XYZ", "year": 2023},
+        {"company_name": "サンプル社B", "year": 2023},
+    ]
+    results = batch_fetch_companies(companies)
+    assert len(results) == 3
+
+    assert results[0].company_name == "サンプル社A"
+    assert results[0].success is True
+
+    assert results[1].company_name == "存在しない会社XYZ"
+    assert results[1].docs == []
+    assert results[1].success is False
+    assert results[1].error == ""  # エラーではなく単に0件
+
+    assert results[2].company_name == "サンプル社B"
+    assert results[2].success is True
+
+
+def test_tc20_batch_fetch_companies_empty_input():
+    """空リスト入力 → 空リスト返す"""
+    results = batch_fetch_companies([])
+    assert results == []
+
+
+def test_tc21_batch_fetch_companies_order_preserved():
+    """入力順が出力順に保持されること"""
+    companies = [
+        {"company_name": "サンプル社C", "year": 2023},
+        {"company_name": "サンプル社A", "year": 2023},
+        {"company_name": "サンプル社B", "year": 2023},
+    ]
+    results = batch_fetch_companies(companies)
+    assert len(results) == 3
+    assert results[0].company_name == "サンプル社C"
+    assert results[1].company_name == "サンプル社A"
+    assert results[2].company_name == "サンプル社B"
+
+
+def test_tc22_batch_fetch_companies_year_field():
+    """BatchCompanyResult の year フィールドが入力値と一致"""
+    companies = [
+        {"company_name": "サンプル社A", "year": 2022},
+        {"company_name": "サンプル社B", "year": 2024},
+    ]
+    results = batch_fetch_companies(companies)
+    assert results[0].year == 2022
+    assert results[1].year == 2024
