@@ -66,6 +66,7 @@ export default function HomePage() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [showDetails, setShowDetails] = useState(false);
+  const [useDebug, setUseDebug] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -110,7 +111,8 @@ export default function HomePage() {
         file,
         company_name: companyName,
         level,
-        use_mock: true,
+        use_mock: !useDebug,
+        use_debug: useDebug,
       });
       setTaskId(resp.task_id);
       addHistory({
@@ -233,6 +235,18 @@ export default function HomePage() {
                   <p className="text-xs text-muted-foreground">
                     梅: コンパクト / 竹: 標準（推奨） / 松: 詳細
                   </p>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    id="debug-mode"
+                    type="checkbox"
+                    checked={useDebug}
+                    onChange={(e) => setUseDebug(e.target.checked)}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  <label htmlFor="debug-mode" className="text-sm text-muted-foreground cursor-pointer">
+                    Debug Mode (Claude Code) — 足軽がLLM応答を担当
+                  </label>
                 </div>
               </CardContent>
             </Card>
