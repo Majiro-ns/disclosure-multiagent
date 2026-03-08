@@ -50,6 +50,44 @@ LAW_YAML_FILE: Path = Path(os.environ.get("LAW_YAML_FILE", str(_DEFAULT_YAML_FIL
 # 重要カテゴリ（1件もエントリがない場合は警告）
 CRITICAL_CATEGORIES = ["人的資本ガイダンス", "金商法・開示府令", "SSBJ"]
 
+# 業種別カテゴリプレフィックス（該当業種でなければ除外）
+INDUSTRY_CATEGORY_PREFIXES = {
+    "銀行業": ["銀行業"],
+    "保険業": ["保険業"],
+    "証券業": ["証券業"],
+}
+
+
+def _filter_by_industry(
+    entries: list[LawEntry],
+    industry: Optional[str] = None,
+) -> list[LawEntry]:
+    """業種固有の法令カテゴリをフィルタする。
+
+    industry=None（未指定）の場合: 業種固有カテゴリ（銀行業等）を全て除外する。
+    industry指定の場合: 指定業種以外の業種固有カテゴリを除外する。
+    """
+    # 全ての業種固有プレフィックスを収集
+    all_industry_prefixes = []
+    for prefixes in INDUSTRY_CATEGORY_PREFIXES.values():
+        all_industry_prefixes.extend(prefixes)
+
+    # 指定業種のプレフィックスは許可
+    allowed_prefixes = []
+    if industry and industry in INDUSTRY_CATEGORY_PREFIXES:
+        allowed_prefixes = INDUSTRY_CATEGORY_PREFIXES[industry]
+
+    filtered = []
+    for entry in entries:
+        is_industry_specific = any(
+            entry.category.startswith(p) for p in all_industry_prefixes
+        )
+        if not is_industry_specific:
+            filtered.append(entry)
+        elif any(entry.category.startswith(p) for p in allowed_prefixes):
+            filtered.append(entry)
+    return filtered
+
 
 # ─────────────────────────────────────────────────────────
 # YAMLファイル読み込み
@@ -198,8 +236,7 @@ def get_applicable_entries(
     Returns:
         期間内かつカテゴリ条件に一致するLawEntryのリスト
     """
-    start_str, end_str = ref_period
-    start = date.fromisoformat(start_str.replace("/", "-"))
+    _start_str, end_str = ref_period
     end = date.fromisoformat(end_str.replace("/", "-"))
 
     applicable: list[LawEntry] = []
@@ -218,7 +255,8 @@ def get_applicable_entries(
             )
             continue
 
-        if start <= eff <= end:
+        # 施行日が参照期間終了日以前なら適用（一度施行された法令は継続適用）
+        if eff <= end:
             applicable.append(entry)
 
     # カテゴリフィルタ（指定がある場合のみ）
@@ -237,6 +275,7 @@ def load_law_context(
     fiscal_month_end: int = 3,
     yaml_path: Optional[Path] = None,
     categories: Optional[list[str]] = None,
+    industry: Optional[str] = None,
 ) -> LawContext:
     """
     対象年度・決算月から法令コンテキスト（LawContext）を生成するメインAPI（設計書 Section 4-2）。
@@ -245,6 +284,7 @@ def load_law_context(
       1. YAMLファイル読み込み
       2. 法令参照期間を算出（calc_law_ref_period使用）
       3. 参照期間内エントリをフィルタ
+      3b. 業種フィルタ（銀行業等の業種固有法令を除外）
       4. 重要カテゴリの網羅性チェック（警告生成）
       5. LawContextとして返す
 
@@ -253,6 +293,7 @@ def load_law_context(
         fiscal_month_end: 決算月（デフォルト3月）
         yaml_path: 法令YAMLのパス（Noneの場合はLAW_YAML_FILE定数を使用）
         categories: フィルタカテゴリ（Noneの場合は全カテゴリ）
+        industry: 業種（例: "銀行業"）。Noneの場合は業種固有法令を除外する。
 
     Returns:
         LawContext（applicable_entries, law_yaml_as_of, warnings等を含む）
@@ -285,7 +326,15 @@ def load_law_context(
         ref_period=(ref_start, ref_end),
         categories=categories,
     )
-    logger.info("適用エントリ: %d件 / 全%d件", len(applicable), len(all_entries))
+    logger.info("適用エントリ(日付フィルタ後): %d件 / 全%d件", len(applicable), len(all_entries))
+
+    # STEP 3b: 業種フィルタ（銀行業等の業種固有法令を除外）
+    before_industry = len(applicable)
+    applicable = _filter_by_industry(applicable, industry=industry)
+    filtered_count = before_industry - len(applicable)
+    if filtered_count > 0:
+        logger.info("業種フィルタ: %d件除外（industry=%s）", filtered_count, industry or "一般")
+    logger.info("適用エントリ(最終): %d件", len(applicable))
 
     # STEP 4: 重要カテゴリの網羅性チェック
     warnings: list[str] = []

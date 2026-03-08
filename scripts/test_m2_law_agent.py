@@ -177,7 +177,7 @@ class TestApplicableEntriesFilter(unittest.TestCase):
                 disclosure_items=["テスト項目"],
                 source="https://example.com",
                 source_confirmed=True,
-                effective_from="2025-03-31",  # 期間開始日の前日 → 含まれないはず
+                effective_from="2025-03-31",  # 期間開始日の前日 → 施行済みなので含まれる
             ),
             LawEntry(
                 id="TEST_AFTER",
@@ -196,9 +196,9 @@ class TestApplicableEntriesFilter(unittest.TestCase):
 
         self.assertIn("TEST_START", result_ids, "期間開始日ちょうどのエントリが含まれない")
         self.assertIn("TEST_END", result_ids, "期間終了日ちょうどのエントリが含まれない")
-        self.assertNotIn("TEST_BEFORE", result_ids, "期間前のエントリが誤って含まれている")
+        self.assertIn("TEST_BEFORE", result_ids, "施行済みエントリは継続適用されるべき")
         self.assertNotIn("TEST_AFTER", result_ids, "期間後のエントリが誤って含まれている")
-        print(f"  [PASS] 境界値テスト: 開始日・終了日ちょうどのエントリを正しく処理 ✓")
+        print(f"  [PASS] 境界値テスト: 施行済み法令の継続適用を正しく処理 ✓")
 
 
 class TestCalcLawRefPeriod(unittest.TestCase):

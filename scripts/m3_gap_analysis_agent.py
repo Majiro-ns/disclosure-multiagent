@@ -518,18 +518,16 @@ def is_entry_applicable(
 ) -> bool:
     """
     法令エントリが指定事業年度に適用されるかを判定する。
-    effective_from が法令参照期間内であれば適用。
+    施行日が参照期間の終了日以前であれば適用（一度施行された法令は継続適用）。
     """
     if not entry.effective_from:
         return True  # 施行日不明は常に対象
 
-    start_str, end_str = calc_law_ref_period(fiscal_year, fiscal_month_end)
-    # YYYY/MM/DD を date に変換
-    start = date.fromisoformat(start_str.replace("/", "-"))
+    _start_str, end_str = calc_law_ref_period(fiscal_year, fiscal_month_end)
     end = date.fromisoformat(end_str.replace("/", "-"))
     eff = date.fromisoformat(entry.effective_from)
 
-    return start <= eff <= end
+    return eff <= end
 
 
 # ─────────────────────────────────────────────────────────
