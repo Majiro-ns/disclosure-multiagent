@@ -37,14 +37,12 @@ async def start_analysis(
             raise HTTPException(400, f"PDF取得失敗: {e}")
     else:
         # Use mock sample PDF for demo
-        scripts_dir = Path(__file__).parent.parent.parent / "scripts"
-        samples_dir = scripts_dir.parent / "10_Research" / "samples"
-        sample = samples_dir / "company_a.pdf"
-        if sample.exists():
-            pdf_path = str(sample)
-        else:
-            # Create a minimal placeholder for mock mode
-            pdf_path = str(sample)
+        project_root = Path(__file__).parent.parent.parent
+        sample = project_root / "10_Research" / "samples" / "company_a.pdf"
+        if not sample.exists():
+            # Fallback: use test fixture
+            sample = project_root / "tests" / "fixtures" / "sample_yuho.pdf"
+        pdf_path = str(sample)
 
     # Resolve company name from sec_code if needed
     company_name = request.company_name
