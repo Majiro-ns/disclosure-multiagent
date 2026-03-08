@@ -78,6 +78,47 @@ def ensure_debug_dir() -> None:
     DEBUG_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# ─────────────────────────────────────────────────────────
+# ステータス管理関数（cmd_360k_a6d）
+# ─────────────────────────────────────────────────────────
+
+def write_status(request_id: str, status: str) -> Path:
+    """
+    /tmp/disclosure_debug/status_{id}.json にステータスを書き出す。
+
+    Args:
+        request_id: UUID 文字列
+        status: "pending" | "processing" | "done"
+
+    Returns:
+        書き込んだファイルのパス
+    """
+    ensure_debug_dir()
+    status_path = DEBUG_DIR / f"status_{request_id}.json"
+    payload = {
+        "id": request_id,
+        "status": status,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    status_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    logger.debug("[debug_ipc] ステータス更新: %s → %s", request_id, status)
+    return status_path
+
+
+def read_status(request_id: str) -> str | None:
+    """
+    status_{id}.json を読んでステータス文字列を返す。ファイル不在の場合は None。
+    """
+    status_path = DEBUG_DIR / f"status_{request_id}.json"
+    if not status_path.exists():
+        return None
+    try:
+        data = json.loads(status_path.read_text(encoding="utf-8"))
+        return data.get("status")
+    except Exception:
+        return None
+
+
 def write_request(
     stage: str,
     system_prompt: str,
@@ -107,6 +148,7 @@ def write_request(
     }
     request_path = DEBUG_DIR / f"request_{request_id}.json"
     request_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_status(request_id, "pending")
     logger.info("[debug_ipc] リクエスト書き出し: %s (stage=%s)", request_path.name, stage)
     return request_id
 
@@ -142,6 +184,7 @@ def wait_for_response(request_id: str, timeout: float = DEFAULT_TIMEOUT) -> str:
                     raise ValueError(
                         f"response_{request_id}.json に 'content' キーがありません: {data}"
                     )
+                write_status(request_id, "done")
                 logger.info("[debug_ipc] 応答受信: %s (%d文字)", response_path.name, len(content))
                 return content
             except json.JSONDecodeError as e:
@@ -215,6 +258,7 @@ def write_batch_request(
     }
     request_path = DEBUG_DIR / f"request_{request_id}.json"
     request_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_status(request_id, "pending")
     logger.info(
         "[debug_ipc] バッチリクエスト書き出し: %s (stage=%s, items=%d件)",
         request_path.name, stage, len(items),
@@ -260,6 +304,7 @@ def wait_for_batch_response(
                     raise ValueError(
                         f"response_{request_id}.json の 'results' がリストではありません: {type(results)}"
                     )
+                write_status(request_id, "done")
                 logger.info(
                     "[debug_ipc] バッチ応答受信: %s (%d件)",
                     response_path.name, len(results),

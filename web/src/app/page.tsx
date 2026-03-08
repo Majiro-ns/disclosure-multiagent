@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAnalysisStore } from '@/store/analysisStore';
-import { uploadPdfAnalysis } from '@/lib/api/client';
+import { uploadPdfAnalysis, startStepExecution } from '@/lib/api/client';
 import {
   Upload,
   FileText,
@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Shield,
   FlaskConical,
+  Layers,
 } from 'lucide-react';
 
 const LEVEL_OPTIONS = ['梅', '竹', '松'] as const;
@@ -57,7 +58,7 @@ const FEATURES = [
 
 export default function HomePage() {
   const router = useRouter();
-  const { setTaskId, addHistory, level, setLevel } = useAnalysisStore();
+  const { setTaskId, addHistory, level, setLevel, setStepTaskId, setStepOutput, clearStepOutputs } = useAnalysisStore();
 
   const [dragOver, setDragOver] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -67,6 +68,7 @@ export default function HomePage() {
   const [companyName, setCompanyName] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [useDebug, setUseDebug] = useState(false);
+  const [useStepMode, setUseStepMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -107,21 +109,43 @@ export default function HomePage() {
     setLoading(true);
     setError('');
     try {
-      const resp = await uploadPdfAnalysis({
-        file,
-        company_name: companyName,
-        level,
-        use_mock: !useDebug,
-        use_debug: useDebug,
-      });
-      setTaskId(resp.task_id);
-      addHistory({
-        taskId: resp.task_id,
-        companyName: companyName || file.name,
-        date: new Date().toLocaleDateString('ja-JP'),
-        level,
-      });
-      router.push('/analysis');
+      if (useStepMode) {
+        // ステップ実行モード: /api/step/start を呼び出し
+        clearStepOutputs();
+        const resp = await startStepExecution({
+          file,
+          company_name: companyName,
+          level,
+          use_mock: !useDebug,
+          use_debug: useDebug,
+        });
+        setStepTaskId(resp.task_id);
+        setStepOutput('m1', resp.m1_output);
+        addHistory({
+          taskId: resp.task_id,
+          companyName: companyName || file.name,
+          date: new Date().toLocaleDateString('ja-JP'),
+          level,
+        });
+        router.push('/step-analysis');
+      } else {
+        // 通常モード: /api/analyze/upload を呼び出し
+        const resp = await uploadPdfAnalysis({
+          file,
+          company_name: companyName,
+          level,
+          use_mock: !useDebug,
+          use_debug: useDebug,
+        });
+        setTaskId(resp.task_id);
+        addHistory({
+          taskId: resp.task_id,
+          companyName: companyName || file.name,
+          date: new Date().toLocaleDateString('ja-JP'),
+          level,
+        });
+        router.push('/analysis');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : '分析開始に失敗しました');
     } finally {
@@ -246,6 +270,19 @@ export default function HomePage() {
                   />
                   <label htmlFor="debug-mode" className="text-sm text-muted-foreground cursor-pointer">
                     Debug Mode (Claude Code) — 足軽がLLM応答を担当
+                  </label>
+                </div>
+                <div className="flex items-center gap-2 pt-1 border-t pt-3">
+                  <input
+                    id="step-mode"
+                    type="checkbox"
+                    checked={useStepMode}
+                    onChange={(e) => setUseStepMode(e.target.checked)}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  <label htmlFor="step-mode" className="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <Layers className="size-3.5 text-primary" />
+                    <span>ステップ実行モード — 各段階の出力を確認しながら進む</span>
                   </label>
                 </div>
               </CardContent>

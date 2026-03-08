@@ -32,6 +32,14 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+# debug_ipc のステータス関数を使えるなら使う（インポート失敗時は無視）
+try:
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).parent))
+    from debug_ipc import write_status as _write_status
+except ImportError:
+    _write_status = None  # type: ignore
+
 WATCH_DIR = Path("/tmp/disclosure_debug")
 POLL_INTERVAL = 1.0  # seconds
 
@@ -95,6 +103,13 @@ def display_request(req_path: Path) -> dict:
             role = msg.get("role", "?")
             content = msg.get("content", "")
             print(f"[{role}] {content}")
+
+    # ステータスを "processing" に更新
+    if _write_status is not None:
+        try:
+            _write_status(rid, "processing")
+        except Exception:
+            pass
 
     print("\n" + "-" * 60)
     return data

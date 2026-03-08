@@ -1,4 +1,10 @@
-import type { CompanyInfo, EdinetDocument, PipelineStatus } from '@/types';
+import type {
+  CompanyInfo,
+  EdinetDocument,
+  PipelineStatus,
+  StepStartResponse,
+  StepNextResponse,
+} from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -93,6 +99,51 @@ export async function uploadPdfAnalysis(params: {
 
 export async function getTaskStatus(taskId: string): Promise<PipelineStatus> {
   return fetchJson(`/api/status/${taskId}`);
+}
+
+// ── SSE Stream ───────────────────────────────────────────
+
+// ── Step Execution API ────────────────────────────────────
+
+export async function startStepExecution(params: {
+  file: File;
+  company_name?: string;
+  fiscal_year?: number;
+  fiscal_month_end?: number;
+  level?: string;
+  use_mock?: boolean;
+  use_debug?: boolean;
+}): Promise<StepStartResponse> {
+  const form = new FormData();
+  form.append('file', params.file);
+  form.append('company_name', params.company_name ?? '');
+  form.append('fiscal_year', String(params.fiscal_year ?? 2025));
+  form.append('fiscal_month_end', String(params.fiscal_month_end ?? 3));
+  form.append('level', params.level ?? '竹');
+  form.append('use_mock', String(params.use_mock ?? true));
+  form.append('use_debug', String(params.use_debug ?? false));
+
+  const res = await fetch(`${API_BASE}/api/step/start`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API error ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+export async function executeNextStep(taskId: string): Promise<StepNextResponse> {
+  return fetchJson(`/api/step/${taskId}/next`, { method: 'POST' });
+}
+
+export async function getStepOutput(taskId: string, stage: string): Promise<StepNextResponse> {
+  return fetchJson(`/api/step/${taskId}/output/${stage}`);
+}
+
+export async function runAllRemaining(taskId: string): Promise<{ status: string; task_id: string }> {
+  return fetchJson(`/api/step/${taskId}/run-all`, { method: 'POST' });
 }
 
 // ── SSE Stream ───────────────────────────────────────────

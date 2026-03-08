@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { CompanyInfo, PipelineStatus, AnalysisResult } from '@/types';
+import type { CompanyInfo, PipelineStatus, AnalysisResult, StepOutputsMap } from '@/types';
 
 interface AnalysisState {
   // Search
@@ -14,7 +14,7 @@ interface AnalysisState {
   level: '松' | '竹' | '梅';
   setLevel: (level: '松' | '竹' | '梅') => void;
 
-  // Pipeline
+  // Pipeline (auto mode)
   taskId: string | null;
   setTaskId: (id: string | null) => void;
   pipelineStatus: PipelineStatus | null;
@@ -23,6 +23,13 @@ interface AnalysisState {
   // Result
   result: AnalysisResult | null;
   setResult: (result: AnalysisResult | null) => void;
+
+  // Step execution mode
+  stepTaskId: string | null;
+  setStepTaskId: (id: string | null) => void;
+  stepOutputs: StepOutputsMap;
+  setStepOutput: (stage: keyof StepOutputsMap, data: StepOutputsMap[keyof StepOutputsMap]) => void;
+  clearStepOutputs: () => void;
 
   // History
   history: { taskId: string; companyName: string; date: string; level: string }[];
@@ -51,6 +58,13 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   result: null,
   setResult: (result) => set({ result }),
 
+  stepTaskId: null,
+  setStepTaskId: (id) => set({ stepTaskId: id }),
+  stepOutputs: {},
+  setStepOutput: (stage, data) =>
+    set((state) => ({ stepOutputs: { ...state.stepOutputs, [stage]: data } })),
+  clearStepOutputs: () => set({ stepOutputs: {}, stepTaskId: null }),
+
   history: [],
   addHistory: (entry) => set((state) => ({ history: [entry, ...state.history].slice(0, 20) })),
 
@@ -60,5 +74,7 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
       taskId: null,
       pipelineStatus: null,
       result: null,
+      stepTaskId: null,
+      stepOutputs: {},
     }),
 }));
