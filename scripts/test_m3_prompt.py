@@ -15,11 +15,13 @@ dis_b03_a6: M3ギャップ判定プロンプト改善テスト
   TP-10: _mock_judge_response() が定性系項目でキーワードありの場合充足判定（confidence: medium）
   TP-11: _mock_judge_response() が定性系項目でキーワードなしの場合ギャップ判定（confidence: high）
   TP-12: _mock_judge_response() の返り値が必須キーを含むこと
+  TP-13: _mock_judge_response() セクション見出しが明らかに無関係な場合はLevel3欠落（dis_b03_a2）
+  TP-14: _heading_is_unrelated() 2文字共通漢字があれば無関係判定しない（dis_b03_a2）
 
 実行方法（プロジェクトルートから）:
     python3 -m pytest scripts/test_m3_prompt.py -v
 
-作成者: Majiro-ns / 2026-03-14 / dis_b03_a6
+作成者: Majiro-ns / 2026-03-14 / dis_b03_a6 + dis_b03_a2
 """
 from __future__ import annotations
 
@@ -34,6 +36,7 @@ import m3_gap_analysis_agent as m3
 from m3_gap_analysis_agent import (
     SYSTEM_PROMPT,
     _build_user_prompt,
+    _heading_is_unrelated,
     _mock_judge_response,
 )
 
@@ -212,6 +215,31 @@ class TestMockJudgeResponse(unittest.TestCase):
         section = _make_section(text)
         result = _mock_judge_response("給与", section)
         self.assertTrue(result["has_gap"], "キーワードがなければ数値があってもギャップ")
+
+    def test_tp13_unrelated_heading_returns_gap_high(self):
+        """TP-13: セクション見出しが開示項目と明らかに無関係な場合はLevel3欠落（confidence=high）"""
+        section = m3.SectionData(
+            section_id="SEC-002",
+            heading="設備の状況",
+            text="当社は工場の設備に継続的に投資しています。",
+            tables=[],
+        )
+        result = _mock_judge_response("女性管理職比率", section)
+        self.assertTrue(result["has_gap"], "無関係な見出しでは has_gap=True")
+        self.assertEqual(result["confidence"], "high", "無関係な見出しは confidence=high")
+
+    def test_tp14_ngram_overlap_prevents_unrelated_classification(self):
+        """TP-14: 2文字共通漢字がある場合は _heading_is_unrelated=False であること"""
+        # 「設備投資の状況」と「設備の状況」は「設備」を共通に持つ → 関連あり
+        self.assertFalse(
+            _heading_is_unrelated("設備投資の状況", ["設備投資の状況"], "設備の状況"),
+            "共通2文字漢字がある場合は無関係と判定しない",
+        )
+        # 「財務諸表」と「財務情報管理方針」は「財務」共通 → 関連あり
+        self.assertFalse(
+            _heading_is_unrelated("財務情報管理方針", ["財務情報管理方針"], "財務諸表"),
+            "「財務」共通の場合は無関係と判定しない",
+        )
 
 
 if __name__ == "__main__":
