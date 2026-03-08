@@ -269,14 +269,18 @@ class TestStepAPIEndpoints(unittest.TestCase):
 
     def _start_step(self) -> dict:
         """POST /api/step/start を実行し、レスポンスdictを返す。"""
-        response = self.client.post("/api/step/start", json={
-            "pdf_path": self.pdf_path,
-            "company_name": "テスト株式会社",
-            "fiscal_year": 2025,
-            "fiscal_month_end": 3,
-            "level": "竹",
-            "use_mock": True,
-        })
+        with open(self.pdf_path, "rb") as f:
+            response = self.client.post(
+                "/api/step/start",
+                files={"file": ("sample_yuho.pdf", f, "application/pdf")},
+                data={
+                    "company_name": "テスト株式会社",
+                    "fiscal_year": "2025",
+                    "fiscal_month_end": "3",
+                    "level": "竹",
+                    "use_mock": "true",
+                },
+            )
         self.assertEqual(response.status_code, 200, f"start failed: {response.text}")
         return response.json()
 
@@ -420,17 +424,16 @@ class TestStepAPINoPDF(unittest.TestCase):
         from api.main import app
         cls.client = TestClient(app)
 
-    def test_start_with_nonexistent_pdf_returns_500(self):
-        """存在しないPDFパスで /start を呼ぶと 500 が返る（M1失敗）"""
-        resp = self.client.post("/api/step/start", json={
-            "pdf_path": "/tmp/nonexistent_test_pdf_abc123.pdf",
-            "company_name": "テスト株式会社",
-            "fiscal_year": 2025,
-            "fiscal_month_end": 3,
-            "level": "竹",
-            "use_mock": True,
-        })
-        self.assertEqual(resp.status_code, 500)
+    def test_start_with_invalid_file_type_returns_400(self):
+        """PDFでないファイルで /start を呼ぶと 400 が返る（バリデーション失敗）"""
+        import io
+        fake_file = io.BytesIO(b"this is not a pdf")
+        resp = self.client.post(
+            "/api/step/start",
+            files={"file": ("test.txt", fake_file, "text/plain")},
+            data={"company_name": "テスト株式会社", "fiscal_year": "2025", "use_mock": "true"},
+        )
+        self.assertEqual(resp.status_code, 400)
 
     def test_next_on_nonexistent_task_returns_404(self):
         """存在しないタスクで /next → 404"""

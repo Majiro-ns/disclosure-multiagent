@@ -14,14 +14,16 @@
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+import uuid
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from api.auth import verify_api_key
 from api.models.schemas import (
     PipelineStatus,
     StepNextResponse,
     StepOutputResponse,
-    StepStartRequest,
     StepStartResponse,
 )
 from api.services.pipeline import (
@@ -31,28 +33,56 @@ from api.services.pipeline import (
     run_step_async,
 )
 
+_UPLOAD_DIR = Path("/tmp/disclosure_uploads")
+_MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
+
 router = APIRouter(prefix="/api/step", tags=["step"])
 
 
 @router.post("/start", response_model=StepStartResponse)
 async def step_start(
-    request: StepStartRequest,
+    file: UploadFile = File(...),
+    company_name: str = Form(""),
+    fiscal_year: int = Form(2025),
+    fiscal_month_end: int = Form(3),
+    level: str = Form("竹"),
+    use_mock: bool = Form(True),
+    use_debug: bool = Form(False),
     _auth: None = Depends(verify_api_key),
 ) -> StepStartResponse:
     """ステップ実行モードを開始し、M1（PDF解析）を即時実行する。
 
-    M1が完了したらtask_idとM1出力サマリを返す。
+    PDFファイルを multipart/form-data で受け取り、/tmp/disclosure_uploads/ に保存後
+    M1を実行する。M1完了後に task_id と M1出力サマリを返す。
     後続ステージは POST /api/step/{task_id}/next で1つずつ進める。
     """
+    # ── バリデーション ───────────────────────────────────────────────
+    filename = file.filename or ""
+    if not filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="PDFファイルのみ対応しています")
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="PDFファイルのみ対応しています")
+
+    content = await file.read()
+    if len(content) > _MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="ファイルサイズが20MB上限を超えています")
+    if not content.startswith(b"%PDF"):
+        raise HTTPException(status_code=400, detail="PDFフォーマットではありません")
+
+    # ── ファイル保存 ─────────────────────────────────────────────────
+    _UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    file_id = str(uuid.uuid4())[:8]
+    pdf_path = _UPLOAD_DIR / f"step_{file_id}_{filename}"
+    pdf_path.write_bytes(content)
+
     task_id = create_task_step(
-        pdf_path=request.pdf_path,
-        company_name=request.company_name,
-        fiscal_year=request.fiscal_year,
-        fiscal_month_end=request.fiscal_month_end,
-        level=request.level,
-        use_mock=request.use_mock,
-        doc_type=request.doc_type,
-        use_debug=request.use_debug,
+        pdf_path=str(pdf_path),
+        company_name=company_name,
+        fiscal_year=fiscal_year,
+        fiscal_month_end=fiscal_month_end,
+        level=level,
+        use_mock=use_mock,
+        use_debug=use_debug,
     )
 
     try:

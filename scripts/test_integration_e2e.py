@@ -25,17 +25,18 @@ PDF_PATH = os.path.abspath(PDF_PATH)
 
 def _start() -> dict:
     """ステップ実行を開始してレスポンスを返す。"""
-    resp = client.post(
-        "/api/step/start",
-        json={
-            "pdf_path": PDF_PATH,
-            "company_name": "株式会社テスト商事",
-            "fiscal_year": 2025,
-            "level": "竹",
-            "use_mock": True,
-            "use_debug": False,
-        },
-    )
+    with open(PDF_PATH, "rb") as f:
+        resp = client.post(
+            "/api/step/start",
+            files={"file": ("sample_yuho.pdf", f, "application/pdf")},
+            data={
+                "company_name": "株式会社テスト商事",
+                "fiscal_year": "2025",
+                "level": "竹",
+                "use_mock": "true",
+                "use_debug": "false",
+            },
+        )
     assert resp.status_code == 200, f"start failed: {resp.text[:200]}"
     return resp.json()
 
