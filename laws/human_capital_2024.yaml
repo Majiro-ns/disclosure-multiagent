@@ -100,6 +100,7 @@ amendments:
     effective_from: "2024-04-01"
     title: "人材版伊藤レポート2.0（経済産業省、2022年5月）"
     source: "https://www.meti.go.jp/policy/economy/jinteki_shihon/pdf/report2.0.pdf"
+    source_confirmed: false  # タイムアウト: PDF直接リンクのため現環境アクセス不可（URLは有効と推定）
     summary: >
       経済産業省が公表した人的資本経営の実践ガイド（法的拘束力なし）。
       「人的資本経営コンソーシアム」の開示例が参考になる。プライム大企業の
@@ -120,7 +121,7 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ「サステナビリティ開示基準（公開草案）」（2024年3月）"
-    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source: "https://www.fasf-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
     source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       サステナビリティ基準委員会（SSBJ）が2024年3月29日に公表した公開草案。
@@ -142,7 +143,7 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ基準 — ガバナンス・指標と目標（4柱）の開示要件"
-    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source: "https://www.fasf-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
     source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       SSBJ公開草案における4柱（ガバナンス・戦略・リスク管理・指標と目標）の
@@ -182,7 +183,7 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ基準 適用スケジュール（大規模企業 2027年3月期から強制）"
-    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source: "https://www.fasf-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
     source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       SSBJ公開草案（2024年3月）に基づく適用スケジュール案。
@@ -235,6 +236,7 @@ amendments:
     effective_from: "2022-05-13"
     title: "経済産業省「人材版伊藤レポート2.0」（2022年5月）"
     source: "https://www.meti.go.jp/policy/economy/jinteki_shihon/pdf/report2.0.pdf"
+    source_confirmed: false  # タイムアウト: PDF直接リンクのため現環境アクセス不可（URLは有効と推定）
     summary: >
       経済産業省「人的資本経営の実現に向けた検討会」が公表した実践ガイド。
       企業が「人的資本経営」を実践するための3つの視点（変革・協創・プロセス）と
@@ -257,6 +259,7 @@ amendments:
     effective_from: "2018-12-01"
     title: "ISO 30414（人的資本報告のガイドライン）"
     source: "https://www.iso.org/standard/69338.html"
+    source_confirmed: true
     summary: >
       国際標準化機構（ISO）が2018年12月に策定した人的資本報告の国際ガイドライン。
       11分野・58指標（コンプライアンス・倫理、多様性、リーダーシップ、
@@ -280,6 +283,7 @@ amendments:
     effective_from: "2016-10-19"
     title: "GRIスタンダード（GRI 400シリーズ: 社会分野 — 人的資本関連）"
     source: "https://www.globalreporting.org/standards/standards-development/universal-standards/"
+    source_confirmed: true
     summary: >
       Global Reporting Initiative（GRI）が策定した持続可能性報告の国際スタンダード。
       GRI 400シリーズ（社会分野）に人的資本関連の指標が含まれる:
