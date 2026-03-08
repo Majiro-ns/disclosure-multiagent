@@ -18,7 +18,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 from m1_pdf_agent import extract_report  # noqa: E402
 from m2_law_agent import load_law_context  # noqa: E402
 from m3_gap_analysis_agent import analyze_gaps, GapItem as M3GapItem  # noqa: E402
-from m4_proposal_agent import generate_proposals, ProposalSet  # noqa: E402
+from m4_proposal_agent import generate_proposals, generate_all_proposals_batch, ProposalSet  # noqa: E402
 from m5_report_agent import generate_report, _m3_gap_to_m4_gap  # noqa: E402
 
 from api.models.schemas import (
@@ -157,11 +157,21 @@ async def run_pipeline_async(
         proposals: list[ProposalSet] = []
 
         def _generate_proposals():
-            for gap in gap_result.gaps:
-                if gap.has_gap:
-                    m4_gap = _m3_gap_to_m4_gap(gap)
-                    ps = generate_proposals(m4_gap, use_debug=use_debug)
-                    proposals.append(ps)
+            gap_items_with_gap = [
+                _m3_gap_to_m4_gap(gap) for gap in gap_result.gaps if gap.has_gap
+            ]
+            if use_debug and gap_items_with_gap:
+                # バッチIPC: 全ギャップを1回のリクエストで処理
+                try:
+                    batch_results = generate_all_proposals_batch(gap_items_with_gap)
+                    proposals.extend(batch_results)
+                    return
+                except Exception as e:
+                    logger.warning("[pipeline M4 batch] バッチ失敗、逐次処理にフォールバック: %s", e)
+            # 逐次処理（use_debug=False またはバッチ失敗時）
+            for m4_gap in gap_items_with_gap:
+                ps = generate_proposals(m4_gap, use_debug=use_debug)
+                proposals.append(ps)
 
         await loop.run_in_executor(None, _generate_proposals)
         _update_step(task_id, 3, "done", f"{len(proposals)}件の提案セット")

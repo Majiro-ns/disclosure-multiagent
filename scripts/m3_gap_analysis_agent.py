@@ -578,6 +578,191 @@ def is_entry_applicable(
 
 
 # ─────────────────────────────────────────────────────────
+# バッチデバッグパス用ヘルパー（cmd_360k_a7e）
+# ─────────────────────────────────────────────────────────
+
+def _parse_m3_json(raw_text: str, disclosure_item: str, section: "SectionData") -> dict:
+    """M3 LLM応答テキストをパースして判定結果dictを返す。失敗時はモックを返す。"""
+    try:
+        if raw_text.startswith("```"):
+            lines = raw_text.splitlines()
+            raw_text = "\n".join(l for l in lines if not l.startswith("```"))
+        result = json.loads(raw_text)
+        valid_conf = {c.value for c in Confidence if c not in (Confidence.ERROR, Confidence.PARSE_ERROR)}
+        if result.get("confidence") not in valid_conf:
+            result["confidence"] = Confidence.LOW.value
+        return result
+    except (ValueError, json.JSONDecodeError):
+        return _mock_judge_response(disclosure_item, section)
+
+
+def _analyze_gaps_via_batch_debug(
+    report: "StructuredReport",
+    law_context: "LawContext",
+    relevant_sections: "list[SectionData]",
+    logger: "logging.Logger",
+) -> "GapAnalysisResult":
+    """
+    バッチIPCを使ってギャップ分析を実行し、GapAnalysisResult を返す。
+
+    全 (entry × disclosure_item × section) の組み合わせのプロンプトを一括生成し、
+    call_debug_llm_batch() で1回のIPC送信にまとめる。計130件規模でも2回（M3/M4）で完結。
+
+    Args:
+        report: M1出力の構造化有報
+        law_context: M2出力の適用法令コンテキスト
+        relevant_sections: 分析対象セクションリスト
+        logger: ロガー
+
+    Returns:
+        GapAnalysisResult
+
+    Raises:
+        TimeoutError: IPC タイムアウトの場合（呼び出し側でキャッチ）
+        ValueError: レスポンスのパースに失敗した場合
+    """
+    from debug_ipc import call_debug_llm_batch
+
+    # ── 全組み合わせのプロンプトを収集 ──
+    batch_items: list[dict] = []
+    batch_meta: list[tuple] = []  # (entry, disclosure_item, section)
+    idx = 0
+
+    for entry in law_context.applicable_entries:
+        if not entry.disclosure_items:
+            continue
+        for disclosure_item in entry.disclosure_items:
+            for section in relevant_sections:
+                user_prompt = _build_user_prompt(section, disclosure_item, entry)
+                batch_items.append({"index": idx, "user_prompt": user_prompt})
+                batch_meta.append((entry, disclosure_item, section))
+                idx += 1
+
+    logger.info("[m3 batch] バッチリクエスト: %d件の組み合わせ", len(batch_items))
+
+    if not batch_items:
+        # 組み合わせが0件の場合は空結果を返す
+        return GapAnalysisResult(
+            document_id=report.document_id,
+            fiscal_year=report.fiscal_year,
+            law_yaml_as_of=law_context.law_yaml_as_of,
+            summary=GapSummary(total_gaps=0, by_change_type={ct.value: 0 for ct in ChangeType}),
+            gaps=[],
+            no_gap_items=[],
+            metadata=GapMetadata(
+                llm_model="debug_batch",
+                sections_analyzed=len(relevant_sections),
+                entries_checked=len(law_context.applicable_entries),
+                input_tokens_total=0,
+                output_tokens_total=0,
+            ),
+        )
+
+    # ── バッチIPC送信 ──
+    results_list = call_debug_llm_batch("m3", SYSTEM_PROMPT, batch_items)
+    results_by_idx = {r["index"]: r.get("content", "") for r in results_list}
+
+    # ── 結果をパースして best_result を選択 ──
+    # state: {entry_id+item → {entry, item_has_gap, best_result, best_section, done}}
+    group_states: dict[tuple, dict] = {}
+
+    for i, (entry, disclosure_item, section) in enumerate(batch_meta):
+        key = (entry.id, disclosure_item)
+        if key not in group_states:
+            group_states[key] = {
+                "entry": entry,
+                "disclosure_item": disclosure_item,
+                "item_has_gap": True,
+                "best_result": None,
+                "best_section": None,
+                "done": False,
+            }
+
+        state = group_states[key]
+        if state["done"]:
+            # has_gap=False が既に確定 → 後続セクションはスキップ
+            continue
+
+        content = results_by_idx.get(i, "")
+        result = _parse_m3_json(content, disclosure_item, section)
+
+        if result.get("has_gap") is False:
+            state["item_has_gap"] = False
+            state["best_result"] = result
+            state["best_section"] = section
+            state["done"] = True
+        elif state["best_result"] is None or result.get("has_gap") is True:
+            state["best_result"] = result
+            state["best_section"] = section
+
+    # ── gaps / no_gap_items 構築 ──
+    gaps: list[GapItem] = []
+    no_gap_items: list[NoGapItem] = []
+    gap_counter = 0
+
+    for (entry_id, disclosure_item), state in group_states.items():
+        entry = state["entry"]
+        best_result = state["best_result"]
+        best_section = state["best_section"]
+
+        if best_result:
+            best_result = attach_reference_url(best_result, entry)
+
+        if state["item_has_gap"]:
+            gap_counter += 1
+            gap_id = f"GAP-{gap_counter:03d}"
+            gaps.append(GapItem(
+                gap_id=gap_id,
+                section_id=best_section.section_id if best_section else "N/A",
+                section_heading=best_section.heading if best_section else "N/A",
+                change_type=entry.change_type,
+                has_gap=best_result.get("has_gap") if best_result else True,
+                gap_description=best_result.get("gap_description") if best_result else None,
+                disclosure_item=disclosure_item,
+                reference_law_id=best_result.get("reference_law_id", entry.id) if best_result else entry.id,
+                reference_law_title=best_result.get("reference_law_title", entry.title) if best_result else entry.title,
+                reference_url=best_result.get("reference_url", entry.source) if best_result else entry.source,
+                source_confirmed=best_result.get("source_confirmed", entry.source_confirmed) if best_result else entry.source_confirmed,
+                source_warning=best_result.get("source_warning") if best_result else None,
+                evidence_hint=best_result.get("evidence_hint", "") if best_result else "",
+                llm_reasoning=best_result.get("gap_description") if best_result else None,
+                confidence=best_result.get("confidence", Confidence.MEDIUM.value) if best_result else Confidence.MEDIUM.value,
+            ))
+        else:
+            no_gap_items.append(NoGapItem(
+                disclosure_item=disclosure_item,
+                reference_law_id=entry.id,
+                evidence_hint=best_result.get("evidence_hint", "") if best_result else "",
+                section_id=best_section.section_id if best_section else None,
+            ))
+
+    # ── 集計 ──
+    by_change_type: dict[str, int] = {ct.value: 0 for ct in ChangeType}
+    for gap in gaps:
+        if gap.has_gap is True:
+            by_change_type[gap.change_type] = by_change_type.get(gap.change_type, 0) + 1
+
+    real_gaps = [g for g in gaps if g.has_gap is True]
+    logger.info("[m3 batch] バッチ分析完了: total_gaps=%d", len(real_gaps))
+
+    return GapAnalysisResult(
+        document_id=report.document_id,
+        fiscal_year=report.fiscal_year,
+        law_yaml_as_of=law_context.law_yaml_as_of,
+        summary=GapSummary(total_gaps=len(real_gaps), by_change_type=by_change_type),
+        gaps=gaps,
+        no_gap_items=no_gap_items,
+        metadata=GapMetadata(
+            llm_model="debug_batch",
+            sections_analyzed=len(relevant_sections),
+            entries_checked=len(law_context.applicable_entries),
+            input_tokens_total=0,
+            output_tokens_total=0,
+        ),
+    )
+
+
+# ─────────────────────────────────────────────────────────
 # メイン: ギャップ分析
 # ─────────────────────────────────────────────────────────
 
@@ -649,7 +834,21 @@ def analyze_gaps(
         len(relevant_sections), len(law_context.applicable_entries),
     )
 
-    # ── STEP 3: エントリ×セクション のマトリクス判定 ──
+    # ── バッチデバッグパス（use_debug=True → 全組み合わせを一括IPC送信して早期return） ──
+    if use_debug:
+        try:
+            return _analyze_gaps_via_batch_debug(
+                report=report,
+                law_context=law_context,
+                relevant_sections=relevant_sections,
+                logger=logger,
+            )
+        except Exception as e:
+            logger.warning("[m3 batch] バッチ失敗、モック逐次処理にフォールバック: %s", e)
+            use_mock = True
+            use_debug = False
+
+    # ── STEP 3: エントリ×セクション のマトリクス判定（逐次処理パス） ──
     gaps: list[GapItem] = []
     no_gap_items: list[NoGapItem] = []
     gap_counter = 0

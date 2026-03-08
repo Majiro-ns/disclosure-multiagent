@@ -8,9 +8,18 @@ debug_monitor.py — disclosure debug mode モニター
 
 仕組み:
   /tmp/disclosure_debug/ を監視
-  request_{id}.json を検知 → system_prompt + user_prompt を表示
+  request_{id}.json を検知 → system_prompt + user_prompt/items を表示
   インタラクティブモード: 応答を標準入力から受け取り response_{id}.json に書く
   自動モード: request 内容を表示してポーズ（足軽が response_{id}.json を直接書く）
+
+【単件 response_{id}.json フォーマット】
+  {"id": "uuid", "content": "応答テキスト", "created_at": "ISO8601"}
+
+【バッチ response_{id}.json フォーマット】（batch: true の場合）
+  {"id": "uuid", "results": [{"index": 0, "content": "..."}, ...], "created_at": "ISO8601"}
+
+cmd_360k_a7d: 単件IPC対応 (2026-03-14)
+cmd_360k_a7e: バッチIPC対応追加 (2026-03-14)
 """
 
 from __future__ import annotations
@@ -43,6 +52,11 @@ def list_pending_requests() -> list[Path]:
     return pending
 
 
+def is_batch_request(data: dict) -> bool:
+    """バッチリクエストか否かを判定する。"""
+    return bool(data.get("batch"))
+
+
 def display_request(req_path: Path) -> dict:
     """リクエストの内容を読み込んで表示する。内容を返す。"""
     with open(req_path, encoding="utf-8") as f:
@@ -50,21 +64,28 @@ def display_request(req_path: Path) -> dict:
 
     rid = req_path.stem.replace("request_", "")
     ts = datetime.now().strftime("%H:%M:%S")
+    batch = is_batch_request(data)
+    mode_label = "【バッチ】" if batch else "【単件】"
 
     print("\n" + "=" * 60)
-    print(f"[{ts}] 📩 リクエスト検知: {req_path.name}")
-    print(f"  ID: {rid}")
-    if "agent" in data:
-        print(f"  エージェント: {data['agent']}")
-    if "model" in data:
-        print(f"  モデル: {data['model']}")
+    print(f"[{ts}] 📩 {mode_label}リクエスト検知: {req_path.name}")
+    print(f"  ID: {rid}  stage: {data.get('stage', '?')}")
+    if batch:
+        print(f"  items: {data.get('item_count', len(data.get('items', [])))}件")
     print("=" * 60)
 
     if "system_prompt" in data:
+        sp = data["system_prompt"]
         print("\n--- SYSTEM PROMPT ---")
-        print(data["system_prompt"])
+        print(sp[:500] + ("..." if len(sp) > 500 else ""))
 
-    if "user_prompt" in data:
+    if batch and "items" in data:
+        print(f"\n--- BATCH ITEMS ({len(data['items'])}件) ---")
+        for item in data["items"]:
+            idx = item.get("index", "?")
+            up = item.get("user_prompt", "")
+            print(f"\n[index={idx}]\n{up[:400]}{'...' if len(up) > 400 else ''}")
+    elif "user_prompt" in data:
         print("\n--- USER PROMPT ---")
         print(data["user_prompt"])
 
@@ -80,11 +101,11 @@ def display_request(req_path: Path) -> dict:
 
 
 def write_response(rid: str, response_text: str, metadata: dict | None = None) -> Path:
-    """response_{id}.json を書き込む。"""
+    """単件 response_{id}.json を書き込む。"""
     resp_path = WATCH_DIR / f"response_{rid}.json"
     payload = {
         "id": rid,
-        "response": response_text,
+        "content": response_text,  # debug_ipc.wait_for_response() が "content" キーを期待
         "timestamp": datetime.now().isoformat(),
     }
     if metadata:
@@ -92,6 +113,38 @@ def write_response(rid: str, response_text: str, metadata: dict | None = None) -
     with open(resp_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
     return resp_path
+
+
+def write_batch_response(rid: str, results: list[dict]) -> Path:
+    """バッチ response_{id}.json を書き込む。"""
+    resp_path = WATCH_DIR / f"response_{rid}.json"
+    payload = {
+        "id": rid,
+        "results": results,  # debug_ipc.wait_for_batch_response() が "results" キーを期待
+        "timestamp": datetime.now().isoformat(),
+    }
+    with open(resp_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    return resp_path
+
+
+def _read_multiline_input(prompt: str = "") -> str:
+    """複数行の入力を受け取る（空行2回 または 'EOF' で確定）。"""
+    if prompt:
+        print(prompt)
+    lines = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        if line == "EOF":
+            break
+        lines.append(line)
+        if len(lines) >= 2 and lines[-1] == "" and lines[-2] == "":
+            lines = lines[:-2]
+            break
+    return "\n".join(lines).strip()
 
 
 def interactive_mode() -> None:
@@ -108,27 +161,40 @@ def interactive_mode() -> None:
             rid = req_path.stem.replace("request_", "")
             data = display_request(req_path)
 
-            print("▶ 応答を入力してください（空行2回で確定 / 'EOF' 単独行で確定）:")
-            lines = []
-            while True:
-                try:
-                    line = input()
-                except EOFError:
-                    break
-                if line == "EOF":
-                    break
-                lines.append(line)
-                # 空行2回で確定
-                if len(lines) >= 2 and lines[-1] == "" and lines[-2] == "":
-                    lines = lines[:-2]  # 末尾の空行2つは除去
-                    break
-
-            response_text = "\n".join(lines).strip()
-            if not response_text:
-                response_text = "[足軽応答なし]"
-
-            resp_path = write_response(rid, response_text)
-            print(f"✅ 応答書き込み完了: {resp_path.name}")
+            if is_batch_request(data):
+                # ── バッチリクエスト処理 ──
+                items = data.get("items", [])
+                print(f"▶ バッチ応答入力 ({len(items)}件)。")
+                print("  各itemを 'index,content' 形式で入力（'EOF' で終了）:")
+                results = []
+                while True:
+                    try:
+                        line = input()
+                    except EOFError:
+                        break
+                    if line == "EOF":
+                        break
+                    if "," in line:
+                        idx_str, _, content = line.partition(",")
+                        try:
+                            idx = int(idx_str.strip())
+                            results.append({"index": idx, "content": content.strip()})
+                        except ValueError:
+                            print(f"  ⚠️ 無効な形式: {line}")
+                if results:
+                    resp_path = write_batch_response(rid, results)
+                    print(f"✅ バッチ応答書き込み完了: {resp_path.name} ({len(results)}件)")
+                else:
+                    print("⚠️ 応答なし — スキップ")
+            else:
+                # ── 単件リクエスト処理 ──
+                response_text = _read_multiline_input(
+                    "▶ 応答を入力してください（空行2回で確定 / 'EOF' 単独行で確定）:"
+                )
+                if not response_text:
+                    response_text = "[足軽応答なし]"
+                resp_path = write_response(rid, response_text)
+                print(f"✅ 応答書き込み完了: {resp_path.name}")
 
         time.sleep(POLL_INTERVAL)
 
@@ -152,12 +218,17 @@ def auto_mode() -> None:
             seen.add(rid)
 
             data = display_request(req_path)
-
             resp_path = WATCH_DIR / f"response_{rid}.json"
+
             print(f"\n⏸  応答待機中...")
-            print(f"   以下のファイルを作成してください:")
-            print(f"   {resp_path}")
-            print(f'   形式: {{"id": "{rid}", "response": "<応答テキスト>"}}')
+            print(f"   以下のファイルを作成してください: {resp_path}")
+
+            if is_batch_request(data):
+                items = data.get("items", [])
+                print(f"   【バッチ形式】{len(items)}件の結果を以下の形式で書いてください:")
+                print(f'   {{"id": "{rid}", "results": [{{"index": 0, "content": "..."}}, ...]}}')
+            else:
+                print(f'   【単件形式】{{"id": "{rid}", "content": "<応答テキスト>"}}')
             print()
 
             # 応答ファイルが現れるまで待つ
@@ -168,7 +239,11 @@ def auto_mode() -> None:
             try:
                 with open(resp_path, encoding="utf-8") as f:
                     resp_data = json.load(f)
-                print(f"   応答内容（先頭200文字）: {str(resp_data.get('response', ''))[:200]}")
+                if "results" in resp_data:
+                    print(f"   バッチ応答: {len(resp_data['results'])}件")
+                else:
+                    preview = str(resp_data.get("content", ""))[:200]
+                    print(f"   応答内容（先頭200文字）: {preview}")
             except Exception as e:
                 print(f"   ⚠️  読み込みエラー: {e}")
 

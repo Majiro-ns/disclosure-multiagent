@@ -844,6 +844,124 @@ def generate_proposals(gap_item: GapItem, use_debug: bool = False) -> ProposalSe
 
 
 # ------------------------------------------------------------------
+# M4 バッチデバッグ処理（cmd_360k_a7e）
+# ------------------------------------------------------------------
+
+def generate_all_proposals_batch(
+    gap_items: list[GapItem],
+) -> list[ProposalSet]:
+    """
+    全ギャップ項目の松竹梅提案を1回のバッチIPCで一括生成する（use_debug=True 専用）。
+
+    各ギャップ×各レベル（松竹梅）のプロンプトを items にまとめて
+    call_debug_llm_batch("m4", BASE_SYSTEM_PROMPT, items) で送信。
+    足軽が results[] を書き込むと proposals が返る。
+
+    Args:
+        gap_items: M3ギャップ分析結果のうち has_gap=True のもの
+
+    Returns:
+        ProposalSet のリスト（gap_items と同順）
+
+    Raises:
+        TimeoutError: IPC タイムアウトの場合
+        ValueError: レスポンスのパースに失敗した場合
+    """
+    import logging
+    from debug_ipc import call_debug_llm_batch
+    logger = logging.getLogger(__name__)
+
+    # ── 全gap×levelのプロンプトを収集 ──
+    batch_items: list[dict] = []
+    # meta: (gap_idx, level) のリスト
+    batch_meta: list[tuple] = []
+    idx = 0
+
+    for gap_idx, gap_item in enumerate(gap_items):
+        section_name = gap_item.disclosure_item or gap_item.section_heading
+        law_summary = gap_item.law_summary or (
+            f"{gap_item.reference_law_title}。{gap_item.change_type}の開示項目。"
+        )
+        for level in VALID_LEVELS:
+            user_prompt = USER_PROMPT_TEMPLATE.format(
+                section_name=section_name,
+                change_type=gap_item.change_type,
+                law_summary=law_summary,
+                law_id=gap_item.reference_law_id,
+                level=level,
+            )
+            batch_items.append({"index": idx, "user_prompt": user_prompt})
+            batch_meta.append((gap_idx, level))
+            idx += 1
+
+    logger.info("[m4 batch] バッチリクエスト: %d件（%d gap × 3 levels）", len(batch_items), len(gap_items))
+
+    # ── バッチIPC送信 ──
+    results_list = call_debug_llm_batch("m4", BASE_SYSTEM_PROMPT, batch_items)
+    results_by_idx = {r["index"]: r.get("content", "") for r in results_list}
+
+    # ── 各gap×levelの結果をProposalに変換 ──
+    # proposals_map: gap_idx → {level → Proposal}
+    proposals_map: dict[int, dict] = {i: {} for i in range(len(gap_items))}
+
+    for i, (gap_idx, level) in enumerate(batch_meta):
+        content = results_by_idx.get(i, "")
+        gap_item = gap_items[gap_idx]
+        section_name = gap_item.disclosure_item or gap_item.section_heading
+        if not content:
+            text = _mock_generate(section_name, level)
+        else:
+            text = content.strip()
+
+        # 品質チェック（既存の quality_check() を使用）
+        quality = quality_check(text, level)
+        import re as _re
+        placeholders = _re.findall(r"\[[^\]]+\]", text)
+        proposals_map[gap_idx][level] = Proposal(
+            level=level,
+            text=text,
+            quality=quality,
+            attempts=1,
+            status="pass" if quality.passed else "warn",
+            placeholders=placeholders,
+        )
+
+    # ── ProposalSet を構築 ──
+    proposal_sets: list[ProposalSet] = []
+    for gap_idx, gap_item in enumerate(gap_items):
+        level_proposals = proposals_map[gap_idx]
+        section_name = gap_item.disclosure_item or gap_item.section_heading
+        proposal_sets.append(ProposalSet(
+            gap_id=gap_item.gap_id,
+            disclosure_item=gap_item.disclosure_item,
+            reference_law_id=gap_item.reference_law_id,
+            reference_url=gap_item.reference_url,
+            source_warning=gap_item.source_warning,
+            matsu=level_proposals.get("松") or _make_mock_proposal("松", section_name=section_name),
+            take=level_proposals.get("竹") or _make_mock_proposal("竹", section_name=section_name),
+            ume=level_proposals.get("梅") or _make_mock_proposal("梅", section_name=section_name),
+        ))
+
+    logger.info("[m4 batch] バッチ生成完了: %d件のProposalSet", len(proposal_sets))
+    return proposal_sets
+
+
+def _make_mock_proposal(level: str, section_name: str) -> Proposal:
+    """フォールバック用の簡易Proposal生成。"""
+    import re as _re
+    text = _mock_generate(section_name or "不明セクション", level)
+    quality = quality_check(text, level)
+    return Proposal(
+        level=level,
+        text=text,
+        quality=quality,
+        attempts=1,
+        status="pass",
+        placeholders=_re.findall(r"\[[^\]]+\]", text),
+    )
+
+
+# ------------------------------------------------------------------
 # デモ実行
 # ------------------------------------------------------------------
 

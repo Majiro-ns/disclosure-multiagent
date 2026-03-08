@@ -16,10 +16,20 @@ disclosure-multiagent debug mode バックエンドのテスト。
   TC-11: wait_for_response() がレスポンス内の content を正しく返すこと
   TC-12: response JSON に content がない場合 ValueError を送出すること
 
+  【バッチIPC テスト (cmd_360k_a7e)】
+  TC-13: write_batch_request() がバッチリクエストファイルを書き出すこと
+  TC-14: バッチリクエスト JSON に batch=true と items が含まれること
+  TC-15: wait_for_batch_response() がバッチレスポンスファイルを読めること
+  TC-16: wait_for_batch_response() がファイル不在の場合 TimeoutError を送出すること
+  TC-17: wait_for_batch_response() が results キーなしの場合 ValueError を送出すること
+  TC-18: call_debug_llm_batch() が write_batch_request + wait_for_batch_response を呼ぶこと
+  TC-19: analyze_gaps(use_debug=True) がバッチパスを経由すること（_analyze_gaps_via_batch_debug呼び出し）
+  TC-20: generate_all_proposals_batch() が バッチIPC を呼び出すこと（モック）
+
 実行方法（プロジェクトルートから）:
     python3 -m pytest scripts/test_debug_mode.py -v
 
-作成者: Majiro-ns / 2026-03-14 / cmd_360k_a7d
+作成者: Majiro-ns / 2026-03-14 / cmd_360k_a7d+a7e
 """
 from __future__ import annotations
 
@@ -39,8 +49,11 @@ import debug_ipc
 from debug_ipc import (
     DEBUG_DIR,
     call_debug_llm,
+    call_debug_llm_batch,
     wait_for_response,
+    wait_for_batch_response,
     write_request,
+    write_batch_request,
 )
 
 
@@ -184,59 +197,48 @@ class TestM3DebugMode(unittest.TestCase):
             self.assertEqual(out_tok, 0)
             self.assertTrue(result.get("has_gap"))
 
-    def test_tc7_analyze_gaps_propagates_use_debug(self):
-        """TC-7: analyze_gaps(use_debug=True) が judge_gap に use_debug=True を渡すこと。"""
+    def test_tc7_analyze_gaps_use_debug_calls_batch_path(self):
+        """TC-7: analyze_gaps(use_debug=True) がバッチパス(_analyze_gaps_via_batch_debug)を経由すること。
+        ※バッチ化後は judge_gap は呼ばれず、バッチ関数が直接呼ばれる。
+        """
         from m3_gap_analysis_agent import analyze_gaps
 
-        with patch("m3_gap_analysis_agent.judge_gap") as mock_judge:
-            mock_judge.return_value = (
-                {"has_gap": False, "confidence": "high", "summary": "OK"},
-                0, 0,
-            )
+        mock_result = MagicMock()
+        with patch("m3_gap_analysis_agent._analyze_gaps_via_batch_debug", return_value=mock_result) as mock_batch:
             mock_report = MagicMock()
             mock_report.sections = [MagicMock()]
             mock_report.document_id = "TEST"
             mock_report.fiscal_year = 2025
 
             mock_law = MagicMock()
-            entry = MagicMock()
-            entry.disclosure_items = ["項目A"]
-            entry.id = "LAW-001"
-            mock_law.applicable_entries = [entry]
+            mock_law.applicable_entries = []
 
             with patch("m3_gap_analysis_agent.is_relevant_section", return_value=True):
-                analyze_gaps(mock_report, mock_law, use_debug=True)
+                result = analyze_gaps(mock_report, mock_law, use_debug=True)
 
-            # judge_gap が use_debug=True で呼ばれたか確認
-            for call in mock_judge.call_args_list:
-                self.assertTrue(call.kwargs.get("use_debug", False))
+            mock_batch.assert_called_once()
+            self.assertEqual(result, mock_result)
 
-    def test_tc10_env_var_activates_debug_mode(self):
-        """TC-10: 環境変数 USE_DEBUG_LLM=true で debug モードが有効になること。"""
+    def test_tc10_env_var_activates_batch_debug_mode(self):
+        """TC-10: 環境変数 USE_DEBUG_LLM=true でバッチデバッグパスが有効になること。"""
         os.environ["USE_DEBUG_LLM"] = "true"
         from m3_gap_analysis_agent import analyze_gaps
 
-        with patch("m3_gap_analysis_agent.judge_gap") as mock_judge:
-            mock_judge.return_value = (
-                {"has_gap": False, "confidence": "high", "summary": "OK"},
-                0, 0,
-            )
+        mock_result = MagicMock()
+        with patch("m3_gap_analysis_agent._analyze_gaps_via_batch_debug", return_value=mock_result) as mock_batch:
             mock_report = MagicMock()
             mock_report.sections = [MagicMock()]
             mock_report.document_id = "TEST"
             mock_report.fiscal_year = 2025
 
             mock_law = MagicMock()
-            entry = MagicMock()
-            entry.disclosure_items = ["項目A"]
-            entry.id = "LAW-001"
-            mock_law.applicable_entries = [entry]
+            mock_law.applicable_entries = []
 
             with patch("m3_gap_analysis_agent.is_relevant_section", return_value=True):
-                analyze_gaps(mock_report, mock_law)  # use_debug=None -> 環境変数で解決
+                result = analyze_gaps(mock_report, mock_law)  # use_debug=None -> 環境変数で解決
 
-            for call in mock_judge.call_args_list:
-                self.assertTrue(call.kwargs.get("use_debug", False))
+            mock_batch.assert_called_once()
+            self.assertEqual(result, mock_result)
 
         os.environ.pop("USE_DEBUG_LLM", None)
 
@@ -306,6 +308,155 @@ class TestM4DebugMode(unittest.TestCase):
 
             for call in mock_check.call_args_list:
                 self.assertTrue(call.kwargs.get("use_debug", False))
+
+
+# ===========================================================================
+# 4. バッチ IPC テスト（cmd_360k_a7e）
+# ===========================================================================
+
+class TestWriteBatchRequest(unittest.TestCase):
+    """write_batch_request() のテスト。"""
+
+    def setUp(self):
+        debug_ipc.DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+
+    def test_tc13_creates_batch_request_file(self):
+        """TC-13: バッチ request_{uuid}.json が作成されること。"""
+        items = [{"index": 0, "user_prompt": "prompt0"}, {"index": 1, "user_prompt": "prompt1"}]
+        req_id = write_batch_request(stage="m3", system_prompt="sys", items=items)
+        request_path = DEBUG_DIR / f"request_{req_id}.json"
+        self.assertTrue(request_path.exists(), f"バッチリクエストファイルが存在しない: {request_path}")
+        request_path.unlink(missing_ok=True)
+
+    def test_tc14_batch_request_has_required_keys(self):
+        """TC-14: バッチリクエスト JSON に batch=true と items が含まれること。"""
+        items = [{"index": 0, "user_prompt": "pA"}, {"index": 1, "user_prompt": "pB"}]
+        req_id = write_batch_request(stage="m4", system_prompt="sys_p", items=items)
+        request_path = DEBUG_DIR / f"request_{req_id}.json"
+        data = json.loads(request_path.read_text(encoding="utf-8"))
+        self.assertTrue(data.get("batch"), "batch キーが True でない")
+        self.assertEqual(data["stage"], "m4")
+        self.assertEqual(data["items"], items)
+        self.assertEqual(data["item_count"], 2)
+        self.assertIn("created_at", data)
+        request_path.unlink(missing_ok=True)
+
+
+class TestWaitForBatchResponse(unittest.TestCase):
+    """wait_for_batch_response() のテスト。"""
+
+    def setUp(self):
+        debug_ipc.DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+
+    def test_tc15_reads_batch_response(self):
+        """TC-15: response_{uuid}.json の results を返すこと。"""
+        req_id = "test-batch-read"
+        response_path = DEBUG_DIR / f"response_{req_id}.json"
+        expected = [{"index": 0, "content": "応答0"}, {"index": 1, "content": "応答1"}]
+        response_path.write_text(
+            json.dumps({"id": req_id, "results": expected}), encoding="utf-8"
+        )
+        result = wait_for_batch_response(req_id, timeout=5.0)
+        self.assertEqual(result, expected)
+        response_path.unlink(missing_ok=True)
+
+    def test_tc16_raises_timeout_error(self):
+        """TC-16: タイムアウト内にファイルが出現しない場合 TimeoutError を送出すること。"""
+        with self.assertRaises(TimeoutError):
+            wait_for_batch_response("nonexistent-batch-uuid-xxxx", timeout=0.5)
+
+    def test_tc17_raises_value_error_if_no_results(self):
+        """TC-17: response JSON に results がない場合 ValueError を送出すること。"""
+        req_id = "test-batch-no-results"
+        response_path = DEBUG_DIR / f"response_{req_id}.json"
+        response_path.write_text(json.dumps({"id": req_id}), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            wait_for_batch_response(req_id, timeout=5.0)
+        response_path.unlink(missing_ok=True)
+
+
+class TestCallDebugLlmBatch(unittest.TestCase):
+    """call_debug_llm_batch() のテスト（モック）。"""
+
+    def test_tc18_calls_write_and_wait_batch(self):
+        """TC-18: write_batch_request と wait_for_batch_response を正しく呼ぶこと。"""
+        mock_results = [{"index": 0, "content": "応答0"}]
+        with patch("debug_ipc.write_batch_request", return_value="mock-batch-uuid") as mock_write, \
+             patch("debug_ipc.wait_for_batch_response", return_value=mock_results) as mock_wait:
+            items = [{"index": 0, "user_prompt": "p0"}]
+            result = call_debug_llm_batch(stage="m3", system_prompt="sys", items=items)
+            mock_write.assert_called_once_with(stage="m3", system_prompt="sys", items=items)
+            mock_wait.assert_called_once_with(request_id="mock-batch-uuid", timeout=debug_ipc.BATCH_TIMEOUT)
+            self.assertEqual(result, mock_results)
+
+
+class TestM3BatchDebugMode(unittest.TestCase):
+    """M3 バッチデバッグパスのテスト。"""
+
+    def setUp(self):
+        os.environ.pop("USE_DEBUG_LLM", None)
+        os.environ.pop("USE_MOCK_LLM", None)
+
+    def test_tc19_analyze_gaps_uses_batch_path(self):
+        """TC-19: analyze_gaps(use_debug=True) がバッチパス(_analyze_gaps_via_batch_debug)を経由すること。"""
+        from m3_gap_analysis_agent import analyze_gaps
+
+        mock_result = MagicMock()
+        with patch("m3_gap_analysis_agent._analyze_gaps_via_batch_debug", return_value=mock_result) as mock_batch:
+            mock_report = MagicMock()
+            mock_report.sections = [MagicMock()]
+            mock_report.document_id = "TEST"
+            mock_report.fiscal_year = 2025
+
+            mock_law = MagicMock()
+            mock_law.applicable_entries = []
+
+            with patch("m3_gap_analysis_agent.is_relevant_section", return_value=True):
+                result = analyze_gaps(mock_report, mock_law, use_debug=True)
+
+            mock_batch.assert_called_once()
+            self.assertEqual(result, mock_result)
+
+
+class TestM4BatchDebugMode(unittest.TestCase):
+    """M4 バッチデバッグパスのテスト。"""
+
+    def setUp(self):
+        os.environ.pop("USE_DEBUG_LLM", None)
+        os.environ["ANTHROPIC_API_KEY"] = "dummy-key-for-test"
+
+    def tearDown(self):
+        os.environ.pop("ANTHROPIC_API_KEY", None)
+
+    def test_tc20_generate_all_proposals_batch_calls_ipc(self):
+        """TC-20: generate_all_proposals_batch() がバッチIPC を呼び出すこと。"""
+        from m4_proposal_agent import generate_all_proposals_batch, GapItem
+
+        gap = GapItem(
+            gap_id="GAP-001",
+            section_id="SEC-001",
+            has_gap=True,
+            disclosure_item="人的資本方針",
+            section_heading="人的資本",
+            change_type="追加必須",
+            reference_law_id="hc-2024-001",
+            reference_law_title="人的資本ガイドライン",
+            reference_url=None,
+            source_confirmed=True,
+            source_warning=None,
+            law_summary="人的資本開示",
+        )
+
+        mock_results = [
+            {"index": 0, "content": "松の文案"},
+            {"index": 1, "content": "竹の文案"},
+            {"index": 2, "content": "梅の文案"},
+        ]
+        with patch("debug_ipc.call_debug_llm_batch", return_value=mock_results) as mock_ipc:
+            result = generate_all_proposals_batch([gap])
+            mock_ipc.assert_called_once()
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0].gap_id, "GAP-001")
 
 
 if __name__ == "__main__":
