@@ -37,6 +37,7 @@ os.environ["USE_MOCK_LLM"] = "true"
 from m4_proposal_agent import (
     CHAR_LIMITS,
     FEW_SHOT_EXAMPLES,
+    FORBIDDEN_PATTERNS,
     SECTION_NORMALIZE,
     GapItem,
     Proposal,
@@ -773,6 +774,194 @@ class TestBankingExamples(unittest.TestCase):
         print("  [PASS] 銀行業松サンプル全3セクション: プレースホルダ [xxx] 含む ✓")
 
 
+class TestPhaseBExamples(unittest.TestCase):
+    """TEST 11: dis_b04_a7 Phase B 新規 4 セクションの検証"""
+
+    PHASE_B_SECTIONS = [
+        "経営方針・経営環境",
+        "事業等のリスク",
+        "コーポレートガバナンスの状況",
+        "重要な契約等",
+    ]
+
+    def test_phase_b_few_shot_examples_exist(self):
+        """FEW_SHOT_EXAMPLES に Phase B 4 セクションが定義されている"""
+        for section in self.PHASE_B_SECTIONS:
+            self.assertIn(section, FEW_SHOT_EXAMPLES,
+                          f"FEW_SHOT_EXAMPLES に '{section}' が定義されていない")
+        print(f"  [PASS] Phase B {len(self.PHASE_B_SECTIONS)} セクション定義済み ✓")
+
+    def test_phase_b_few_shot_has_three_levels(self):
+        """Phase B 各セクションが松・竹・梅の 3 水準を持つ"""
+        for section in self.PHASE_B_SECTIONS:
+            for level in ("松", "竹", "梅"):
+                with self.subTest(section=section, level=level):
+                    self.assertIn(level, FEW_SHOT_EXAMPLES[section],
+                                  f"'{section}' に '{level}' が定義されていない")
+                    self.assertGreater(len(FEW_SHOT_EXAMPLES[section][level]), 0,
+                                       f"'{section}' の '{level}' テキストが空")
+        print("  [PASS] Phase B 全セクション × 松竹梅 3 水準 定義済み ✓")
+
+    def test_phase_b_char_ordering(self):
+        """Phase B 各セクションの文字数: 松 > 竹 > 梅"""
+        for section in self.PHASE_B_SECTIONS:
+            matsu = len(FEW_SHOT_EXAMPLES[section]["松"].strip())
+            take  = len(FEW_SHOT_EXAMPLES[section]["竹"].strip())
+            ume   = len(FEW_SHOT_EXAMPLES[section]["梅"].strip())
+            with self.subTest(section=section):
+                self.assertGreater(matsu, take,
+                    f"{section}: 松({matsu}字) ≤ 竹({take}字)")
+                self.assertGreater(take, ume,
+                    f"{section}: 竹({take}字) ≤ 梅({ume}字)")
+            print(f"  [PASS] {section}: 松={matsu}字>竹={take}字>梅={ume}字 ✓")
+
+    def test_phase_b_ume_within_char_limit(self):
+        """Phase B 梅レベルが文字数制限（50〜120字）内にある"""
+        for section in self.PHASE_B_SECTIONS:
+            text = FEW_SHOT_EXAMPLES[section]["梅"].strip()
+            count = len(text)
+            with self.subTest(section=section):
+                self.assertGreaterEqual(count, CHAR_LIMITS["梅"]["min"],
+                    f"{section} 梅: {count}字 < 最小{CHAR_LIMITS['梅']['min']}字")
+                self.assertLessEqual(count, CHAR_LIMITS["梅"]["max"],
+                    f"{section} 梅: {count}字 > 最大{CHAR_LIMITS['梅']['max']}字")
+            print(f"  [PASS] {section} 梅: {count}字 in [{CHAR_LIMITS['梅']['min']},{CHAR_LIMITS['梅']['max']}] ✓")
+
+    def test_phase_b_take_within_char_limit(self):
+        """Phase B 竹レベルが文字数制限（100〜260字）内にある"""
+        for section in self.PHASE_B_SECTIONS:
+            text = FEW_SHOT_EXAMPLES[section]["竹"].strip()
+            count = len(text)
+            with self.subTest(section=section):
+                self.assertGreaterEqual(count, CHAR_LIMITS["竹"]["min"],
+                    f"{section} 竹: {count}字 < 最小{CHAR_LIMITS['竹']['min']}字")
+                self.assertLessEqual(count, CHAR_LIMITS["竹"]["max"],
+                    f"{section} 竹: {count}字 > 最大{CHAR_LIMITS['竹']['max']}字")
+            print(f"  [PASS] {section} 竹: {count}字 in [{CHAR_LIMITS['竹']['min']},{CHAR_LIMITS['竹']['max']}] ✓")
+
+    def test_phase_b_matsu_within_char_limit(self):
+        """Phase B 松レベルが文字数制限（200〜480字）内にある"""
+        for section in self.PHASE_B_SECTIONS:
+            text = FEW_SHOT_EXAMPLES[section]["松"].strip()
+            count = len(text)
+            with self.subTest(section=section):
+                self.assertGreaterEqual(count, CHAR_LIMITS["松"]["min"],
+                    f"{section} 松: {count}字 < 最小{CHAR_LIMITS['松']['min']}字")
+                self.assertLessEqual(count, CHAR_LIMITS["松"]["max"],
+                    f"{section} 松: {count}字 > 最大{CHAR_LIMITS['松']['max']}字")
+            print(f"  [PASS] {section} 松: {count}字 in [{CHAR_LIMITS['松']['min']},{CHAR_LIMITS['松']['max']}] ✓")
+
+    def test_phase_b_section_normalize_mappings(self):
+        """SECTION_NORMALIZE に Phase B エイリアスが定義されている"""
+        required_aliases = {
+            "MD&A": "経営方針・経営環境",
+            "経営方針": "経営方針・経営環境",
+            "主要リスク": "事業等のリスク",
+            "コーポレートガバナンス": "コーポレートガバナンスの状況",
+            "重要な契約": "重要な契約等",
+        }
+        for alias, expected in required_aliases.items():
+            with self.subTest(alias=alias):
+                self.assertIn(alias, SECTION_NORMALIZE,
+                              f"SECTION_NORMALIZE に '{alias}' が定義されていない")
+                self.assertEqual(SECTION_NORMALIZE[alias], expected,
+                                 f"'{alias}' → '{expected}' マッピング不正")
+        print(f"  [PASS] Phase B {len(required_aliases)} エイリアス正常マッピング ✓")
+
+    def test_phase_b_mock_returns_few_shot_example(self):
+        """モックモードで Phase B セクションの few-shot 例が返る"""
+        for section in self.PHASE_B_SECTIONS:
+            for level in ("松", "竹", "梅"):
+                with self.subTest(section=section, level=level):
+                    result = generate_proposal(
+                        section_name=section,
+                        change_type="追加必須",
+                        law_summary=f"{section}の開示",
+                        law_id="TEST_001",
+                        level=level,
+                    )
+                    expected = FEW_SHOT_EXAMPLES[section][level]
+                    self.assertEqual(result, expected,
+                        f"モックモード: '{section}' {level} が few-shot 例を返すべき")
+        print("  [PASS] Phase B モックモード: 全セクション×松竹梅 few-shot 例返却確認 ✓")
+
+
+class TestPhaseBForbiddenPatterns(unittest.TestCase):
+    """TEST 12: dis_b04_a7 追加禁止パターン + check_char_count メッセージ改善"""
+
+    def test_detect_industry_top_class(self):
+        """「業界トップクラス」を検出する（新規追加）"""
+        text = "当社は業界トップクラスの技術力を持っています。"
+        violations = check_forbidden_patterns(text)
+        reasons = [v["reason"] for v in violations]
+        self.assertTrue(any("業界" in r for r in reasons),
+                        f"「業界トップクラス」が検出されなかった: {reasons}")
+
+    def test_detect_industry_highest_standard(self):
+        """「業界最高水準」を検出する（新規追加）"""
+        text = "業界最高水準のサービスを提供しています。"
+        violations = check_forbidden_patterns(text)
+        reasons = [v["reason"] for v in violations]
+        self.assertTrue(any("業界" in r for r in reasons),
+                        f"「業界最高水準」が検出されなかった: {reasons}")
+
+    def test_detect_kanarazu_expression(self):
+        """「確実に」を検出する（新規追加）"""
+        text = "当社は法令を確実に遵守しています。"
+        violations = check_forbidden_patterns(text)
+        reasons = [v["reason"] for v in violations]
+        self.assertTrue(any("確実" in r for r in reasons),
+                        f"「確実に」が検出されなかった: {reasons}")
+
+    def test_industry_top_existing_patterns_still_work(self):
+        """既存の「業界トップ」「業界No.1」パターンが引き続き検出される"""
+        cases = ["業界トップ水準の給与", "業界No.1のシェア", "業界一位の実績"]
+        for text in cases:
+            violations = check_forbidden_patterns(text)
+            self.assertTrue(len(violations) > 0,
+                            f"「{text}」が検出されなかった")
+
+    def test_forbidden_patterns_count(self):
+        """FORBIDDEN_PATTERNS に 確実に・業界最高水準パターンが含まれる"""
+        patterns_str = str(FORBIDDEN_PATTERNS)
+        self.assertIn("確実に", patterns_str, "確実に パターンが FORBIDDEN_PATTERNS に存在しない")
+        self.assertIn("最高水準", patterns_str, "業界最高水準 パターンが FORBIDDEN_PATTERNS に存在しない")
+
+    def test_check_char_count_overrun_message_contains_target(self):
+        """文字数超過メッセージに目標文字数が含まれる（改善）"""
+        text_500 = "あ" * 500  # 松の上限480字を超過
+        ok, msg, _ = check_char_count(text_500, "松")
+        self.assertFalse(ok)
+        self.assertIn("超過", msg)
+        self.assertIn("目標", msg, f"超過メッセージに「目標」が含まれない: {msg}")
+        print(f"  [PASS] 文字数超過メッセージ: {msg[:60]}... ✓")
+
+    def test_quality_check_error_on_industry_top_class(self):
+        """「業界トップクラス」含むテキストが quality_check でエラーになる"""
+        # 文字数を竹の範囲（100-260）に収める
+        text = ("当社は業界トップクラスの技術力を有しており、" + "あ" * 80)[:200]
+        # 文字数をきちんと確保
+        text_base = "当社は業界トップクラスの技術力を有しており、顧客の期待に応えています。" + "あ" * 70
+        result = quality_check(text_base, "竹")
+        self.assertFalse(result.passed)
+        forbidden_errors = [e for e in result.errors if "禁止パターン" in e]
+        self.assertTrue(len(forbidden_errors) > 0, f"禁止パターンエラーが出ていない: {result.errors}")
+
+    def test_placeholder_improvement_examples(self):
+        """改善済みプレースホルダ: 「例: 」形式が既存セクションに含まれる"""
+        sections_with_examples = [
+            ("従業員給与等の決定に関する方針", "松"),
+            ("人材育成方針", "松"),
+            ("気候変動に関するガバナンス体制の開示", "松"),
+        ]
+        for section, level in sections_with_examples:
+            with self.subTest(section=section, level=level):
+                text = FEW_SHOT_EXAMPLES[section][level]
+                self.assertIn("例:", text,
+                    f"'{section}' {level}: プレースホルダに「例:」説明が含まれない")
+        print("  [PASS] プレースホルダ改善: 「例:」形式確認 ✓")
+
+
 # ------------------------------------------------------------------
 # テスト実行
 # ------------------------------------------------------------------
@@ -798,6 +987,8 @@ def main() -> None:
         TestGenerateProposals,
         TestSSBJExamples,
         TestBankingExamples,
+        TestPhaseBExamples,
+        TestPhaseBForbiddenPatterns,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 
