@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import Enum
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Any, Optional
 
 
 class DocTypeCode(str, Enum):
@@ -81,6 +81,10 @@ class PipelineStatus(BaseModel):
     steps: list[PipelineStep] = []
     result: Optional[AnalysisResult] = None
     error: Optional[str] = None
+    # Step execution mode fields (cmd_360k_a2d)
+    step_outputs: dict[str, Any] = Field(default_factory=dict)
+    execution_mode: str = "auto"  # "auto" | "step"
+    next_stage: str = "m1"  # "m1"|"m2"|"m3"|"m4"|"m5"|"done"
 
 
 # ── Analysis Result ──────────────────────────────────────
@@ -138,6 +142,47 @@ class AnalysisResult(BaseModel):
 
 # Forward reference resolution
 PipelineStatus.model_rebuild()
+
+
+# ── Step Execution Mode（ステップ実行 cmd_360k_a2d）────────────────────────────
+
+class StepStartRequest(BaseModel):
+    """POST /api/step/start リクエスト"""
+    pdf_path: str = Field(..., description="PDFファイルの絶対パス")
+    company_name: str = Field("", description="企業名（未指定時はPDFから推定）")
+    fiscal_year: int = Field(2025, description="対象年度")
+    fiscal_month_end: int = Field(3, description="決算月")
+    level: str = Field("竹", pattern=r"^(松|竹|梅)$", description="提案粒度")
+    use_mock: bool = Field(True, description="モックLLMを使用する")
+    doc_type: str = Field("yuho", description="書類種別 (yuho|shoshu)")
+    use_debug: bool = Field(False, description="デバッグLLMを使用する")
+
+
+class StepStartResponse(BaseModel):
+    """POST /api/step/start レスポンス（M1完了後）"""
+    task_id: str
+    status: str = "step_paused"
+    next_stage: str = "m2"
+    m1_output: dict[str, Any] = Field(
+        default_factory=dict,
+        description="M1出力サマリ（sections_count, company_name 等）",
+    )
+
+
+class StepNextResponse(BaseModel):
+    """POST /api/step/{task_id}/next レスポンス"""
+    task_id: str
+    step: str  # "m2"|"m3"|"m4"|"m5"
+    status: str  # "done"|"all_done"
+    next_stage: Optional[str] = None  # 次に実行すべきステージ（all_done時はNone）
+    output: dict[str, Any] = Field(default_factory=dict, description="当該ステージ出力サマリ")
+
+
+class StepOutputResponse(BaseModel):
+    """GET /api/step/{task_id}/output/{stage} レスポンス"""
+    task_id: str
+    stage: str
+    output: dict[str, Any]
 
 
 # ── Checklist (実務判断データ蓄積) ──────────────────────────
