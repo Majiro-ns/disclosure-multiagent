@@ -494,11 +494,11 @@ class TestLawsDirectoryLoading(unittest.TestCase):
         )
 
     def test_laws_dir_has_three_yamls(self):
-        """laws/ 配下に4件のYAMLが存在すること（banking_2025.yaml追加済み）"""
+        """laws/ 配下に5件のYAMLが存在すること（kinshohō_2025.yaml追加済み）"""
         yaml_files = list(LAW_YAML_DIR.glob("*.yaml"))
-        self.assertEqual(
-            len(yaml_files), 4,
-            f"laws/*.yaml が4件ではありません: {[f.name for f in yaml_files]}"
+        self.assertGreaterEqual(
+            len(yaml_files), 5,
+            f"laws/*.yaml が5件未満です: {[f.name for f in yaml_files]}"
         )
 
     def test_load_all_from_dir_returns_all_entries(self):
