@@ -13,7 +13,9 @@
 | `human_capital_2024.yaml` | 人的資本・多様性 / SSBJ 2024 | 2024年度 | 8件 | `hc-2024-xxx`（4件）、`sb-2024-xxx`（4件） |
 | `ssbj_2025.yaml` | SSBJ（サステナビリティ開示基準）| 2025年度 | 25件 | `sb-2025-001〜025` |
 | `shareholder_notice_2025.yaml` | 総会前開示・ガバナンス（招集通知） | 2025年度 | 16件 | `gm-2025-xxx`（12件）、`gc-2025-xxx`（4件） |
-| **合計** | — | — | **49件** | — |
+| `fsa_best_practices_2024.yaml` | 金融庁好事例集2024（サステナビリティ・重要契約・MD&A・中堅中小・CG） | 2024年度 | 5件 | `bp-2024-xxx` |
+| `banking_2025.yaml` | 銀行業特化（バーゼルIII・不良債権引当） | 2025年度 | 10件 | `bk-2025-xxx` |
+| **合計** | — | — | **64件** | — |
 
 ---
 
@@ -30,6 +32,8 @@
 | `sb-` | SSBJ（Sustainability Disclosure Standards Board Japan） |
 | `gm-` | 総会前開示（General Meeting disclosure） |
 | `gc-` | ガバナンス（Governance Compliance） |
+| `bp-` | 金融庁好事例（Best Practices） |
+| `bk-` | 銀行業（Banking） |
 
 ---
 
