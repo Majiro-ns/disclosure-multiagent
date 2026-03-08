@@ -423,5 +423,116 @@ class TestStepAPINoPDF(unittest.TestCase):
         self.assertEqual(resp.status_code, 404)
 
 
+# ═══════════════════════════════════════════════════════════════
+# TEST 8-10: ステップ実行 × debug モード統合テスト（cmd_360k_a6d）
+#
+# 目的: run_step_async が use_debug=True のとき、M3/M4でデバッグ
+#       IPCパス（バッチ処理）に正しく分岐することを検証する。
+# ═══════════════════════════════════════════════════════════════
+
+class TestStepDebugIntegration(unittest.TestCase):
+    """TEST 8-10: ステップ実行 × debug モード統合（cmd_360k_a6d）"""
+
+    def setUp(self):
+        os.environ.pop("USE_DEBUG_LLM", None)
+        os.environ.pop("USE_MOCK_LLM", None)
+
+    def tearDown(self):
+        os.environ.pop("USE_DEBUG_LLM", None)
+        os.environ.pop("USE_MOCK_LLM", None)
+
+    def test_8_use_debug_stored_in_step_params(self):
+        """TEST 8: create_task_step(use_debug=True) が _step_params に use_debug=True を保存すること"""
+        from api.services.pipeline import create_task_step, _step_params
+
+        task_id = create_task_step(
+            pdf_path="/tmp/test.pdf",
+            company_name="テスト株式会社",
+            fiscal_year=2025,
+            fiscal_month_end=3,
+            level="竹",
+            use_debug=True,
+        )
+        self.assertIn(task_id, _step_params, "タスクが _step_params に登録されること")
+        self.assertTrue(
+            _step_params[task_id]["use_debug"],
+            "use_debug=True が _step_params に保存されること",
+        )
+
+    def test_9_run_step_m3_passes_use_debug_to_analyze_gaps(self):
+        """TEST 9: run_step_async M3 が analyze_gaps を use_debug=True で呼ぶこと"""
+        import asyncio
+        from types import SimpleNamespace
+        from unittest.mock import patch, MagicMock
+        from api.services.pipeline import create_task_step, _step_cache, run_step_async
+
+        task_id = create_task_step(
+            pdf_path="/tmp/test.pdf",
+            company_name="テスト",
+            fiscal_year=2025,
+            fiscal_month_end=3,
+            level="竹",
+            use_debug=True,
+        )
+
+        # M1/M2 キャッシュを設定（M3 実行の前提条件）
+        _step_cache[task_id]["m1"] = MagicMock(
+            sections=[], company_name="テスト", fiscal_year=2025, document_id="doc-001"
+        )
+        _step_cache[task_id]["m2"] = MagicMock(
+            applicable_entries=[], warnings=[], missing_categories=[]
+        )
+
+        mock_result = MagicMock()
+        mock_result.gaps = []
+        mock_result.no_gap_items = []
+        mock_result.summary = SimpleNamespace(total_gaps=0, by_change_type={})
+
+        with patch("api.services.pipeline.analyze_gaps", return_value=mock_result) as mock_fn:
+            asyncio.run(run_step_async(task_id, "m3"))
+
+        self.assertTrue(mock_fn.called, "analyze_gaps が呼ばれること")
+        _, call_kwargs = mock_fn.call_args
+        self.assertTrue(
+            call_kwargs.get("use_debug"),
+            "analyze_gaps が use_debug=True で呼ばれること",
+        )
+
+    def test_10_run_step_m4_calls_batch_when_use_debug(self):
+        """TEST 10: run_step_async M4 で use_debug=True かつ has_gap あり のとき generate_all_proposals_batch が呼ばれること"""
+        import asyncio
+        from types import SimpleNamespace
+        from unittest.mock import patch, MagicMock
+        from api.services.pipeline import create_task_step, _step_cache, run_step_async
+
+        task_id = create_task_step(
+            pdf_path="/tmp/test.pdf",
+            company_name="テスト",
+            fiscal_year=2025,
+            fiscal_month_end=3,
+            level="竹",
+            use_debug=True,
+        )
+
+        # M3 キャッシュに has_gap=True のギャップを設定
+        mock_gap = MagicMock()
+        mock_gap.has_gap = True
+        mock_m3 = MagicMock()
+        mock_m3.gaps = [mock_gap]
+        _step_cache[task_id]["m1"] = MagicMock()
+        _step_cache[task_id]["m2"] = MagicMock()
+        _step_cache[task_id]["m3"] = mock_m3
+
+        with patch("api.services.pipeline._m3_gap_to_m4_gap") as mock_convert, \
+             patch("api.services.pipeline.generate_all_proposals_batch", return_value=[]) as mock_batch:
+            mock_convert.return_value = MagicMock(has_gap=True)
+            asyncio.run(run_step_async(task_id, "m4"))
+
+        self.assertTrue(
+            mock_batch.called,
+            "use_debug=True かつ has_gap あり のとき generate_all_proposals_batch が呼ばれること",
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
