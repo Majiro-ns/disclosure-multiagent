@@ -173,6 +173,33 @@ docker-compose down   # Stop all services
 
 ---
 
+## 🚀 UIクイックスタート（Docker不要・npm版）
+
+### 方法A（UI閲覧のみ・APIキー不要）
+
+```bash
+cd disclosure-multiagent/web
+npm install && npm run dev
+```
+
+→ http://localhost:3000 で確認（`/sample` ページはAPIなしで閲覧可）
+
+### 方法B（フルスタック・AI分析も動作）
+
+```powershell
+# ターミナル1（バックエンド）
+$env:USE_MOCK_LLM='true'; python -m uvicorn api.main:app --port 8010
+```
+
+```bash
+# ターミナル2（フロントエンド）
+cd web && npm run dev
+```
+
+→ http://localhost:3000 で PDF アップロード + AI 分析が全て動作
+
+---
+
 ## Sample Output
 
 Running `disclosure-check` produces a Markdown report. Here is a representative excerpt:
@@ -357,6 +384,18 @@ Upload a PDF → M1–M5 full pipeline runs in browser.
 | `LAW_YAML_DIR` | `laws/` | Custom law YAML directory |
 
 Copy `.env.example` to `.env` to get started.
+
+---
+
+## 関連OSS
+
+同作者が開発する財務・AI品質系OSSのエコシステムです。
+
+| OSS | 説明 | 状態 |
+|-----|------|------|
+| [fixed-asset-agentic](https://github.com/Majiro-ns/fixed-asset-agentic) | 固定資産台帳AI解析（償却計算・異常検知） | 公開中 |
+| [agent-quality-gate](https://github.com/Majiro-ns/agent-quality-gate) | AIエージェント品質ゲート（自信度・クロスレビュー検証） | 公開中 |
+| [xbrl-ai-analyzer](https://github.com/Majiro-ns/xbrl-ai-analyzer) | XBRL財務データAI解析（EDINETデータ構造化） | 準備中 |
 
 ---
 
