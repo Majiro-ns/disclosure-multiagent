@@ -124,7 +124,10 @@ class TestSerializeStepOutput(unittest.TestCase):
 
     def _make_mock_m2_law_context(self):
         """M2用モックオブジェクト"""
-        entry = SimpleNamespace(id="law-001", title="改正法令A", category="人的資本")
+        entry = SimpleNamespace(
+            id="law-001", title="改正法令A", category="人的資本",
+            source_confirmed=True,
+        )
         return SimpleNamespace(
             applicable_entries=[entry],
             warnings=["WARN-001"],
@@ -141,6 +144,9 @@ class TestSerializeStepOutput(unittest.TestCase):
             gap_description="開示不足",
             disclosure_item="多様性推進",
             confidence="high",
+            reference_law_title="内閣府令改正2024",
+            reference_url="https://example.com/law",
+            evidence_hint="テキストに記載なし",
         )
         return SimpleNamespace(
             summary=SimpleNamespace(total_gaps=1, by_change_type={"追加": 1}),
@@ -152,36 +158,43 @@ class TestSerializeStepOutput(unittest.TestCase):
         proposal = SimpleNamespace(
             gap_id="gap-001",
             disclosure_item="多様性推進",
-            matsu=SimpleNamespace(text="松: 詳細な開示文章" * 5),
-            take=SimpleNamespace(text="竹: 標準的な開示文章" * 5),
-            ume=SimpleNamespace(text="梅: 簡潔な開示文章" * 5),
+            reference_law_id="HC_001",
+            matsu=SimpleNamespace(text="松: 詳細な開示文章" * 5, status="pass"),
+            take=SimpleNamespace(text="竹: 標準的な開示文章" * 5, status="pass"),
+            ume=SimpleNamespace(text="梅: 簡潔な開示文章" * 5, status="pass"),
         )
         return [proposal]
 
     def test_m1_output_has_required_fields(self):
-        """M1シリアライズ → sections_count, company_name, sections が含まれる"""
+        """M1シリアライズ → section_count, company_name, sections が含まれる (CR3-1)"""
         from api.services.pipeline import serialize_step_output
 
         output = serialize_step_output("m1", self._make_mock_m1_report())
-        self.assertIn("sections_count", output)
+        self.assertIn("section_count", output)
         self.assertIn("company_name", output)
         self.assertIn("sections", output)
-        self.assertEqual(output["sections_count"], 1)
+        self.assertEqual(output["section_count"], 1)
         self.assertEqual(len(output["sections"]), 1)
-        self.assertIn("text_snippet", output["sections"][0])
+        sec = output["sections"][0]
+        self.assertIn("text_excerpt", sec)
+        self.assertIn("char_count", sec)
+        self.assertNotIn("text_snippet", output.get("sections", [{}])[0])
 
     def test_m2_output_has_required_fields(self):
-        """M2シリアライズ → applicable_entries_count, entries が含まれる"""
+        """M2シリアライズ → applied_count, warning_count, source_confirmed が含まれる (CR3-2)"""
         from api.services.pipeline import serialize_step_output
 
         output = serialize_step_output("m2", self._make_mock_m2_law_context())
-        self.assertIn("applicable_entries_count", output)
+        self.assertIn("applied_count", output)
+        self.assertIn("warning_count", output)
         self.assertIn("entries", output)
         self.assertIn("warnings", output)
-        self.assertEqual(output["applicable_entries_count"], 1)
+        self.assertEqual(output["applied_count"], 1)
+        self.assertEqual(output["warning_count"], 1)
+        self.assertIn("source_confirmed", output["entries"][0])
 
     def test_m3_output_has_required_fields(self):
-        """M3シリアライズ → total_gaps, gaps が含まれる"""
+        """M3シリアライズ → total_gaps, gaps[gap_description/reference_law_title] が含まれる (CR3-3)"""
         from api.services.pipeline import serialize_step_output
 
         output = serialize_step_output("m3", self._make_mock_m3_gap_result())
@@ -192,10 +205,14 @@ class TestSerializeStepOutput(unittest.TestCase):
         gap = output["gaps"][0]
         self.assertIn("gap_id", gap)
         self.assertIn("has_gap", gap)
-        self.assertIn("description", gap)
+        self.assertIn("gap_description", gap)
+        self.assertIn("reference_law_title", gap)
+        self.assertIn("reference_url", gap)
+        self.assertIn("evidence_hint", gap)
+        self.assertNotIn("description", gap)
 
     def test_m4_output_has_required_fields(self):
-        """M4シリアライズ → proposals_count, proposals が含まれる"""
+        """M4シリアライズ → proposals[matsu/take/ume オブジェクト形式] (CR3-4)"""
         from api.services.pipeline import serialize_step_output
 
         output = serialize_step_output("m4", self._make_mock_m4_proposals())
@@ -204,9 +221,17 @@ class TestSerializeStepOutput(unittest.TestCase):
         self.assertEqual(output["proposals_count"], 1)
         p = output["proposals"][0]
         self.assertIn("gap_id", p)
-        self.assertIn("matsu_snippet", p)
-        self.assertIn("take_snippet", p)
-        self.assertIn("ume_snippet", p)
+        self.assertIn("reference_law_id", p)
+        for level_key in ("matsu", "take", "ume"):
+            self.assertIn(level_key, p)
+            obj = p[level_key]
+            self.assertIn("text", obj)
+            self.assertIn("status", obj)
+            self.assertIn("level", obj)
+            self.assertIn("char_count", obj)
+        self.assertNotIn("matsu_snippet", p)
+        self.assertNotIn("take_snippet", p)
+        self.assertNotIn("ume_snippet", p)
 
     def test_m5_output_has_report_markdown(self):
         """M5シリアライズ → report_markdown, char_count が含まれる"""
@@ -263,7 +288,7 @@ class TestStepAPIEndpoints(unittest.TestCase):
         self.assertIn("next_stage", data)
         self.assertEqual(data["next_stage"], "m2")
         m1 = data["m1_output"]
-        self.assertIn("sections_count", m1)
+        self.assertIn("section_count", m1)
         self.assertIn("company_name", m1)
 
     def test_step_next_completes_all_stages(self):
@@ -296,7 +321,7 @@ class TestStepAPIEndpoints(unittest.TestCase):
         data = resp.json()
         self.assertEqual(data["stage"], "m1")
         self.assertEqual(data["task_id"], task_id)
-        self.assertIn("sections_count", data["output"])
+        self.assertIn("section_count", data["output"])
         self.assertIn("sections", data["output"])
 
     def test_get_step_output_after_all_stages(self):

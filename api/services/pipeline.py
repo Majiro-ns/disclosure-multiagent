@@ -121,11 +121,14 @@ def create_task_step(
 
 
 def serialize_step_output(stage: str, output: Any) -> dict[str, Any]:
-    """各ステージの生出力をJSON-friendlyなdictサマリに変換する。"""
+    """各ステージの生出力をJSON-friendlyなdictサマリに変換する。
+
+    CR3-1〜CR3-4 (cmd_360k_a2f): key名をTypeScript型定義に合わせた。
+    """
     if stage == "m1":
         report = output
         return {
-            "sections_count": len(report.sections),
+            "section_count": len(report.sections),
             "company_name": report.company_name or "",
             "fiscal_year": report.fiscal_year,
             "document_id": report.document_id,
@@ -133,22 +136,26 @@ def serialize_step_output(stage: str, output: Any) -> dict[str, Any]:
                 {
                     "section_id": s.section_id,
                     "heading": s.heading,
-                    "text_snippet": s.text[:200] if s.text else "",
+                    "text_excerpt": s.text[:200] if s.text else "",
+                    "char_count": len(s.text) if s.text else 0,
                 }
                 for s in report.sections
             ],
         }
     elif stage == "m2":
         law = output
+        warnings_list = list(law.warnings) if law.warnings else []
         return {
-            "applicable_entries_count": len(law.applicable_entries),
-            "warnings": law.warnings,
+            "applied_count": len(law.applicable_entries),
+            "warning_count": len(warnings_list),
+            "warnings": warnings_list,
             "missing_categories": law.missing_categories,
             "entries": [
                 {
                     "id": getattr(e, "id", ""),
                     "title": getattr(e, "title", str(e)),
                     "category": getattr(e, "category", ""),
+                    "source_confirmed": getattr(e, "source_confirmed", None),
                 }
                 for e in law.applicable_entries
             ],
@@ -164,9 +171,12 @@ def serialize_step_output(stage: str, output: Any) -> dict[str, Any]:
                     "section_heading": g.section_heading,
                     "change_type": g.change_type,
                     "has_gap": g.has_gap,
-                    "description": g.gap_description or "",
+                    "gap_description": g.gap_description or "",
                     "disclosure_item": g.disclosure_item,
                     "confidence": g.confidence,
+                    "reference_law_title": getattr(g, "reference_law_title", ""),
+                    "reference_url": getattr(g, "reference_url", ""),
+                    "evidence_hint": getattr(g, "evidence_hint", "") or "",
                 }
                 for g in gap.gaps
             ],
@@ -179,9 +189,25 @@ def serialize_step_output(stage: str, output: Any) -> dict[str, Any]:
                 {
                     "gap_id": ps.gap_id,
                     "disclosure_item": ps.disclosure_item,
-                    "matsu_snippet": ps.matsu.text[:100] if ps.matsu.text else "",
-                    "take_snippet": ps.take.text[:100] if ps.take.text else "",
-                    "ume_snippet": ps.ume.text[:100] if ps.ume.text else "",
+                    "reference_law_id": getattr(ps, "reference_law_id", ""),
+                    "matsu": {
+                        "text": ps.matsu.text or "",
+                        "char_count": len(ps.matsu.text) if ps.matsu.text else 0,
+                        "status": getattr(ps.matsu, "status", "pass"),
+                        "level": "matsu",
+                    },
+                    "take": {
+                        "text": ps.take.text or "",
+                        "char_count": len(ps.take.text) if ps.take.text else 0,
+                        "status": getattr(ps.take, "status", "pass"),
+                        "level": "take",
+                    },
+                    "ume": {
+                        "text": ps.ume.text or "",
+                        "char_count": len(ps.ume.text) if ps.ume.text else 0,
+                        "status": getattr(ps.ume, "status", "pass"),
+                        "level": "ume",
+                    },
                 }
                 for ps in proposals
             ],
