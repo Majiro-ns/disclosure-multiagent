@@ -145,21 +145,64 @@ curl -X POST http://localhost:8010/api/analyze/upload \
 
 | ファイル | 役割 |
 |---|---|
-| `scripts/debug_ipc.py` | ファイルベースIPC ユーティリティ（`write_request` / `wait_for_response` / `call_debug_llm`） |
-| `scripts/debug_monitor.py` | リクエスト監視モニター（インタラクティブ / 自動モード） |
+| `scripts/debug_ipc.py` | ファイルベースIPC ユーティリティ（単件: `write_request` / `wait_for_response` / `call_debug_llm`、バッチ: `write_batch_request` / `wait_for_batch_response` / `call_debug_llm_batch`） |
+| `scripts/debug_monitor.py` | リクエスト監視モニター（インタラクティブ / 自動モード、バッチ対応） |
 | `scripts/debug_prompts.py` | 足軽向け追加コンテキスト（M3/M4として振る舞うためのガイド） |
-| `scripts/test_debug_mode.py` | TC-1〜TC-12 ユニットテスト（13件全PASS） |
+| `scripts/test_debug_mode.py` | TC-1〜TC-20 ユニットテスト（21件全PASS） |
+| `scripts/test_step_debug_e2e.py` | ST-1〜ST-8 E2Eテスト（9件全PASS） |
 | `api/routers/analyze.py` | `/api/analyze/upload` に `use_debug: bool = Form(False)` 追加 |
 | `api/services/pipeline.py` | `run_pipeline_async()` に `use_debug` パラメータ追加 |
 
 ---
 
-## E2E テスト確認済み（2026-03-14）
+## バッチ IPC フォーマット（cmd_360k_a7e で追加）
 
-- M3: 135件の IPC リクエストを処理（57法令エントリ × 18セクション相当）
-- ギャップ0件 → M4省略 → M5でレポート 18,365文字生成
-- パイプライン完走: **status: done** ✅
+M3・M4 はバッチ IPC を使用して、130件以上の分析を **2回のIPC** で完結させます。
+
+### バッチ request_{id}.json スキーマ
+
+```json
+{
+  "id": "uuid",
+  "stage": "m3",
+  "batch": true,
+  "item_count": 130,
+  "system_prompt": "（共通システムプロンプト）",
+  "items": [
+    {"index": 0, "user_prompt": "（セクション0のプロンプト）"},
+    {"index": 1, "user_prompt": "（セクション1のプロンプト）"},
+    ...
+  ],
+  "created_at": "2026-03-14T10:00:00+09:00"
+}
+```
+
+### バッチ response_{id}.json スキーマ
+
+```json
+{
+  "id": "uuid（request と同じ）",
+  "results": [
+    {"index": 0, "content": "（index 0への応答）"},
+    {"index": 1, "content": "（index 1への応答）"},
+    ...
+  ],
+  "created_at": "2026-03-14T10:00:00"
+}
+```
+
+> **バッチタイムアウト**: デフォルト **600秒（10分）**（単件より長め）。
 
 ---
 
-*作成者: Majiro-ns / 2026-03-14 / cmd_360k_a8b*
+## E2E テスト確認済み（2026-03-14）
+
+- M3 バッチ: 130件× 2ステージ → 2回のIPCで完結（cmd_360k_a7e）
+- debug mode 21テスト（TC-1〜TC-20）全PASS
+- ST-1〜ST-8 E2Eテスト（単件/バッチ/タイムアウト/バックグラウンドスレッド）全PASS
+- パイプライン全段階（USE_MOCK_LLM=true）: M1→M2→M3→M4→M5 完走 ✅
+- レポート 89470文字生成
+
+---
+
+*作成者: Majiro-ns / 2026-03-14 / cmd_360k_a8b → a8c*
