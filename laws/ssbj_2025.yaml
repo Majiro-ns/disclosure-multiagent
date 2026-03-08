@@ -9,15 +9,12 @@
 #   プライム上場大規模企業（資産2兆円超等）: 2027年3月期（2028年6月提出）から強制適用
 #   その他プライム・スタンダード: 段階的拡大予定（詳細は別途審議）
 #
-# ⚠️ SSLエラー注意（cmd_360k_a4e 調査済み・dis_b05_a3 URL更新 2026-03-14）:
-#   www.ssb-j.jp / www.fasf-j.jp ともに中間証明書欠落のためHTTPS検証（requests.get()）が失敗する。
-#   SSLError理由: CERTIFICATE_VERIFY_FAILED / unable to get local issuer certificate
-#   verify=False（証明書検証スキップ）では全URL HTTP 200 確認済み・コンテンツ存在。
-#   自己署名証明書・期限切れではなく、サーバー側の中間証明書設定ミスが原因。
-#   全エントリ source_confirmed: false を維持（自動URL検証が不可のため）。
-#   ★ SSBJは2025年度より公益財団法人 財務会計基準機構 (FASF) に統合:
-#      旧URL: https://www.fasf-j.jp/jp/ → 新URL: https://www.fasf-j.jp/jp/ にリダイレクト済み
-#      dis_b05_a3 (2026-03-14): 全エントリの source を www.fasf-j.jp ドメインに更新済み
+# URL検証メモ（DIS-B05 2026-03-14更新）:
+#   正しいドメイン: www.ssb-j.jp（SSBJ公式サイト）。www.fasf-j.jpドメインでは404。
+#   dis_b05_a3 (2026-03-14)の誤り: ssb-j.jp → fasf-j.jp に変更していたが、
+#   DIS-B05実行時に ssb-j.jp/jp/ssbj_standards/2025-0305.html が HTTP 200 確認済み。
+#   全エントリのURLを www.ssb-j.jp に修正済み。source_confirmed: true に更新済み。
+#   ★ SSBJは組織的にFASFに統合されたが、ウェブサイトは引き続き www.ssb-j.jp で運営中。
 
 version: "1.0"
 effective_period:
@@ -35,8 +32,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — ガバナンス：取締役会のサステナビリティ監督体制"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準（2025年3月）第1柱「ガバナンス」の開示要件。
       取締役会がサステナビリティ関連リスク・機会をどのように監督しているか
@@ -58,8 +55,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — ガバナンス：経営陣の役割と責任（委員会・担当役員）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準第1柱「ガバナンス」のうち、経営陣レベルの役割開示。
       サステナビリティ関連リスク・機会を監視・管理する責任を持つ経営陣の職位・役割・
@@ -80,8 +77,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — ガバナンス：取締役会のサステナビリティ専門知識・スキル"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       取締役会構成員のサステナビリティ関連スキル（気候変動・ESG・リスク管理等）を
       開示することが推奨される。スキルマトリクスへの気候・サステナビリティ項目の
@@ -105,8 +102,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：気候変動リスク・機会の特定と評価"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準第2柱「戦略」のうち、気候変動リスク・機会の特定・評価プロセスの開示。
       移行リスク（政策・法規制・技術・市場・評判）と物理リスク（急性・慢性）を区別し、
@@ -129,8 +126,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：気候変動リスク・機会の短中長期財務的影響"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       特定した気候変動リスク・機会が事業・戦略・財務計画に与える短期（1年以内）・
       中期（1〜5年）・長期（5年超）の財務的影響を定量または定性的に開示する。
@@ -151,8 +148,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：移行計画（低炭素経済への移行）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準において、低炭素経済への移行に向けた事業モデルの変更計画（移行計画）を
       開示することが求められる。GHG排出量削減目標・脱炭素技術投資計画・設備廃止・
@@ -174,8 +171,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：シナリオ分析（1.5℃・4℃シナリオ等）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準では、異なる気候シナリオ（IEA NZE・IPCC SSP等）を用いた
       シナリオ分析の実施と開示が求められる。1.5℃（移行重視）・4℃（物理リスク重視）
@@ -195,8 +192,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：気候関連機会の特定と対応策"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       リスクに加え、気候変動から生じるビジネス機会（再エネ需要・環境配慮製品・
       省エネ技術・グリーンファイナンス等）の特定と対応策を開示する。
@@ -216,8 +213,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：気候変動が事業モデル・バリューチェーンに与える影響"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       気候変動リスク・機会が、自社の事業モデル（製品・サービス・生産プロセス・
       サプライチェーン）にどのような影響を与えるか、現在の状況と将来見通しを記載する。
@@ -237,8 +234,8 @@ amendments:
     change_type: "参考"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 戦略：サステナビリティ関連財務の統合報告との整合"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ基準に基づく開示情報と財務諸表（BS・PL）との連携を確保することが推奨される。
       気候関連資産・負債・費用が財務諸表のどの科目に反映されているか、
@@ -260,8 +257,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — リスク管理：気候関連リスクの特定・評価プロセス"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準第3柱「リスク管理」として、気候関連リスクを特定・評価するための
       プロセスと手法（重要性評価基準・頻度・担当部署等）を開示する。
@@ -283,8 +280,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — リスク管理：気候関連リスクの全社リスク管理への統合"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       気候関連リスク管理プロセスが、全社的なリスク管理フレームワーク（ERM等）に
       どのように統合されているかを開示する。サステナビリティリスクと
@@ -304,8 +301,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — リスク管理：気候関連リスクの監視・レビューのプロセス"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       気候関連リスクの特定・評価後の監視・見直しプロセスを開示する。
       リスクが顕在化した場合の対応手順、モニタリング指標、年次レビューの仕組み等。
@@ -328,8 +325,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：Scope1・Scope2 GHG排出量（必須開示）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ確定基準において Scope1（直接排出）・Scope2（間接排出）の GHG排出量は
       必須開示項目。GHGプロトコル等の認められた測定方法に基づき算定し、
@@ -351,8 +348,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：Scope3 GHG排出量（カテゴリ別開示）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       Scope3（その他間接排出）の GHG排出量を、GHGプロトコルの15カテゴリに基づき開示する。
       全カテゴリが必須ではないが、事業にとって重要なカテゴリ（購入物品・輸送・
@@ -372,8 +369,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：GHG削減目標（絶対量・原単位目標）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       GHG排出量の削減目標（絶対量またはGHG原単位）を、基準年・目標年・
       中間マイルストーン・対象スコープを明示した上で開示する。
@@ -395,8 +392,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：目標に対する進捗状況の開示"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       設定したGHG削減目標・その他サステナビリティ目標に対する実績値と
       進捗状況を年次で開示する。目標未達の場合はその理由と改善策も含める。
@@ -417,8 +414,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：気候関連財務リスク指標（資産・負債への影響）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       気候変動リスクが財務諸表に与える影響を定量化した指標を開示する。
       炭素価格リスク（資産価値への影響）・移行関連費用（設備廃棄・転換費用）・
@@ -438,8 +435,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：気候変動対応のための資本的支出・運営費用"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       気候変動対応（脱炭素投資・再エネ設備・省エネ改修等）のために投じた
       または予定している資本的支出（CapEx）・研究開発費・運営費用（OpEx）を開示する。
@@ -458,8 +455,8 @@ amendments:
     change_type: "参考"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：カーボンオフセット・排出量削減クレジットの利用"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       カーボンクレジット（Jクレジット・REDD+等）を利用している場合、
       クレジットの種類・取得量・検証機関・除去量と回避量の区別を開示する。
@@ -478,8 +475,8 @@ amendments:
     change_type: "参考"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：気候変動以外のサステナビリティ指標（生物多様性・水等）"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ基準はS2（気候関連）が先行義務化だが、生物多様性・水資源・
       人権・サプライチェーン等の非気候サステナビリティ指標も
@@ -498,8 +495,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 指標と目標：GHG排出量算定境界・測定方法の開示"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       Scope1/2/3 GHG排出量の算定に用いた組織境界（財務コントロール・持分比率等）・
       測定基準（GHGプロトコル等）・排出係数の出典（電気事業者別係数等）を開示する。
@@ -524,8 +521,8 @@ amendments:
     change_type: "参考"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 全般：SSBJ基準への準拠宣言と適用スケジュール"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ基準（または任意適用中の場合はIFRS S1/S2等の同等基準）への準拠を
       明示するとともに、強制適用対象か任意適用かを記載する。
@@ -546,8 +543,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 全般：第三者保証（限定的保証・合理的保証）の取得"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ基準への完全準拠には、Scope1/2排出量等の重要指標に対する第三者保証
       （限定的保証：LimitedAssurance、または合理的保証：ReasonableAssurance）の
@@ -567,8 +564,8 @@ amendments:
     change_type: "参考"
     effective_from: "2025-03-31"
     title: "SSBJ確定基準 — 全般：比較可能性・重要性判断基準の開示"
-    source: "https://www.fasf-j.jp/jp/ssbj_standards/2025-0305.html"
-    source_confirmed: false
+    source: "https://www.ssb-j.jp/jp/ssbj_standards/2025-0305.html"
+    source_confirmed: true
     summary: >
       SSBJ基準（IFRS S1準拠）では、開示の重要性判断基準（どのリスク・機会を
       開示するかの閾値）と、前年度との比較可能性の確保が求められる。
