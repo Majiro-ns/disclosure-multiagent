@@ -25,7 +25,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2024-04-01"
     title: "開示府令改正 — 人的資本・多様性の記載義務化（2024年3月期以降）"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       2022年11月改正（2023年1月施行）の有報改革。有価証券報告書様式第二号に
       「人的資本」および「多様性」に関する記載欄が追加された。
@@ -51,7 +52,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2022-08-30"
     title: "内閣官房「人的資本可視化指針」（2022年8月）"
-    source: "https://www.cas.go.jp/jp/houdou/220830jinzai.html"
+    source: "https://www.cas.go.jp/jp/houdou/20220830jintekisihon.html"
+    source_confirmed: true
     summary: >
       内閣官房 非財務情報可視化研究会が公表したガイドライン。
       人的資本に関する定量・定性的指標の開示方針を示す。法令ではないが
@@ -74,7 +76,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2024-04-01"
     title: "開示府令改正 — 平均給与増減率の算出方法の明確化（様式第二号）"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       様式第二号の記載要領において、平均給与増減率の算出方法が明確化された。
       正規従業員の年間総支給額（基本給・手当・賞与を含み退職金を除く）を
@@ -117,7 +120,8 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ「サステナビリティ開示基準（公開草案）」（2024年3月）"
-    source: "https://www.ssb-j.jp/page_ssbj/pressrelease/2024/ne_20240329.html"
+    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       サステナビリティ基準委員会（SSBJ）が2024年3月29日に公表した公開草案。
       IFRS S1（全般的要求事項）・S2（気候関連開示）に準拠した日本版基準。
@@ -138,7 +142,8 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ基準 — ガバナンス・指標と目標（4柱）の開示要件"
-    source: "https://www.ssb-j.jp/page_ssbj/pressrelease/2024/ne_20240329.html"
+    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       SSBJ公開草案における4柱（ガバナンス・戦略・リスク管理・指標と目標）の
       開示要件。特にガバナンス（取締役会の監督体制）と指標（Scope1/2/3排出量、
@@ -159,7 +164,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-04-01"
     title: "TCFD提言準拠開示（気候関連財務情報）の有報への記載推奨"
-    source: "https://www.fsa.go.jp/singi/singi_kinyu/tosin/20221213.html"
+    source: "https://www.fsa.go.jp/singi/singi_kinyu/tosin/20221227.html"
+    source_confirmed: true
     summary: >
       金融審議会の方針に基づき、プライム上場企業を中心にTCFD提言（または同等の
       国際フレームワーク）に準拠した気候関連情報の有報記載が推奨されている。
@@ -176,7 +182,8 @@ amendments:
     change_type: "参考"
     effective_from: "2024-03-29"
     title: "SSBJ基準 適用スケジュール（大規模企業 2027年3月期から強制）"
-    source: "https://www.ssb-j.jp/page_ssbj/pressrelease/2024/ne_20240329.html"
+    source: "https://www.ssb-j.jp/jp/domestic_standards/exposure_draft/y2024/2024-0329.html"
+    source_confirmed: false  # SSLError: ssb-j.jp 中間証明書欠落のためHTTPS検証不可。verify=Falseで HTTP 200 確認済み・コンテンツ存在。
     summary: >
       SSBJ公開草案（2024年3月）に基づく適用スケジュール案。
       大規模上場企業（主にプライム・資産2兆円超等）は2027年3月期（2028年6月提出）
@@ -201,7 +208,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2022-08-30"
     title: "内閣官房「人的資本可視化指針」（2022年8月30日）"
-    source: "https://www.cas.go.jp/jp/houdou/220830jinzai.html"
+    source: "https://www.cas.go.jp/jp/houdou/20220830jintekisihon.html"
+    source_confirmed: true
     summary: >
       内閣官房 非財務情報可視化研究会が公表した人的資本開示の実践ガイドライン。
       19項目・7分野（健康・安全、エンゲージメント、流動性、多様性、
