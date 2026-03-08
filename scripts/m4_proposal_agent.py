@@ -189,26 +189,27 @@ FEW_SHOT_EXAMPLES: dict[str, dict[str, str]] = {
         ),
     },
     "平均年間給与の対前事業年度増減率": {
+        # ※ 以下は架空数値による記載例。実際の有報には自社の数値を記入してください。
         "松": (
             "【平均年間給与の推移（連結・単体）】\n\n"
-            "連結従業員の平均年間給与は[平均年間給与額]千円（前事業年度比[率]%）です。\n\n"
-            "内訳: 正社員 [正社員給与]千円（[率]%）、嘱託・契約社員 [契約社員給与]千円（[率]%）\n\n"
+            "連結従業員の平均年間給与は6,520千円（前事業年度比+3.2%）です。\n\n"
+            "内訳: 正社員 7,100千円（+3.8%）、嘱託・契約社員 3,950千円（+1.5%）\n\n"
             "算出方法: 「平均年間給与」は、決算期末の在籍者の1年間の給与・賞与・各種手当の"
             "合計を在籍者数で除して算出しています。"
             "育児休業・介護休業中の従業員を除外しています。\n\n"
             "部門別内訳（参考）:\n"
-            "- 技術系職種: [技術職給与]千円\n"
-            "- 管理系職種: [管理職給与]千円"
+            "- 技術系職種: 7,890千円\n"
+            "- 管理系職種: 8,230千円"
         ),
         "竹": (
-            "連結従業員の平均年間給与は[平均年間給与額]千円（前事業年度比[率]%）です。\n\n"
+            "連結従業員の平均年間給与は6,520千円（前事業年度比+3.2%）です。\n\n"
             "算出方法: 決算期末在籍者の年間給与・賞与・手当合計を在籍者数で除した金額です。"
             "育児休業中の従業員は対象から除外しています。\n\n"
-            "単体従業員の平均年間給与は[単体給与額]千円（前事業年度比[率]%）です。"
+            "単体従業員の平均年間給与は6,850千円（前事業年度比+3.5%）です。"
         ),
         "梅": (
-            "連結従業員の平均年間給与は[平均年間給与額]千円（前事業年度比[率]%）です。"
-            "単体従業員の平均年間給与は[単体給与額]千円（同[率]%）です。"
+            "連結従業員の平均年間給与は6,520千円（前事業年度比+3.2%）です。"
+            "単体従業員の平均年間給与は6,850千円（同+3.5%）です。"
         ),
     },
     "従業員給与等の決定に関する方針": {
@@ -621,21 +622,21 @@ def _mock_generate(section_name: str, level: str) -> str:
     normalized = _normalize_section_name(section_name)
     if normalized in FEW_SHOT_EXAMPLES and level in FEW_SHOT_EXAMPLES[normalized]:
         return FEW_SHOT_EXAMPLES[normalized][level]
-    # フォールバック: レベル別のデフォルトテキスト
+    # フォールバック: レベル別のデフォルトテキスト（プレースホルダなし）
     defaults = {
         "松": (
-            "当社は、経営戦略と連動した[セクション名]に関する方針を策定しています。"
+            "当社は、経営戦略と連動した人材・サステナビリティに関する方針を策定しています。"
             "具体的なKPI・数値目標を設定し、四半期ごとに取締役会へ進捗を報告する体制を整備しています。"
             "外部認証・第三者保証の取得についても検討を進めています。"
         ),
         "竹": (
-            "当社は、[セクション名]に関する方針を経営計画と整合させ、"
+            "当社は、人材・サステナビリティに関する方針を経営計画と整合させ、"
             "継続的な改善に取り組んでいます。"
             "必要な指標の計測・開示を行い、担当部門による定期的な見直しを実施しています。"
         ),
-        "梅": f"当社は、[セクション名]について、法令の定めに従い適切に対応しています。",
+        "梅": "当社は、法令の定めに従い人材・環境に関する事項を適切に対応・開示しています。",
     }
-    return defaults.get(level, f"【{level}レベル】[セクション名]に関する記載文案")
+    return defaults.get(level, f"【{level}レベル】対象項目に関する記載文案")
 
 
 def generate_proposal(
@@ -645,6 +646,7 @@ def generate_proposal(
     law_id: str,
     level: str,
     system_prompt: Optional[str] = None,
+    use_debug: bool = False,
 ) -> str:
     """
     指定レベルの有報記載文案を1件生成する。
@@ -656,12 +658,32 @@ def generate_proposal(
         law_id: 法令エントリID（例: "HC_20260220_001"）
         level: "松" / "竹" / "梅"
         system_prompt: 使用するシステムプロンプト（None の場合は自動構築）
+        use_debug: True の場合はファイルベースIPC経由で足軽が応答する（use_mock より優先）
 
     Returns:
         生成された文案テキスト
     """
     if level not in VALID_LEVELS:
         raise ValueError(f"無効なレベル: {level}。'松'/'竹'/'梅' のいずれかを指定してください。")
+
+    # use_debug が最優先
+    if use_debug or os.environ.get("USE_DEBUG_LLM", "").lower() in ("true", "1", "yes"):
+        from debug_ipc import call_debug_llm
+        if system_prompt is None:
+            system_prompt = build_system_prompt_with_few_shot(section_name, level)
+        user_prompt = USER_PROMPT_TEMPLATE.format(
+            section_name=section_name,
+            change_type=change_type,
+            law_summary=law_summary,
+            law_id=law_id,
+            level=level,
+        )
+        try:
+            return call_debug_llm(stage="m4", system_prompt=system_prompt, user_prompt=user_prompt)
+        except (TimeoutError, ValueError) as e:
+            import logging
+            logging.getLogger(__name__).warning("[m4 debug_ipc] 応答エラー、モックにフォールバック: %s", e)
+            return _mock_generate(section_name, level)
 
     if _is_mock_mode():
         return _mock_generate(section_name, level)
@@ -701,12 +723,14 @@ def generate_with_quality_check(
     law_summary: str,
     law_id: str,
     level: str,
+    use_debug: bool = False,
 ) -> Proposal:
     """
     品質チェック付き文案生成。再生成を最大 MAX_REGENERATE 回まで試みる。
 
     Args:
         section_name, change_type, law_summary, law_id, level: generate_proposal と同じ
+        use_debug: True の場合はファイルベースIPC経由（generate_proposal に伝搬）
 
     Returns:
         Proposal データクラス
@@ -718,7 +742,8 @@ def generate_with_quality_check(
 
     for attempt in range(1, MAX_REGENERATE + 2):  # 最大 MAX_REGENERATE+1 回
         text = generate_proposal(
-            section_name, change_type, law_summary, law_id, level, system_prompt
+            section_name, change_type, law_summary, law_id, level, system_prompt,
+            use_debug=use_debug,
         )
         qc = quality_check(text, level)
         placeholders = check_placeholders(text)
@@ -765,12 +790,13 @@ def generate_with_quality_check(
 # メインエントリ: GapItem → ProposalSet
 # ------------------------------------------------------------------
 
-def generate_proposals(gap_item: GapItem) -> ProposalSet:
+def generate_proposals(gap_item: GapItem, use_debug: bool = False) -> ProposalSet:
     """
     1つの GapItem から 松竹梅 3水準の提案セット（ProposalSet）を生成する。
 
     Args:
         gap_item: M3ギャップ分析エージェントの出力
+        use_debug: True の場合はファイルベースIPC経由で足軽が応答する
 
     Returns:
         ProposalSet
@@ -783,6 +809,10 @@ def generate_proposals(gap_item: GapItem) -> ProposalSet:
             f"gap_id={gap_item.gap_id}: has_gap=False のため提案生成は不要です。"
             "ギャップがある項目（has_gap=True）のみ generate_proposals を呼び出してください。"
         )
+
+    # 環境変数フォールバック
+    if not use_debug:
+        use_debug = os.environ.get("USE_DEBUG_LLM", "").lower() in ("true", "1", "yes")
 
     section_name = gap_item.disclosure_item or gap_item.section_heading
     law_summary = gap_item.law_summary or (
@@ -797,6 +827,7 @@ def generate_proposals(gap_item: GapItem) -> ProposalSet:
             law_summary=law_summary,
             law_id=gap_item.reference_law_id,
             level=level,
+            use_debug=use_debug,
         )
         proposals[level] = proposal
 

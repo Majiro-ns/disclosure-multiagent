@@ -96,6 +96,7 @@ async def run_pipeline_async(
     level: str,
     use_mock: bool = True,
     doc_type: str = "yuho",
+    use_debug: bool = False,
 ) -> None:
     """Execute the M1-M5 pipeline in a background thread."""
     task = _tasks.get(task_id)
@@ -103,8 +104,10 @@ async def run_pipeline_async(
         return
 
     try:
-        # Set mock mode
-        if use_mock:
+        # Set mock mode / debug mode via environment variables
+        if use_debug:
+            os.environ["USE_DEBUG_LLM"] = "true"
+        elif use_mock:
             os.environ["USE_MOCK_LLM"] = "true"
 
         loop = asyncio.get_event_loop()
@@ -143,6 +146,7 @@ async def run_pipeline_async(
                 report=structured_report,
                 law_context=law_context,
                 use_mock=use_mock,
+                use_debug=use_debug,
             ),
         )
         has_gap_count = sum(1 for g in gap_result.gaps if g.has_gap)
@@ -156,7 +160,7 @@ async def run_pipeline_async(
             for gap in gap_result.gaps:
                 if gap.has_gap:
                     m4_gap = _m3_gap_to_m4_gap(gap)
-                    ps = generate_proposals(m4_gap)
+                    ps = generate_proposals(m4_gap, use_debug=use_debug)
                     proposals.append(ps)
 
         await loop.run_in_executor(None, _generate_proposals)

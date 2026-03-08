@@ -76,9 +76,16 @@ async def start_analysis_with_upload(
     fiscal_month_end: int = Form(3),
     level: str = Form("竹"),
     use_mock: bool = Form(True),
+    use_debug: bool = Form(False),
     _auth: None = Depends(verify_api_key),
 ):
-    """PDF直接アップロードでパイプライン起動."""
+    """PDF直接アップロードでパイプライン起動.
+
+    use_debug=True の場合:
+        M3/M4 の LLM 呼び出しをファイルベースIPCに切り替える。
+        /tmp/disclosure_debug/request_{uuid}.json が生成されるので、
+        足軽（Claude Code）が読んで response_{uuid}.json を書けばパイプラインが続行する。
+    """
 
     # ── バリデーション（3段階 + サイズ上限）──────────────────────────
 
@@ -131,6 +138,7 @@ async def start_analysis_with_upload(
         fiscal_month_end=fiscal_month_end,
         level=level,
         use_mock=use_mock,
+        use_debug=use_debug,
     )
 
     return AnalyzeResponse(task_id=task_id)
