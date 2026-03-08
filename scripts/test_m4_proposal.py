@@ -510,6 +510,32 @@ class TestPlaceholders(unittest.TestCase):
         # プレースホルダのみなら pass
         self.assertTrue(result.passed, f"Errors: {result.errors}")
 
+    def test_kyuyo_section_no_placeholders(self):
+        """P2修正確認: 平均年間給与セクションのFEW_SHOT_EXAMPLESにプレースホルダがない"""
+        import re
+        section = "平均年間給与の対前事業年度増減率"
+        self.assertIn(section, FEW_SHOT_EXAMPLES, f"FEW_SHOT_EXAMPLES に '{section}' が定義されていない")
+        placeholder_pattern = re.compile(r'\[[^\]]{1,30}\]')
+        for level in ("松", "竹", "梅"):
+            text = FEW_SHOT_EXAMPLES[section][level]
+            found = placeholder_pattern.findall(text)
+            self.assertEqual(found, [],
+                f"'{section}' {level}レベルにプレースホルダが残存: {found}")
+        print("  [PASS] 平均年間給与セクション 松竹梅: プレースホルダなし ✓")
+
+    def test_mock_generate_defaults_no_placeholders(self):
+        """P2修正確認: _mock_generate() のフォールバックデフォルトにプレースホルダがない"""
+        import re
+        from scripts.m4_proposal_agent import _mock_generate
+        placeholder_pattern = re.compile(r'\[[^\]]{1,30}\]')
+        for level in ("松", "竹", "梅"):
+            # FEW_SHOT_EXAMPLESに存在しないセクション名を使ってフォールバックをテスト
+            text = _mock_generate("__テスト用未定義セクション__", level)
+            found = placeholder_pattern.findall(text)
+            self.assertEqual(found, [],
+                f"_mock_generate() {level} フォールバックにプレースホルダ残存: {found}")
+        print("  [PASS] _mock_generate() フォールバック 松竹梅: プレースホルダなし ✓")
+
 
 class TestGenerateProposals(unittest.TestCase):
     """TEST 8: generate_proposals 全体フロー"""
