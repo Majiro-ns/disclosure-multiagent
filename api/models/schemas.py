@@ -352,3 +352,25 @@ class ScoringHistoryResponse(BaseModel):
     """GET /api/scoring/history レスポンス"""
     history: list[ScoringHistoryItem]
     count: int
+
+
+# ── Tier Score（松竹梅スコア C06 cmd_374k_a7）──────────────────────────────────
+
+class TierScoreRequest(BaseModel):
+    """POST /api/scoring/tier リクエスト"""
+    disclosure_text: str = Field(..., description="ティアスコア算出対象の開示文書テキスト")
+    target_tier: Optional[str] = Field(
+        None,
+        pattern=r"^(梅|竹|松)$",
+        description="目標ティア（省略時は現在ティアの次段階）",
+    )
+
+
+class TierScoreResponse(BaseModel):
+    """POST /api/scoring/tier レスポンス"""
+    tier_score: int = Field(..., ge=0, le=100, description="ティアスコア（0-100）")
+    tier_label: str = Field(..., description="ティアラベル: 未達 / 梅 / 竹 / 松")
+    upgrade_items: list[str] = Field(
+        default_factory=list,
+        description="次ティアに必要な開示項目リスト",
+    )

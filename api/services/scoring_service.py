@@ -11,10 +11,17 @@
       理由: チェックリスト一致率をより重視（開示義務の充足が主目的）
   - risk_level: "low" (<40) / "medium" (40-69) / "high" (>=70)
 
+松竹梅ティアスコア (C06: cmd_374k_a7):
+  - tier_score: 0〜100 の整数
+      = カバー済み必須項目数 / 全必須項目数 × 100
+  - tier_label: "未達" (<60) / "梅" (60-79) / "竹" (80-94) / "松" (>=95)
+  - upgrade_items: 次ティアに必要な開示項目リスト
+
 設計方針:
   - compute_scores は純粋関数（DB非依存・テスト容易）
   - _get_connection は checklist_eval_service から再利用
   - score_document / get_score_history が公開 API
+  - compute_tier_score / get_tier_label / get_upgrade_items は純粋関数（後方互換）
 """
 from __future__ import annotations
 
@@ -33,6 +40,51 @@ from api.services.checklist_eval_service import _get_connection, evaluate_and_sa
 CHANGE_VOCABULARY: list[str] = [
     "変更", "改正", "廃止", "新設", "追加", "削除", "修正", "見直し",
 ]
+
+# ─── 松竹梅ティアスコア定数（C06: cmd_374k_a7）─────────────────────────────────
+
+TIER_UME_MIN: int = 60   # 梅ライン（法令必須をすべてカバー）
+TIER_TAKE_MIN: int = 80  # 竹ライン（推奨項目もカバー）
+TIER_MATSU_MIN: int = 95 # 松ライン（任意項目もほぼ全カバー）
+
+# A6のC07（tier_requirement追加）完了前のモックデータ
+# 必須 10件 + 推奨 5件
+MOCK_LAW_ENTRIES: list[dict] = [
+    {"id": "LAW-001", "title": "人的資本KPI開示（従業員エンゲージメント）", "tier_requirement": "必須"},
+    {"id": "LAW-002", "title": "人的資本KPI開示（女性管理職比率）", "tier_requirement": "必須"},
+    {"id": "LAW-003", "title": "人的資本KPI開示（男性育休取得率）", "tier_requirement": "必須"},
+    {"id": "LAW-004", "title": "人的資本KPI開示（研修時間・研修費用）", "tier_requirement": "必須"},
+    {"id": "LAW-005", "title": "人的資本KPI開示（離職率）", "tier_requirement": "必須"},
+    {"id": "LAW-006", "title": "有価証券報告書・サステナビリティ情報の記載", "tier_requirement": "必須"},
+    {"id": "LAW-007", "title": "コーポレートガバナンス報告書との整合性", "tier_requirement": "必須"},
+    {"id": "LAW-008", "title": "SSBJ基準に基づく気候変動リスク開示", "tier_requirement": "必須"},
+    {"id": "LAW-009", "title": "GHG排出量（Scope1・Scope2）の開示", "tier_requirement": "必須"},
+    {"id": "LAW-010", "title": "サプライチェーン人権リスク対応の開示", "tier_requirement": "必須"},
+    {"id": "LAW-011", "title": "SSBJ早期適用宣言", "tier_requirement": "推奨"},
+    {"id": "LAW-012", "title": "Scope3排出量の開示", "tier_requirement": "推奨"},
+    {"id": "LAW-013", "title": "人的資本投資ROIの定量開示", "tier_requirement": "推奨"},
+    {"id": "LAW-014", "title": "気候変動シナリオ分析（1.5℃/4℃）の詳細開示", "tier_requirement": "推奨"},
+    {"id": "LAW-015", "title": "TNFD（自然関連財務情報）への対応状況", "tier_requirement": "推奨"},
+]
+
+# 各ティア到達に必要な代表的開示項目
+_UPGRADE_ITEMS: dict[str, list[str]] = {
+    "梅": [
+        "有価証券報告書への人的資本KPI追記（エンゲージメント・離職率）",
+        "GHG排出量（Scope1・Scope2）の開示",
+        "サステナビリティ情報のサステナビリティ方針記載",
+    ],
+    "竹": [
+        "有価証券報告書への人的資本KPI追記",
+        "SSBJ早期適用宣言",
+        "Scope3排出量の開示（サプライチェーン全体）",
+    ],
+    "松": [
+        "TNFD（自然関連財務情報）への対応状況の開示",
+        "気候変動シナリオ分析（1.5℃・4℃）の詳細開示",
+        "人的資本投資ROIの定量開示（人材育成費用対効果）",
+    ],
+}
 
 # ─── DB スキーマ ──────────────────────────────────────────────────────────────
 
@@ -207,6 +259,79 @@ def score_document(disclosure_text: str) -> dict:
         "risk_level": scores["risk_level"],
         "top_matched_items": top_matched,
     }
+
+
+# ─── 松竹梅ティアスコア 純粋関数（C06: cmd_374k_a7）────────────────────────────
+
+
+def compute_tier_score(gap_results: list[dict], law_entries: list[dict]) -> int:
+    """法令エントリとギャップ分析結果から松竹梅ティアスコア (0〜100) を計算する。
+
+    計算式: カバー済み必須項目数 / 全必須項目数 × 100
+    「カバー済み」= has_gap が True でない項目（False または None）。
+    law_entries に "必須" 項目がない場合は 0 を返す。
+
+    Args:
+        gap_results: M3ギャップ分析結果のリスト。各要素に "has_gap": bool|None を含む。
+        law_entries: 法令エントリのリスト。各要素に "tier_requirement": str を含む。
+
+    Returns:
+        0〜100 の整数。
+    """
+    required_count = sum(1 for e in law_entries if e.get("tier_requirement") == "必須")
+    if required_count == 0:
+        return 0
+    gaps_found = sum(1 for r in gap_results if r.get("has_gap") is True)
+    covered = max(0, required_count - gaps_found)
+    return min(100, round(covered / required_count * 100))
+
+
+def get_tier_label(score: int) -> str:
+    """ティアスコアから松竹梅ラベルを返す。
+
+    - 95点以上: "松"
+    - 80〜94点: "竹"
+    - 60〜79点: "梅"
+    - 59点以下: "未達"
+
+    Args:
+        score: 0〜100 の整数。
+
+    Returns:
+        "松" / "竹" / "梅" / "未達"
+    """
+    if score >= TIER_MATSU_MIN:
+        return "松"
+    if score >= TIER_TAKE_MIN:
+        return "竹"
+    if score >= TIER_UME_MIN:
+        return "梅"
+    return "未達"
+
+
+def get_upgrade_items(score: int, target_tier: str) -> list[str]:
+    """現在スコアから目標ティアに達するために必要な開示項目を返す。
+
+    Args:
+        score: 現在の tier_score (0〜100)。
+        target_tier: "梅" | "竹" | "松"。
+
+    Returns:
+        推奨開示項目のリスト。既に目標ティア以上の場合は空リスト。
+
+    Raises:
+        ValueError: target_tier が "梅"/"竹"/"松" 以外の場合。
+    """
+    if target_tier not in ("梅", "竹", "松"):
+        raise ValueError(
+            f"target_tier は '梅'/'竹'/'松' のいずれかを指定してください: {target_tier!r}"
+        )
+    _tier_order = {"未達": 0, "梅": 1, "竹": 2, "松": 3}
+    _target_order = {"梅": 1, "竹": 2, "松": 3}
+    current_label = get_tier_label(score)
+    if _tier_order.get(current_label, 0) >= _target_order[target_tier]:
+        return []
+    return list(_UPGRADE_ITEMS[target_tier])
 
 
 def get_score_history(limit: int = 10) -> list[dict]:

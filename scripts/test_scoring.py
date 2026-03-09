@@ -259,5 +259,274 @@ class TestPureFunctions(unittest.TestCase):
         self.assertEqual(compute_risk_level(70.0), "high")
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# TC-TS1〜TC-TS8: 松竹梅ティアスコア テスト (C06 cmd_374k_a7)
+# ──────────────────────────────────────────────────────────────────────────────
+
+class TestComputeTierScore(unittest.TestCase):
+    """TC-TS1/TC-TS2: compute_tier_score 純粋関数テスト。"""
+
+    def setUp(self):
+        from api.services.scoring_service import compute_tier_score
+        self._func = compute_tier_score
+
+    def test_tc_ts1_basic_calculation(self):
+        """TC-TS1: 10必須中4ギャップ → covered=6 → score=60 → 梅ライン境界。
+
+        根拠: required_count=10, gaps_found=4 → covered=6
+              round(6/10*100) = 60
+        """
+        law_entries = [{"tier_requirement": "必須"}] * 10
+        gap_results = [{"has_gap": True}] * 4 + [{"has_gap": False}] * 6
+        score = self._func(gap_results, law_entries)
+        self.assertEqual(score, 60)
+
+    def test_tc_ts1b_all_covered(self):
+        """TC-TS1b: 10必須中ギャップなし → score=100。
+
+        根拠: covered=10, round(10/10*100)=100
+        """
+        law_entries = [{"tier_requirement": "必須"}] * 10
+        gap_results = [{"has_gap": False}] * 10
+        self.assertEqual(self._func(gap_results, law_entries), 100)
+
+    def test_tc_ts1c_all_gaps(self):
+        """TC-TS1c: 10必須全てギャップ → score=0。
+
+        根拠: covered=max(0, 10-10)=0, round(0/10*100)=0
+        """
+        law_entries = [{"tier_requirement": "必須"}] * 10
+        gap_results = [{"has_gap": True}] * 10
+        self.assertEqual(self._func(gap_results, law_entries), 0)
+
+    def test_tc_ts2_empty_law_entries(self):
+        """TC-TS2: law_entries が空 → 0。
+
+        根拠: required_count=0 → early return 0
+        """
+        self.assertEqual(self._func([], []), 0)
+
+    def test_tc_ts2b_no_required_entries(self):
+        """TC-TS2b: law_entries に "必須" なし → 0。
+
+        根拠: required_count=0（全て "推奨"）→ early return 0
+        """
+        law_entries = [{"tier_requirement": "推奨"}] * 5
+        gap_results = [{"has_gap": True}] * 3
+        self.assertEqual(self._func(gap_results, law_entries), 0)
+
+    def test_tc_ts2c_has_gap_none_treated_as_covered(self):
+        """TC-TS2c: has_gap=None は「カバー済み」扱い（True のみカウント）。
+
+        根拠: has_gap is True のみ gaps_found に加算
+              10必須, gaps_found=0 (Noneは除外) → covered=10 → score=100
+        """
+        law_entries = [{"tier_requirement": "必須"}] * 10
+        gap_results = [{"has_gap": None}] * 10
+        self.assertEqual(self._func(gap_results, law_entries), 100)
+
+    def test_tc_ts2d_score_caps_at_100(self):
+        """TC-TS2d: gap_results が law_entries より少なくてもスコアは100以下。
+
+        根拠: covered = max(0, required - gaps_found), min(100, ...)
+              10必須, gaps_found=0 (gap_results空) → 100
+        """
+        law_entries = [{"tier_requirement": "必須"}] * 10
+        self.assertEqual(self._func([], law_entries), 100)
+
+    def test_tc_ts1d_only_required_counted(self):
+        """TC-TS1d: 推奨エントリはスコア計算に含まれない。
+
+        根拠: required_count = 必須のみ = 5
+              gaps_found=2, covered=3, round(3/5*100)=60
+        """
+        law_entries = (
+            [{"tier_requirement": "必須"}] * 5
+            + [{"tier_requirement": "推奨"}] * 5
+        )
+        gap_results = [{"has_gap": True}] * 2 + [{"has_gap": False}] * 8
+        score = self._func(gap_results, law_entries)
+        self.assertEqual(score, 60)
+
+
+class TestGetTierLabel(unittest.TestCase):
+    """TC-TS3: get_tier_label 境界値テスト。"""
+
+    def setUp(self):
+        from api.services.scoring_service import get_tier_label
+        self._func = get_tier_label
+
+    def test_tc_ts3_boundary_59_未達(self):
+        """TC-TS3a: score=59 → "未達"（梅ライン60未満）。"""
+        self.assertEqual(self._func(59), "未達")
+
+    def test_tc_ts3_boundary_60_梅(self):
+        """TC-TS3b: score=60 → "梅"（梅ライン到達）。"""
+        self.assertEqual(self._func(60), "梅")
+
+    def test_tc_ts3_boundary_79_梅(self):
+        """TC-TS3c: score=79 → "梅"（竹ライン80未満）。"""
+        self.assertEqual(self._func(79), "梅")
+
+    def test_tc_ts3_boundary_80_竹(self):
+        """TC-TS3d: score=80 → "竹"（竹ライン到達）。"""
+        self.assertEqual(self._func(80), "竹")
+
+    def test_tc_ts3_boundary_94_竹(self):
+        """TC-TS3e: score=94 → "竹"（松ライン95未満）。"""
+        self.assertEqual(self._func(94), "竹")
+
+    def test_tc_ts3_boundary_95_松(self):
+        """TC-TS3f: score=95 → "松"（松ライン到達）。"""
+        self.assertEqual(self._func(95), "松")
+
+    def test_tc_ts3_boundary_100_松(self):
+        """TC-TS3g: score=100 → "松"（最大値）。"""
+        self.assertEqual(self._func(100), "松")
+
+    def test_tc_ts3_boundary_0_未達(self):
+        """TC-TS3h: score=0 → "未達"（最小値）。"""
+        self.assertEqual(self._func(0), "未達")
+
+
+class TestGetUpgradeItems(unittest.TestCase):
+    """TC-TS4: get_upgrade_items テスト。"""
+
+    def setUp(self):
+        from api.services.scoring_service import get_upgrade_items
+        self._func = get_upgrade_items
+
+    def test_tc_ts4_score50_target_梅_returns_items(self):
+        """TC-TS4a: score=50 (未達), target="梅" → 梅到達用アイテムを返す。"""
+        items = self._func(50, "梅")
+        self.assertIsInstance(items, list)
+        self.assertGreater(len(items), 0)
+
+    def test_tc_ts4_score62_target_竹_returns_items(self):
+        """TC-TS4b: score=62 (梅), target="竹" → 竹到達用アイテムを返す。
+
+        根拠: タスク例「upgrade_items: ['有価証券報告書への人的資本KPI追記', 'SSBJ早期適用宣言']」
+        """
+        items = self._func(62, "竹")
+        self.assertIsInstance(items, list)
+        self.assertGreater(len(items), 0)
+        # 竹到達アイテムに「SSBJ」が含まれることを確認
+        joined = " ".join(items)
+        self.assertIn("SSBJ", joined, "竹到達アイテムに SSBJ 関連項目が含まれること")
+
+    def test_tc_ts4_score82_target_松_returns_items(self):
+        """TC-TS4c: score=82 (竹), target="松" → 松到達用アイテムを返す。"""
+        items = self._func(82, "松")
+        self.assertIsInstance(items, list)
+        self.assertGreater(len(items), 0)
+
+    def test_tc_ts4_already_at_target_returns_empty(self):
+        """TC-TS4d: score=95 (松), target="松" → 既に達成 → 空リスト。
+
+        根拠: current_label="松" >= target_order["松"] → []
+        """
+        items = self._func(95, "松")
+        self.assertEqual(items, [])
+
+    def test_tc_ts4_already_above_target_returns_empty(self):
+        """TC-TS4e: score=85 (竹), target="梅" → 目標以上 → 空リスト。"""
+        items = self._func(85, "梅")
+        self.assertEqual(items, [])
+
+    def test_tc_ts4_invalid_target_raises_value_error(self):
+        """TC-TS4f: target_tier が無効 → ValueError。
+
+        根拠: ValueError("target_tier は '梅'/'竹'/'松'...")
+        """
+        with self.assertRaises(ValueError):
+            self._func(50, "invalid")
+
+
+class TestTierScoreEndpoint(unittest.TestCase):
+    """TC-TS5/TC-TS6: POST /api/scoring/tier エンドポイントテスト。"""
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        db_path = str(Path(self._tmpdir.name) / "test.db")
+        self.client = _make_client(db_path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_tc_ts5_tier_endpoint_returns_valid_response(self):
+        """TC-TS5: 正常テキスト → 200, tier_score (0-100), tier_label ∈ 有効値。
+
+        根拠: evaluate_and_save が coverage_rate を返し
+              tier_score = round(coverage_rate * 100) が 0-100 の整数。
+              tier_label ∈ {"未達","梅","竹","松"}。
+        """
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": "当期において固定資産の減損損失を計上しました。"},
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+
+        self.assertIn("tier_score", body)
+        self.assertIn("tier_label", body)
+        self.assertIn("upgrade_items", body)
+
+        self.assertIsInstance(body["tier_score"], int)
+        self.assertGreaterEqual(body["tier_score"], 0)
+        self.assertLessEqual(body["tier_score"], 100)
+
+        self.assertIn(body["tier_label"], {"未達", "梅", "竹", "松"},
+                      f"tier_label '{body['tier_label']}' が有効値でない")
+
+        self.assertIsInstance(body["upgrade_items"], list)
+
+    def test_tc_ts6_tier_endpoint_empty_text_returns_400(self):
+        """TC-TS6: 空テキスト → 400 Bad Request。
+
+        根拠: ルーターが空テキストを HTTPException(400) に変換。
+        """
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": ""},
+        )
+        self.assertEqual(resp.status_code, 400, resp.text)
+
+    def test_tc_ts7_tier_endpoint_with_target_tier(self):
+        """TC-TS7: target_tier 指定時、upgrade_items が対応するアイテムを返す。
+
+        根拠: target_tier="竹" を指定 → get_upgrade_items(score, "竹") の結果が返る。
+        """
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={
+                "disclosure_text": "人材育成および従業員エンゲージメントの向上に注力しています。",
+                "target_tier": "竹",
+            },
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+        # tier_label が 竹以上なら upgrade_items は空、未満なら非空
+        if body["tier_label"] in ("未達", "梅"):
+            self.assertGreater(len(body["upgrade_items"]), 0,
+                               "tier_label<竹 の場合 upgrade_items が空でないこと")
+
+    def test_tc_ts8_tier_label_consistency(self):
+        """TC-TS8: tier_score と tier_label の整合性検証。
+
+        根拠: get_tier_label の境界値（60/80/95）と tier_score の整合性。
+        """
+        from api.services.scoring_service import get_tier_label
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": "減損損失、退職給付、有価証券報告書、人的資本"},
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+
+        expected_label = get_tier_label(body["tier_score"])
+        self.assertEqual(body["tier_label"], expected_label,
+                         f"tier_score={body['tier_score']} に対する tier_label が不整合")
+
+
 if __name__ == "__main__":
     unittest.main()
