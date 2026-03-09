@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { GapSummaryCard } from '@/components/analysis/GapSummaryCard';
+import { TierProgressGauge } from '@/components/analysis/TierProgressGauge';
 import { GapTable } from '@/components/analysis/GapTable';
 import { ProposalCard } from '@/components/analysis/ProposalCard';
 import { ReportViewer } from '@/components/report/ReportViewer';
@@ -102,6 +103,7 @@ export default function ReportPage() {
           {/* Summary */}
           <TabsContent value="summary">
             <div className="space-y-4">
+              <TierProgressGauge taskId={taskId} />
               <GapSummaryCard summary={result.summary} />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Card>
