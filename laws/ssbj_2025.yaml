@@ -49,6 +49,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2025年度は任意適用段階。大規模企業は早期適用が推奨される"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-002"
     category: "SSBJ"
@@ -71,6 +75,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "担当役員が不在の場合はその旨と代替体制を記載すること"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-003"
     category: "SSBJ"
@@ -92,6 +100,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "スキルマトリクスに「サステナビリティ・気候変動」列を追加することを推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   # ──────────────────────────────────────────
   # 【第2柱】戦略（7件）
@@ -120,6 +132,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "TCFD提言と整合。既存TCFD開示を SSBJ様式に転換することで対応可能"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-005"
     category: "SSBJ"
@@ -142,6 +158,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "影響が定量化困難な場合は定性的な記述と理由の開示で対応可"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-006"
     category: "SSBJ"
@@ -165,6 +185,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "移行計画が未策定の場合はその旨と策定予定時期を記載"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-007"
     category: "SSBJ"
@@ -186,6 +210,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "大企業では複数シナリオ（最低2シナリオ）の適用が推奨される"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "必須"
 
   - id: "sb-2025-008"
     category: "SSBJ"
@@ -207,6 +235,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "TCFD「機会」開示項目と整合。既存のTCFD開示があれば転用可能"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2025-009"
     category: "SSBJ"
@@ -228,6 +260,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "Scope3開示と連動して記載すると整合性が高まる"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2025-010"
     category: "SSBJ"
@@ -247,6 +283,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "ISSB IFRS S1の「財務情報との連携」要件に対応"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"
 
   # ──────────────────────────────────────────
   # 【第3柱】リスク管理（3件）
@@ -274,6 +314,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "既存の全社リスク管理プロセスとの連携方法も記載することを推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-012"
     category: "SSBJ"
@@ -295,6 +339,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "リスクの優先順位付け（重要性マトリクス等）の手法を開示することが望ましい"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-013"
     category: "SSBJ"
@@ -315,6 +363,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "リスクKRI（Key Risk Indicator）の設定・追跡方法を具体的に記載することを推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   # ──────────────────────────────────────────
   # 【第4柱】指標と目標（9件）
@@ -342,6 +394,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "GHGプロトコルCorporate Standardまたは ISO 14064-1 が算定基準として認められる"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-015"
     category: "SSBJ"
@@ -363,6 +419,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2025年度は開示努力義務。段階的拡大により2027年度以降は強制適用予定"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "必須"
 
   - id: "sb-2025-016"
     category: "SSBJ"
@@ -386,6 +446,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "カーボンニュートラル宣言がある場合はその目標年と実現方法も記載"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-017"
     category: "SSBJ"
@@ -408,6 +472,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "前年度の開示内容との比較可能性を確保するため、算定方法の変更は注記を要する"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "sb-2025-018"
     category: "SSBJ"
@@ -429,6 +497,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "SSBJ基準では定量化が困難な場合は定性的記述と理由の開示で代替可能"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2025-019"
     category: "SSBJ"
@@ -449,6 +521,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "EU タクソノミー・日本版グリーンタクソノミーへの対応状況も記載することを推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2025-020"
     category: "SSBJ"
@@ -469,6 +545,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "クレジット利用はGHG削減の「補完」であり、直接削減への取り組みが前提"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"
 
   - id: "sb-2025-021"
     category: "SSBJ"
@@ -489,6 +569,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "TNFD（自然関連財務情報開示）・CSRD等の国際動向も参照のこと"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"
 
   - id: "sb-2025-022"
     category: "SSBJ"
@@ -511,6 +595,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "電力の排出係数は電気事業者別排出係数（環境省公表値）の利用を推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   # ──────────────────────────────────────────
   # 全般的要求事項（3件）
@@ -537,6 +625,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "2025年度は大規模企業以外も「準備状況の開示」が実質的に期待される"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2025-024"
     category: "SSBJ"
@@ -558,6 +650,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2025年度は任意。SSBJ強制適用後は段階的に保証要件が強化される見込み"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "推奨"
 
   - id: "sb-2025-025"
     category: "SSBJ"
@@ -578,3 +674,7 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "初年度適用の場合は比較情報が不要の場合があるが、翌年度からは比較情報が必要"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"

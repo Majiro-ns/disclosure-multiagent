@@ -27,7 +27,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2023-01-31"
     title: "金融商品取引法第24条 — 有価証券報告書の提出義務"
-    source: "https://www.fsa.go.jp/policy/disclosure/index.html"
+    source: "https://www.fsa.go.jp/policy/kaiji/kaiji.html"
     source_confirmed: true
     summary: >
       金融商品取引法（昭和23年法律第25号）第24条に基づく有価証券報告書の
@@ -53,7 +53,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2023-01-31"
     title: "企業内容等の開示に関する内閣府令（開示府令）— 2022年11月改正"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     summary: >
       企業内容等の開示に関する内閣府令（昭和48年大蔵省令第5号）の2022年11月15日改正。
@@ -84,8 +84,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-04-01"
     title: "有価証券報告書の記載要領（金融庁、2023年改訂版）— サステナビリティ記載"
-    source: "https://www.fsa.go.jp/policy/disclosure/index.html"
-    source_confirmed: false
+    source: "https://www.fsa.go.jp/policy/kaiji/kaiji.html"
+    source_confirmed: true
     summary: >
       金融庁が公表する有価証券報告書の記載要領（ガイドライン）。
       2023年改訂版では、サステナビリティ情報（第一部第二号様式）の
@@ -114,7 +114,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2023-01-31"
     title: "開示府令改正 — コーポレートガバナンス（政策保有株式・取締役報酬）の記載強化"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     summary: >
       2022年11月改正開示府令によるコーポレートガバナンス情報の記載強化。

@@ -26,7 +26,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "バーゼルIII第3の柱 — 自己資本比率の開示（CET1 / Tier1 / 総自己資本）"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       バーゼルIII第3の柱（市場規律）に基づく自己資本比率の開示要件。
@@ -47,13 +47,17 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "地方銀行・信用金庫等の内部格付け手法適用行は開示様式が異なる場合がある"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "bk-2025-002"
     category: "銀行業（バーゼルIII）"
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "バーゼルIII第3の柱 — リスク加重資産（RWA）内訳の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       バーゼルIII第3の柱に基づくリスク加重資産（RWA）の内訳開示要件。
@@ -73,13 +77,17 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "内部格付け手法採用行はOVA・OV1テンプレートに基づく開示が必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "bk-2025-003"
     category: "銀行業（バーゼルIII）"
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "バーゼルIII — 流動性カバレッジ比率（LCR）の開示"
-    source: "https://www.fsa.go.jp/news/r4/ginkou/20221202.html"
+    source: "https://www.fsa.go.jp/news/r4/ginkou/20221202-1/20221202-1.html"
     source_confirmed: true
     summary: >
       バーゼルIII流動性規制に基づく流動性カバレッジ比率（LCR）の開示要件。
@@ -98,13 +106,17 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "国際統一基準行（国際業務を行う主要行）が主な開示対象"
+    tier_requirement:
+      ume: "対象外"
+      take: "必須"
+      matsu: "必須"
 
   - id: "bk-2025-004"
     category: "銀行業（バーゼルIII）"
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "バーゼルIII — 安定調達比率（NSFR）の開示"
-    source: "https://www.fsa.go.jp/news/r4/ginkou/20221202.html"
+    source: "https://www.fsa.go.jp/news/r4/ginkou/20221202-1/20221202-1.html"
     source_confirmed: true
     summary: >
       バーゼルIII流動性規制に基づく安定調達比率（NSFR）の開示要件。
@@ -123,13 +135,17 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2021年3月末より規制適用開始（国際統一基準行）"
+    tier_requirement:
+      ume: "対象外"
+      take: "必須"
+      matsu: "必須"
 
   - id: "bk-2025-005"
     category: "銀行業（バーゼルIII）"
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "バーゼルIII — レバレッジ比率の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       バーゼルIII補完指標としてのレバレッジ比率（Tier1資本 / エクスポージャー合計）の
@@ -148,6 +164,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "2023年3月末より国内基準行にも適用拡大"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   # ──────────────────────────────────────────
   # 【第2群】不良債権・貸倒引当金（金融再生法ベース）
@@ -158,7 +178,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "金融再生法 — 不良債権残高・分類（破綻先/実質破綻先/破綻懸念先/要管理先）の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20230929/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20230929/20230929-1.html"
     source_confirmed: true
     summary: >
       金融機能の再生のための緊急措置に関する法律（金融再生法）に基づく
@@ -180,13 +200,17 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "地域銀行・信用金庫は銀行法施行規則に基づく開示に準じる"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "bk-2025-007"
     category: "銀行業（不良債権）"
     change_type: "追加必須"
     effective_from: "2025-04-01"
     title: "貸倒引当金の計上方針（個別貸倒引当金・一般貸倒引当金）の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20230929/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20230929/20230929-1.html"
     source_confirmed: true
     summary: >
       貸倒引当金の計上根拠・算定方法の開示要件。
@@ -206,6 +230,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "IFRS採用行はIFRS9 ECL（予想信用損失）3ステージ方式の説明も必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   # ──────────────────────────────────────────
   # 【第3群】信用リスク・金利リスク・ストレステスト
@@ -216,7 +244,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2025-04-01"
     title: "信用リスク管理体制の開示（融資審査・モニタリング・集中リスク）"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       銀行の信用リスク管理体制に関する開示要件。
@@ -236,13 +264,17 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "主要行等向けの総合的な監督指針 III-3-1（信用リスク管理）に対応"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "bk-2025-009"
     category: "銀行業（金利リスク）"
     change_type: "修正推奨"
     effective_from: "2025-04-01"
     title: "金利リスク（IRRBB）管理の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       銀行勘定の金利リスク（IRRBB: Interest Rate Risk in the Banking Book）の
@@ -263,13 +295,17 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "バーゼルIII IRRBB基準（2016年）国内実施 — 2020年3月末施行"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "bk-2025-010"
     category: "銀行業（ストレステスト）"
     change_type: "修正推奨"
     effective_from: "2025-04-01"
     title: "ストレステスト・シナリオ分析の実施状況の開示"
-    source: "https://www.fsa.go.jp/news/r5/ginkou/20231020/01.pdf"
+    source: "https://www.fsa.go.jp/news/r5/ginkou/20231004.html"
     source_confirmed: true
     summary: >
       銀行の健全性を評価するストレステスト・シナリオ分析の実施概要の開示要件。
@@ -287,3 +323,7 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "主要行等向けの総合的な監督指針 III-3-7（ストレステスト）に対応"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"

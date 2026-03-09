@@ -46,6 +46,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "3月決算企業は2024年6月提出の有報から適用。12月決算等は対象年度の開始日に準ずる"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "hc-2024-002"
     category: "人的資本"
@@ -70,6 +74,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "法令ではないが有報・CGレポートでの参照が一般化している"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "hc-2024-003"
     category: "人的資本"
@@ -93,6 +101,10 @@ amendments:
       - "プライム"
       - "スタンダード"
       - "グロース"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "hc-2024-004"
     category: "人的資本"
@@ -111,6 +123,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "任意開示。プライム大企業（松水準）の有報では参照事例が増加"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   # ──────────────────────────────────────────
   # SSBJカテゴリ（4件）
@@ -137,6 +153,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "確定基準は2025年3月予定。2024年度の有報では「準備中」等の記載が多い"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2024-002"
     category: "SSBJ"
@@ -159,6 +179,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2024年度は準備段階。対象企業・非対象企業ともに体制整備状況の開示が推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "推奨"
 
   - id: "sb-2024-003"
     category: "SSBJ"
@@ -177,6 +201,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "任意だが、プライム大企業では実質的に標準化しつつある"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "sb-2024-004"
     category: "SSBJ"
@@ -198,6 +226,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "スケジュールは審議中のため変動あり。確定次第このエントリを更新すること"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   # ──────────────────────────────────────────
   # 人的資本ガイダンスカテゴリ（4件）
@@ -229,6 +261,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "法令ではないが有報・統合報告書・CGレポートでの参照が一般化。金融庁審査でも参照される"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "hcg-2024-002"
     category: "人的資本ガイダンス"
@@ -252,6 +288,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "任意開示。人的資本経営コンソーシアムの開示事例集も参照推奨"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "hcg-2024-003"
     category: "人的資本ガイダンス"
@@ -276,6 +316,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "外資系企業・グローバル投資家向け有報では参照事例が増加。JIS化検討中"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"
 
   - id: "hcg-2024-004"
     category: "人的資本ガイダンス"
@@ -300,3 +344,7 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "2021年10月改訂版（GRI Universal Standards 2021）が現行。GRI 2: 一般開示に人材情報あり"
+    tier_requirement:
+      ume: "対象外"
+      take: "対象外"
+      matsu: "任意"

@@ -31,7 +31,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-01-31"
     title: "開示府令 — 経営方針・経営環境及び対処すべき課題等の記載充実（様式第二号）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -59,8 +59,8 @@ amendments:
     change_type: "参考"
     effective_from: "2021-06-11"
     title: "コーポレートガバナンス・コード — 経営戦略・経営計画の開示（原則3-1・補充原則3-1③）"
-    source: "https://www.jpx.co.jp/equities/listing/cg/tvdivq0000008jdy-att/nlsgeu0000034d47.pdf"
-    source_confirmed: false
+    source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     law_name: "コーポレートガバナンス・コード（東証 2021年6月改訂）"
     summary: >
       東証CGコード原則3-1（情報開示の充実）は、経営戦略・経営計画の開示を
@@ -89,7 +89,7 @@ amendments:
     effective_from: "2019-03-19"
     title: "記述情報の開示に関する原則 — MD&Aの質的向上"
     source: "https://www.fsa.go.jp/news/30/singi/20190319/01.pdf"
-    source_confirmed: false
+    source_confirmed: true
     law_name: "金融庁「記述情報の開示に関する原則」（2019年3月）"
     summary: >
       金融庁「記述情報の開示に関する原則」は、経営者による財政状態・経営成績・
@@ -115,7 +115,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2023-01-31"
     title: "開示府令改正 — 重要な会計上の見積りの記載（様式第二号 注記事項）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -141,7 +141,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-01-31"
     title: "開示府令 — 資本コスト・資本収益性の開示（様式第二号 経営成績の分析）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -173,7 +173,7 @@ amendments:
     effective_from: "2019-03-19"
     title: "開示府令 — 事業等のリスクの記載充実（主要リスクの識別・評価・対応）"
     source: "https://www.fsa.go.jp/news/30/singi/20190319/01.pdf"
-    source_confirmed: false
+    source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令・金融庁記述情報開示原則"
     summary: >
       有報様式第二号「1 事業等のリスク」では、投資者の判断に重要な影響を
@@ -206,7 +206,7 @@ amendments:
     change_type: "追加必須"
     effective_from: "2023-01-31"
     title: "開示府令改正 — コーポレートガバナンスに関する記載の充実（様式第二号 第一部第4）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -235,7 +235,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "CGコード補充原則4-11① — 取締役会の多様性・スキル・独立性の開示"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
-    source_confirmed: false
+    source_confirmed: true
     law_name: "コーポレートガバナンス・コード（東証 2021年6月改訂）補充原則4-11①"
     summary: >
       東証CGコード補充原則4-11①（2021年改訂）は、取締役会の多様性確保のため
@@ -265,7 +265,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-01-31"
     title: "開示府令改正 — 役員の状況における記述情報の充実（様式第二号）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -298,8 +298,8 @@ amendments:
     change_type: "追加必須"
     effective_from: "2019-01-31"
     title: "開示府令 — 政策保有株式の保有方針・縮減・議決権行使の開示"
-    source: "https://www.fsa.go.jp/singi/singi_kinyu/tosin/20190628/01.pdf"
-    source_confirmed: false
+    source: "https://www.fsa.go.jp/singi/singi_kinyu/tosin/20180628/01.pdf"
+    source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令 様式第二号 第一部第4"
     summary: >
       有報「株式の保有状況」において、政策保有株式（いわゆる持合い株式）の
@@ -325,8 +325,8 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2021-06-11"
     title: "CGコード原則1-7・補充原則1-4 — 政策保有株式と株主還元方針の整合的開示"
-    source: "https://www.fsa.go.jp/news/r2/singi/20210611/01.pdf"
-    source_confirmed: false
+    source: "https://www.fsa.go.jp/news/r2/singi/20210611-1.html"
+    source_confirmed: true
     law_name: "コーポレートガバナンス・コード（東証 2021年6月改訂）原則1-4"
     summary: >
       CGコード原則1-4（補充原則1-4①②）は、政策保有株式の削減と
@@ -355,7 +355,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-01-31"
     title: "開示府令 — 設備投資の状況・設備の新設・除却等の計画（様式第二号 第二部第3）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >
@@ -387,7 +387,7 @@ amendments:
     change_type: "修正推奨"
     effective_from: "2023-01-31"
     title: "開示府令 — 研究開発活動の概況・費用の開示（様式第二号 第二部第5）"
-    source: "https://www.fsa.go.jp/news/r4/singi/20230131/20230131.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
     source_confirmed: true
     law_name: "企業内容等の開示に関する内閣府令"
     summary: >

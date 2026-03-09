@@ -52,6 +52,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "第1弾はサステナビリティ全般、第2弾はTCFD等の気候関連、第3弾は人的資本との連携が重点テーマ"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "bp-2024-002"
     category: "好事例"
@@ -78,6 +82,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "2025年3月期（2025年4月以降提出の有報）から適用。開示義務化に合わせた好事例提示"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "bp-2024-003"
     category: "好事例"
@@ -106,6 +114,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "第5回勉強会（テーマ：重要な契約等・経営方針等・MD&A）の議論を踏まえて作成"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "bp-2024-004"
     category: "好事例"
@@ -135,6 +147,10 @@ amendments:
       - "グロース"
       - "プライム"
     notes: "第6回勉強会（テーマ：中堅中小上場企業の開示例）の議論を踏まえて作成。売上高300億円以下が一般的な対象目安"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "推奨"
 
   - id: "bp-2024-005"
     category: "好事例"
@@ -164,3 +180,7 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "第4弾はコーポレートガバナンス特化。CGコード対応の開示と有報記載の一体的充実が主なテーマ"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"

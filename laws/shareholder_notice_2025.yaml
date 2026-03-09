@@ -27,6 +27,7 @@ amendments:
     effective_from: "2023-09-01"
     title: "電子提供制度の導入 — 招集通知の電子提供義務（改正会社法 第325条の2）"
     source: "https://www.moj.go.jp/MINJI/minji07_00297.html"
+    source_confirmed: true
     summary: >
       改正会社法（2023年9月1日施行）により、上場企業は株主総会招集通知の添付書類を
       ウェブサイトに掲載（電子提供）しなければならない（電子提供制度）。
@@ -45,6 +46,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "2023年9月1日以降に開催の総会から義務化。書面請求株主への書面交付義務も継続"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-002"
     category: "総会前開示"
@@ -52,6 +57,7 @@ amendments:
     effective_from: "2023-09-01"
     title: "招集通知の発送期限 — 総会3週間前（改正会社法 第299条）"
     source: "https://www.moj.go.jp/MINJI/minji07_00297.html"
+    source_confirmed: true
     summary: >
       会社法第299条により、上場企業の株主総会招集通知は総会の日の2週間前（書面・電磁的）
       または3週間前（電子提供措置）までに発送または措置をとる必要がある。
@@ -67,6 +73,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "プライムは4週間前発送がCGコードで強く推奨（補充原則1-2④）"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-003"
     category: "総会前開示"
@@ -74,6 +84,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "招集通知の早期開示（任意開示） — CGコード補充原則1-2④"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       東証CGコード（2021年版）補充原則1-2④は、上場企業に対して招集通知関連書類を
       総会に十分先立って（少なくとも3週間前、可能であれば4週間前以上）提供することを推奨。
@@ -89,6 +100,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "義務ではないが、プライム企業への機関投資家の要求は高まっている"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gm-2025-004"
     category: "総会前開示"
@@ -96,6 +111,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "議決権電子行使プラットフォームへの参加 — CGコード補充原則1-2④"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       CGコード補充原則1-2④は、プライム上場企業に対して議決権電子行使プラットフォームへの
       参加（ICJの機関投資家向けプラットフォーム等）を推奨。
@@ -109,6 +125,10 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "スタンダード・グロースは任意。プライムでは機関投資家から実質要求されることが多い"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
 
   - id: "gm-2025-005"
     category: "総会前開示"
@@ -116,6 +136,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "取締役選任議案の記載要件 — 候補者の資格・独立性等"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       株主総会参考書類（招集通知添付）の取締役選任議案には、候補者の氏名・略歴・
       重要な兼職・当社との利害関係に加え、選任理由を記載する必要がある（会社法施行規則第74条）。
@@ -135,6 +156,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "会社法施行規則第74条・74条の3が根拠。参考書類の記載形式は法定様式"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-006"
     category: "総会前開示"
@@ -142,6 +167,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "社外取締役の独立性基準の開示 — 会社法施行規則・CGコード対応"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       社外取締役候補者を招集通知に記載する際、会社が定める独立性判断基準を明示し、
       各候補者がその基準を充足していることを示す必要がある。
@@ -160,13 +186,18 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "東証独立役員届出制度と整合させること。上場規程第436条の2準拠"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-007"
     category: "総会前開示"
     change_type: "追加必須"
     effective_from: "2021-06-11"
     title: "役員報酬改定議案の記載要件 — 報酬額・算定方法の開示"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       役員報酬の決定または変更に関する議案を株主総会に付議する場合、
       株主総会参考書類に報酬の額・算定方法・その相当性の判断根拠を記載する必要がある。
@@ -185,13 +216,18 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "会社法施行規則第82条・82条の2が根拠。サステナビリティ連動報酬KPI設定も増加"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-008"
     category: "総会前開示"
     change_type: "追加必須"
     effective_from: "2021-06-11"
     title: "監査役選任議案の記載要件 — 候補者の財務・会計知識等"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       監査役選任議案の株主総会参考書類には、候補者の氏名・略歴・当社との利害関係に加え、
       財務・会計に関する知識・経験（財務専門家としての資格等）を記載することが推奨される。
@@ -209,6 +245,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "会社法施行規則第76条・76条の2が根拠。監査等委員会設置会社は別規則"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-009"
     category: "総会前開示"
@@ -216,6 +256,7 @@ amendments:
     effective_from: "2025-04-01"
     title: "定款変更議案の記載要件 — 変更理由・新旧対照表"
     source: "https://www.moj.go.jp/MINJI/minji07_00297.html"
+    source_confirmed: true
     summary: >
       定款変更議案を株主総会に付議する場合、株主総会参考書類に変更の目的・理由・
       変更後の定款条文を記載する必要がある（会社法施行規則第85条）。
@@ -232,6 +273,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "会社法施行規則第85条が根拠。事業目的の変更は特に詳細な説明が必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
 
   - id: "gm-2025-010"
     category: "総会前開示"
@@ -239,6 +284,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "株主提案への対応記載 — CGコード原則1-1③対応"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       株主提案権が行使された場合、招集通知（株主総会参考書類）に株主提案議案を
       会社提案と同等の形式で記載する義務がある（会社法第305条）。
@@ -255,6 +301,10 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "会社法第304条・305条が根拠。株主提案の乱用防止策（上限数10件）も2021年改正で導入"
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gm-2025-011"
     category: "総会前開示"
@@ -262,6 +312,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "議決権行使結果の開示 — 総会後速報・TDNET開示"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       CGコード補充原則1-2②では、株主総会後に議決権行使結果（議案別の賛否票数）を
       速やかに開示することを推奨。東証上場規程第415条により、議決権行使結果は
@@ -278,13 +329,18 @@ amendments:
       - "スタンダード"
       - "グロース"
     notes: "総会終了当日〜翌営業日中のTDnet開示が標準。招集通知本体ではなく総会後の開示"
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gm-2025-012"
     category: "総会前開示"
     change_type: "修正推奨"
     effective_from: "2024-04-01"
     title: "役員個別報酬の開示 — 招集通知への記載推奨（1億円以上）"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       有価証券報告書改革（2024年3月期から）により、1億円以上の報酬を受ける役員の
       個別報酬額が有報への開示義務となった。招集通知においても、報酬総額・役員区分別合計に加え、
@@ -301,6 +357,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "1億円以上の役員個別報酬は有報で必須。招集通知への個別開示は任意だが推奨水準"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "推奨"
 
   # ──────────────────────────────────────────
   # ガバナンスカテゴリ（gc）— CGコード対応要件（4件）
@@ -312,6 +372,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "スキルマトリックス（取締役会スキル一覧）の招集通知への記載"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       CGコード補充原則4-11①（2021年改訂）により、プライム上場企業は取締役会全体として
       必要なスキル・知見と、各取締役が備えるスキルの対応を示すスキルマトリックスの開示が義務化。
@@ -328,6 +389,10 @@ amendments:
       - "プライム"
     notes: "スタンダード・グロースは任意だが開示率は上昇中。女性・外国人比率も合わせて開示"
     deprecated_from: null
+    tier_requirement:
+      ume: "対象外"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gc-2025-002"
     category: "ガバナンス"
@@ -335,6 +400,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "取締役会評価の開示 — CGコード補充原則4-11③対応"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       CGコード補充原則4-11③は、取締役会が毎年その機能・構成・運営等の実効性について
       分析・評価を行い、その結果の概要を招集通知または統合報告書・CGレポートで開示することを要求。
@@ -351,6 +417,10 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "CGレポートとの重複を避けつつ、招集通知では要点のサマリー開示が効果的"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gc-2025-003"
     category: "ガバナンス"
@@ -358,6 +428,7 @@ amendments:
     effective_from: "2021-06-11"
     title: "政策保有株式の保有方針・縮減状況の開示 — CGコード原則1-4対応"
     source: "https://www.jpx.co.jp/news/1020/20210611-01.html"
+    source_confirmed: true
     summary: >
       CGコード原則1-4では、上場企業が政策保有株式を保有する場合に、
       保有方針（保有目的・保有合理性の検証方法）を開示し、毎年取締役会で
@@ -375,13 +446,18 @@ amendments:
       - "プライム"
       - "スタンダード"
     notes: "CGコード原則1-4が根拠。有報での銘柄別開示（60銘柄）と整合させること"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
 
   - id: "gc-2025-004"
     category: "ガバナンス"
     change_type: "修正推奨"
     effective_from: "2024-04-01"
     title: "サステナビリティ連動型役員報酬 — KPI設定・達成状況の開示"
-    source: "https://www.fsa.go.jp/news/r4/sonota/20221114-3/20221114-3.html"
+    source: "https://www.fsa.go.jp/news/r4/sonota/20230131/20230131.html"
+    source_confirmed: true
     summary: >
       プライム上場企業を中心に、役員報酬の一部にサステナビリティ指標（CO2削減・
       女性管理職比率・エンゲージメントスコア等）を連動させる企業が増加。
@@ -399,3 +475,7 @@ amendments:
     applicable_markets:
       - "プライム"
     notes: "義務ではないが、プライム機関投資家の議決権行使方針に影響する開示項目"
+    tier_requirement:
+      ume: "対象外"
+      take: "任意"
+      matsu: "推奨"
