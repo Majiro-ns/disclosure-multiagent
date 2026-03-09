@@ -11,11 +11,19 @@
       理由: チェックリスト一致率をより重視（開示義務の充足が主目的）
   - risk_level: "low" (<40) / "medium" (40-69) / "high" (>=70)
 
-松竹梅ティアスコア (C06: cmd_374k_a7):
+松竹梅ティアスコア (C06: cmd_374k_a7, C06差替: cmd_375k_a7):
   - tier_score: 0〜100 の整数
       = カバー済み必須項目数 / 全必須項目数 × 100
   - tier_label: "未達" (<60) / "梅" (60-79) / "竹" (80-94) / "松" (>=95)
   - upgrade_items: 次ティアに必要な開示項目リスト
+
+  差替後（cmd_375k_a7）:
+  - load_law_entries(): laws/*.yaml から tier_requirement 付き全68エントリを読み込む
+  - _derive_gap_results(): キーワードマッチングで gap_results を生成（M3代替）
+  - compute_tier_score(gap_results, law_entries, tier_level="ume"):
+      tier_level = "ume"|"take"|"matsu" で評価対象ティアを指定
+      後方互換: tier_requirement が文字列の場合もそのまま動作
+  - _get_upgrade_items_from_laws(): 実データからアップグレード項目を抽出
 
 設計方針:
   - compute_scores は純粋関数（DB非依存・テスト容易）
@@ -32,6 +40,8 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+import yaml
 
 from api.services.checklist_eval_service import _get_connection, evaluate_and_save
 
@@ -264,7 +274,11 @@ def score_document(disclosure_text: str) -> dict:
 # ─── 松竹梅ティアスコア 純粋関数（C06: cmd_374k_a7）────────────────────────────
 
 
-def compute_tier_score(gap_results: list[dict], law_entries: list[dict]) -> int:
+def compute_tier_score(
+    gap_results: list[dict],
+    law_entries: list[dict],
+    tier_level: str = "ume",
+) -> int:
     """法令エントリとギャップ分析結果から松竹梅ティアスコア (0〜100) を計算する。
 
     計算式: カバー済み必須項目数 / 全必須項目数 × 100
@@ -273,17 +287,127 @@ def compute_tier_score(gap_results: list[dict], law_entries: list[dict]) -> int:
 
     Args:
         gap_results: M3ギャップ分析結果のリスト。各要素に "has_gap": bool|None を含む。
-        law_entries: 法令エントリのリスト。各要素に "tier_requirement": str を含む。
+        law_entries: 法令エントリのリスト。各要素に "tier_requirement" を含む。
+            tier_requirement は dict {"ume": ..., "take": ..., "matsu": ...} または
+            後方互換のため文字列 "必須"/"推奨" 等もサポート。
+        tier_level: 評価対象ティア。"ume" | "take" | "matsu"（デフォルト: "ume"）。
 
     Returns:
         0〜100 の整数。
     """
-    required_count = sum(1 for e in law_entries if e.get("tier_requirement") == "必須")
+    def _is_required(entry: dict) -> bool:
+        tier_req = entry.get("tier_requirement")
+        if isinstance(tier_req, dict):
+            # 実データ形式: {"ume": "必須", "take": "推奨", ...}
+            return tier_req.get(tier_level, "対象外") == "必須"
+        # 後方互換: 文字列形式（テスト用モックデータ）
+        return tier_req == "必須"
+
+    required_entries = [e for e in law_entries if _is_required(e)]
+    required_count = len(required_entries)
     if required_count == 0:
         return 0
-    gaps_found = sum(1 for r in gap_results if r.get("has_gap") is True)
-    covered = max(0, required_count - gaps_found)
+
+    # ID ベースマッチング（実データ）/ なければ全体集計（後方互換・テスト用モックデータ）
+    gap_map: dict[str, bool] = {
+        r.get("id"): bool(r.get("has_gap", True))
+        for r in gap_results if r.get("id")
+    }
+    if gap_map:
+        # 実データ: 必須エントリのギャップのみカウント
+        required_gaps = sum(
+            1 for e in required_entries
+            if gap_map.get(e.get("id", ""), True) is True
+        )
+    else:
+        # 後方互換: ID なしのモックデータ（既存テスト用）
+        required_gaps = sum(1 for r in gap_results if r.get("has_gap") is True)
+
+    covered = max(0, required_count - required_gaps)
     return min(100, round(covered / required_count * 100))
+
+
+def load_law_entries() -> list[dict]:
+    """laws/ 配下の全 YAML ファイルから tier_requirement 付きエントリを読み込む。
+
+    tier_requirement フィールドを持つエントリのみ対象（A6 C07 完了分、現在 68 件）。
+
+    Returns:
+        各エントリの dict リスト。id / title / tier_requirement 等を含む。
+    """
+    laws_dir = Path(__file__).parent.parent.parent / "laws"
+    entries: list[dict] = []
+    for yaml_path in sorted(laws_dir.glob("*.yaml")):
+        with open(yaml_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        for amendment in data.get("amendments", []):
+            if "tier_requirement" in amendment:
+                entries.append(amendment)
+    return entries
+
+
+def _derive_gap_results(disclosure_text: str, law_entries: list[dict]) -> list[dict]:
+    """開示テキストのキーワードマッチングから gap_results を生成する（M3 LLM 代替）。
+
+    各法令エントリの required_items / title から抽出したキーワードが
+    disclosure_text に含まれていれば has_gap=False（カバー済み）、
+    含まれなければ has_gap=True（ギャップあり）とする。
+
+    Args:
+        disclosure_text: 開示文書テキスト。
+        law_entries: load_law_entries() で取得した法令エントリリスト。
+
+    Returns:
+        [{"id": str, "has_gap": bool}, ...] のリスト（law_entries と同順）。
+    """
+    results: list[dict] = []
+    for entry in law_entries:
+        keywords: list[str] = []
+        # required_items（最も具体的なキーワード群）
+        keywords.extend(entry.get("required_items", []))
+        # title から「—」「：」以降のキーフレーズを抽出
+        title: str = entry.get("title", "")
+        if "—" in title:
+            keywords.append(title.split("—", 1)[1].strip())
+        elif "：" in title:
+            keywords.append(title.split("：", 1)[1].strip())
+        else:
+            keywords.append(title)
+        # 3文字以上のキーワードがテキストに含まれればカバー済み
+        covered = any(kw in disclosure_text for kw in keywords if len(kw) >= 3)
+        results.append({"id": entry.get("id", ""), "has_gap": not covered})
+    return results
+
+
+def _get_upgrade_items_from_laws(
+    gap_results: list[dict],
+    law_entries: list[dict],
+    tier_level: str,
+) -> list[str]:
+    """gap_results + 実 law_entries からアップグレードに必要な開示項目タイトルを返す。
+
+    指定ティアで tier_requirement == "必須" かつ has_gap=True の項目を最大5件返す。
+
+    Args:
+        gap_results: _derive_gap_results() の出力。{"id": str, "has_gap": bool} のリスト。
+        law_entries: load_law_entries() で取得した法令エントリリスト。
+        tier_level: "ume" | "take" | "matsu"
+
+    Returns:
+        開示項目タイトルのリスト（最大5件）。
+    """
+    gap_map: dict[str, bool] = {r.get("id", ""): bool(r.get("has_gap", True)) for r in gap_results}
+    items: list[str] = []
+    for entry in law_entries:
+        tier_req = entry.get("tier_requirement")
+        if not isinstance(tier_req, dict):
+            continue
+        if tier_req.get(tier_level) != "必須":
+            continue
+        entry_id = entry.get("id", "")
+        if gap_map.get(entry_id, True):  # has_gap=True → 未カバー → アップグレード対象
+            items.append(entry.get("title", ""))
+    return items[:5]
 
 
 def get_tier_label(score: int) -> str:

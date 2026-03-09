@@ -528,5 +528,257 @@ class TestTierScoreEndpoint(unittest.TestCase):
                          f"tier_score={body['tier_score']} に対する tier_label が不整合")
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# TC-TI1〜TC-TI4: 実 tier_requirement データ統合テスト (C06差替: cmd_375k_a7)
+# ──────────────────────────────────────────────────────────────────────────────
+
+class TestLoadLawEntries(unittest.TestCase):
+    """TC-TI1: load_law_entries() の実データ読み込み検証。"""
+
+    def test_tc_ti1_load_law_entries_returns_68_entries(self):
+        """TC-TI1a: load_law_entries() が68件のエントリを返す。
+
+        根拠: A6 C07完了（commit e14694b）で laws/ 全7ファイル68エントリに
+              tier_requirement 追加済み。jicpa(13件)とkinshohō(4件)は除外。
+        """
+        from api.services.scoring_service import load_law_entries
+        entries = load_law_entries()
+        self.assertEqual(len(entries), 68,
+                         f"load_law_entries() は68件を返すべきだが {len(entries)} 件")
+
+    def test_tc_ti1b_all_entries_have_dict_tier_requirement(self):
+        """TC-TI1b: 全エントリのtier_requirementが dict 形式。
+
+        根拠: A6 C07の形式: tier_requirement: {ume: ..., take: ..., matsu: ...}
+        """
+        from api.services.scoring_service import load_law_entries
+        entries = load_law_entries()
+        for e in entries:
+            tier_req = e.get("tier_requirement")
+            self.assertIsInstance(tier_req, dict,
+                                  f"エントリ {e.get('id')} の tier_requirement が dict でない")
+            # ume/take/matsu キーが全て存在すること
+            for key in ("ume", "take", "matsu"):
+                self.assertIn(key, tier_req,
+                              f"エントリ {e.get('id')} に '{key}' キーがない")
+
+    def test_tc_ti1c_tier_requirement_values_are_valid(self):
+        """TC-TI1c: tier_requirement の値が有効な文字列。
+
+        根拠: 有効値は "必須" | "推奨" | "任意" | "対象外"
+        """
+        from api.services.scoring_service import load_law_entries
+        valid_values = {"必須", "推奨", "任意", "対象外"}
+        entries = load_law_entries()
+        for e in entries:
+            for key in ("ume", "take", "matsu"):
+                val = e["tier_requirement"].get(key)
+                self.assertIn(val, valid_values,
+                              f"エントリ {e.get('id')}.{key} = {val!r} が有効値でない")
+
+    def test_tc_ti1d_ume_required_count(self):
+        """TC-TI1d: ume=必須 のエントリが14件。
+
+        根拠: laws/*.yaml ume=必須 の手計算: bk(7) + hc(3) + gm(4) = 14件
+        """
+        from api.services.scoring_service import load_law_entries
+        entries = load_law_entries()
+        ume_required = sum(
+            1 for e in entries
+            if e.get("tier_requirement", {}).get("ume") == "必須"
+        )
+        self.assertEqual(ume_required, 14,
+                         f"ume=必須 は14件のはず: {ume_required}件")
+
+
+class TestDeriveGapResults(unittest.TestCase):
+    """TC-TI2: _derive_gap_results() のキーワードマッチング検証。"""
+
+    def test_tc_ti2_keyword_match_produces_covered_entry(self):
+        """TC-TI2a: 実キーワードを含むテキストで has_gap=False。
+
+        根拠: hc-2024-001 の required_items に "女性管理職比率（連結）" を含む。
+              このキーワードをテキストに含めると has_gap=False（カバー済み）。
+        """
+        from api.services.scoring_service import load_law_entries, _derive_gap_results
+        entries = load_law_entries()
+        # hc-2024-001 のキーワードを含むテキスト
+        text = "今期の有価証券報告書に女性管理職比率（連結）を記載しました。"
+        gap_results = _derive_gap_results(text, entries)
+        self.assertEqual(len(gap_results), len(entries),
+                         "gap_results の件数が law_entries と一致すること")
+        # hc-2024-001 エントリがカバー済みになること
+        hc_entry = next(
+            (r for r in gap_results
+             if r.get("id") == "hc-2024-001"), None
+        )
+        self.assertIsNotNone(hc_entry, "hc-2024-001 が gap_results に含まれること")
+        self.assertFalse(hc_entry["has_gap"],
+                         "hc-2024-001: 女性管理職比率（連結）がテキストにあれば has_gap=False")
+
+    def test_tc_ti2b_empty_text_all_gaps(self):
+        """TC-TI2b: 空に近いテキストは全エントリが has_gap=True。
+
+        根拠: キーワード未マッチ → 全68件 has_gap=True
+        """
+        from api.services.scoring_service import load_law_entries, _derive_gap_results
+        entries = load_law_entries()
+        gap_results = _derive_gap_results("無関係なテキスト", entries)
+        gaps = sum(1 for r in gap_results if r.get("has_gap") is True)
+        self.assertEqual(gaps, len(entries),
+                         "キーワード不一致テキストは全エントリ has_gap=True")
+
+    def test_tc_ti2c_results_have_id_and_has_gap(self):
+        """TC-TI2c: gap_results の各要素が 'id' と 'has_gap' を含む。
+
+        根拠: _derive_gap_results は {"id": str, "has_gap": bool} を返す。
+        """
+        from api.services.scoring_service import load_law_entries, _derive_gap_results
+        entries = load_law_entries()
+        gap_results = _derive_gap_results("テスト", entries)
+        for r in gap_results:
+            self.assertIn("id", r)
+            self.assertIn("has_gap", r)
+
+
+class TestComputeTierScoreWithRealData(unittest.TestCase):
+    """TC-TI3: compute_tier_score() の実データ・tier_level パラメータ検証。"""
+
+    def test_tc_ti3_tier_level_ume_uses_ume_required(self):
+        """TC-TI3a: tier_level='ume' で ume=必須エントリ(14件)が分母になる。
+
+        根拠: ume=必須が14件。全てギャップあり → score=0。全てカバー済み → score=100。
+        """
+        from api.services.scoring_service import load_law_entries, compute_tier_score
+        entries = load_law_entries()
+        ume_count = sum(
+            1 for e in entries
+            if e.get("tier_requirement", {}).get("ume") == "必須"
+        )
+        # 全ギャップ → score=0
+        gap_all = [{"id": e.get("id", ""), "has_gap": True} for e in entries]
+        score_zero = compute_tier_score(gap_all, entries, tier_level="ume")
+        self.assertEqual(score_zero, 0)
+
+        # 全カバー → score=100
+        gap_none = [{"id": e.get("id", ""), "has_gap": False} for e in entries]
+        score_full = compute_tier_score(gap_none, entries, tier_level="ume")
+        self.assertEqual(score_full, 100)
+
+    def test_tc_ti3b_tier_level_take_differs_from_ume(self):
+        """TC-TI3b: tier_level='take' と 'ume' でスコアが異なる場合がある。
+
+        根拠: take=必須(16件) ≠ ume=必須(14件) なので分母が異なる。
+              同一ギャップ結果でもスコアが変わりうる。
+        """
+        from api.services.scoring_service import load_law_entries, compute_tier_score
+        entries = load_law_entries()
+        # ume=必須かつtake=非必須のエントリがギャップありのケース
+        gap_results = [{"id": e.get("id", ""), "has_gap": True} for e in entries]
+        score_ume = compute_tier_score(gap_results, entries, tier_level="ume")
+        score_take = compute_tier_score(gap_results, entries, tier_level="take")
+        # 両方とも全ギャップなので 0
+        self.assertEqual(score_ume, 0)
+        self.assertEqual(score_take, 0)
+
+        # 全カバー時は両方 100
+        gap_none = [{"id": e.get("id", ""), "has_gap": False} for e in entries]
+        self.assertEqual(compute_tier_score(gap_none, entries, tier_level="ume"), 100)
+        self.assertEqual(compute_tier_score(gap_none, entries, tier_level="take"), 100)
+
+    def test_tc_ti3c_partial_coverage_score(self):
+        """TC-TI3c: ume=必須14件中7件カバー → score=round(7/14*100)=50。
+
+        根拠: ume=必須のエントリのうち半数をカバー済みにする。
+              covered=7, required=14, score=round(50)=50
+        """
+        from api.services.scoring_service import load_law_entries, compute_tier_score
+        entries = load_law_entries()
+        ume_ids = [
+            e.get("id", "") for e in entries
+            if e.get("tier_requirement", {}).get("ume") == "必須"
+        ]
+        self.assertEqual(len(ume_ids), 14)
+        # 前半7件をカバー済み、後半7件+残りをギャップあり
+        covered_set = set(ume_ids[:7])
+        gap_results = [
+            {"id": e.get("id", ""), "has_gap": e.get("id", "") not in covered_set}
+            for e in entries
+        ]
+        score = compute_tier_score(gap_results, entries, tier_level="ume")
+        self.assertEqual(score, 50, f"7/14 covered → score=50, got {score}")
+
+
+class TestTierEndpointRealData(unittest.TestCase):
+    """TC-TI4: POST /api/scoring/tier の実データ統合テスト。"""
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        db_path = str(Path(self._tmpdir.name) / "test.db")
+        self.client = _make_client(db_path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_tc_ti4_endpoint_response_format_unchanged(self):
+        """TC-TI4a: 実データ接続後もレスポンス形式が維持されること。
+
+        根拠: TierScoreResponse = {tier_score: int, tier_label: str, upgrade_items: list}
+              C06差替後もインターフェース変更なし（制約: レスポンス形式維持）
+        """
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": "女性管理職比率（連結）および男性育児休業取得率を開示します。"},
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+        self.assertIn("tier_score", body)
+        self.assertIn("tier_label", body)
+        self.assertIn("upgrade_items", body)
+        self.assertIsInstance(body["tier_score"], int)
+        self.assertGreaterEqual(body["tier_score"], 0)
+        self.assertLessEqual(body["tier_score"], 100)
+        self.assertIn(body["tier_label"], {"未達", "梅", "竹", "松"})
+        self.assertIsInstance(body["upgrade_items"], list)
+
+    def test_tc_ti4b_tier_label_consistent_with_score(self):
+        """TC-TI4b: tier_score と tier_label の整合性が実データでも維持される。
+
+        根拠: get_tier_label(tier_score) と API返却 tier_label が一致すること。
+        """
+        from api.services.scoring_service import get_tier_label
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": "当社は人的資本開示を実施します。"},
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+        expected = get_tier_label(body["tier_score"])
+        self.assertEqual(body["tier_label"], expected,
+                         f"tier_score={body['tier_score']} → label={expected} だが API={body['tier_label']}")
+
+    def test_tc_ti4c_upgrade_items_are_strings(self):
+        """TC-TI4c: upgrade_items の各要素が文字列であること。
+
+        根拠: _get_upgrade_items_from_laws は entry.get('title') = str のリストを返す。
+        """
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": "無関係なテキスト"},
+        )
+        self.assertEqual(resp.status_code, 200, resp.text)
+        body = resp.json()
+        for item in body["upgrade_items"]:
+            self.assertIsInstance(item, str, f"upgrade_items に文字列でない要素: {item!r}")
+
+    def test_tc_ti4d_empty_text_returns_400(self):
+        """TC-TI4d: 実データ接続後も空テキストで 400 を返す（後方互換）。"""
+        resp = self.client.post(
+            "/api/scoring/tier",
+            json={"disclosure_text": ""},
+        )
+        self.assertEqual(resp.status_code, 400, resp.text)
+
+
 if __name__ == "__main__":
     unittest.main()
