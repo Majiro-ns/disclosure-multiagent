@@ -1,0 +1,58 @@
+name: Law Update Check (DIS-C09)
+
+on:
+  schedule:
+    # 毎週月曜 09:00 JST（= 00:00 UTC）
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "更新チェック開始日 (YYYY-MM-DD)。省略時は30日前"
+        required: false
+        default: ""
+      dry_run:
+        description: "dry-run（Issue作成せず結果表示のみ）"
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    working-directory: disclosure-multiagent
+
+jobs:
+  check-law-updates:
+    name: "e-Gov Law API 更新チェック"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Check law updates (scheduled — last 30 days)
+        if: github.event_name == 'schedule'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: python3 scripts/check_law_updates.py
+
+      - name: Check law updates (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.since }}" ]; then
+            ARGS="--since ${{ inputs.since }}"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python3 scripts/check_law_updates.py $ARGS
