@@ -1,0 +1,641 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS 18（表示と開示）
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令・基準:
+#   IFRS 18 Presentation and Disclosure in Financial Statements
+#   （IASB, 2024年4月公表 / 2027年1月1日強制適用 / 早期適用可）
+#   IAS 1 Presentation of Financial Statements（IFRS 18が置き換え）
+#   ASBJ（企業会計基準委員会）IFRS 18 適用影響調査（2024年〜）
+#
+# 主要変更点（IFRS 18の骨子）:
+#   (1) 損益計算書の3区分（営業/投資/財務）と新たな小計（営業利益）の義務化
+#   (2) MPMs（Management-defined Performance Measures）— 非GAAP指標の開示義務化
+#   (3) 費用の分解（追加的な分解情報のアプローチ）
+#   (4) 注記のグルーピング改善（重要性・集約・disaggregation原則）
+#   (5) キャッシュフロー計算書の営業CF区分とP&L営業区分の整合
+#
+# 注意事項:
+#   日本においてIFRS任意適用企業（2025年3月末時点 約270社）が主な対象。
+#   強制適用は2027年1月1日以降開始年度（多くの3月決算企業は2027年3月期から）。
+#   2025年度は移行準備・影響分析の段階。早期適用を選択した場合は開示が必要。
+#   MPM: Management-defined Performance Measure（経営陣が公開情報で使う非GAAP指標）
+#   IAS 1は2027年1月1日以降廃止（IFRS 18が全面置換）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】損益計算書の3区分構造（営業/投資/財務）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-001"
+    category: "IFRS 18（PL構造）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 損益計算書の3区分構造（営業/投資/財務）の概要開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18が新たに導入する損益計算書の3区分構造（営業区分・投資区分・財務区分）
+      の概要に関する開示要件。現行のIAS 1における営業利益の任意的な小計が、
+      IFRS 18では新たな3区分の枠組みの中で必須小計（営業利益）として義務化される。
+      この区分設定の方針（どの収益・費用をどの区分に配置するか）、
+      適用する会計方針の変更の有無、IAS 1からの主要な変更点の説明が
+      財務諸表への注記で求められる。早期適用企業は2025年度から対応が必要。
+    target_sections:
+      - "重要な会計方針"
+      - "損益計算書"
+      - "会計方針の変更"
+    required_items:
+      - "IFRS 18採用（早期適用 or 強制適用）の事実と適用開始年度"
+      - "損益計算書の3区分（営業/投資/財務）の定義と各区分の主要内容"
+      - "IAS 1との相違点の概要（新たな小計・区分変更の説明）"
+      - "移行時の影響（比較期間の修正再表示の有無と影響額）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "強制適用は2027年1月1日以降開始年度。2025〜2026年度は移行準備期間（影響分析開示推奨）"
+    level_proposals:
+      ume: >
+        「当社は2027年3月期よりIFRS 18を適用する予定であり、
+        現在その影響を調査・分析中である。」の1文開示（2025年度）。
+        適用年度より損益計算書の3区分を採用する旨を会計方針に記載。
+      take: >
+        IFRS 18の3区分と各区分に含まれる主要項目の一覧を開示。
+        IAS 1に基づく現行の損益計算書との対応関係（組換え内容）を
+        説明表として記載。比較期間の修正再表示の影響額を開示。
+      matsu: >
+        3区分ごとの詳細な組換え表（IAS 1→IFRS 18の項目別対応）、
+        修正再表示の前後比較（2〜3期分）、
+        区分設定の判断根拠（投資/財務区分の判定方針の詳細）まで開示。
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-002"
+    category: "IFRS 18（営業区分）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 営業区分（Operating Category）と必須小計「営業利益」の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18の損益計算書に新たに義務化される「営業利益（Operating Profit）」小計の
+      開示要件。営業利益は、投資区分・財務区分に含まれる収益・費用（および法人所得税・
+      中止事業損益）を除いた全ての損益項目の合計として算定される残余定義を採用する。
+      現行のIAS 1では任意的な営業利益の開示が一般的だったが、IFRS 18は
+      全ての企業に同じ計算ベースの営業利益開示を義務付けることで
+      企業間比較可能性を向上させる。
+    target_sections:
+      - "損益計算書"
+      - "重要な会計方針"
+    required_items:
+      - "損益計算書上の「営業利益」小計の表示"
+      - "営業区分に含める収益・費用の方針説明"
+      - "営業利益の前期比較と主要な変動要因の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "営業利益は残余定義（投資区分・財務区分・税金・中止事業を除く全項目の合計）であり独立した計算式は不要"
+    level_proposals:
+      ume: >
+        損益計算書に「営業利益」小計を明示。
+        投資区分・財務区分との区別の方針を会計方針に1段落で記載。
+      take: >
+        営業区分に含む主要な収益・費用の種類と金額を注記開示。
+        前期比較と営業利益率の推移も含める。
+      matsu: >
+        営業利益の構成要素の詳細（収益カテゴリ別・費用性質別分解）、
+        営業利益とセグメント利益の調整表、
+        非継続的・非経常的項目の営業区分への含め方の詳細説明を開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-003"
+    category: "IFRS 18（投資区分）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 投資区分（Investing Category）の定義と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18の投資区分（Investing Category）に含まれる損益項目の定義と開示要件。
+      投資区分には、①IFRS 5の範囲外の投融資資産から生じる利息・配当・評価損益、
+      ②持分法投資損益（関連会社・ジョイントベンチャー）、③不動産投資の公正価値変動、
+      ④短期投資の収益等が含まれる。通常の営業活動として行う企業（例：銀行の貸出）
+      は投資区分ではなく営業区分に分類する例外規定もある。
+    target_sections:
+      - "損益計算書"
+      - "重要な会計方針"
+      - "投資損益"
+    required_items:
+      - "投資区分に含まれる損益の種類と金額"
+      - "持分法投資損益の内訳（重要な関連会社別）"
+      - "投資区分の判定に用いた会計方針の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "金融機関は「通常の営業活動」例外により、大半の金融資産収益が営業区分に留まる可能性がある"
+    level_proposals:
+      ume: >
+        損益計算書に投資区分の合計金額を表示。
+        主要な構成要素（持分法損益・受取配当等）を簡潔に注記。
+      take: >
+        投資区分の構成要素を種類別に分解して開示。
+        持分法損益については関連会社別の開示（重要なもの）を含める。
+      matsu: >
+        投資区分と営業区分の判定方針の詳細（判定事例を含む）、
+        前期IAS 1との組換え対応表、
+        投資区分各項目の前期比較と変動要因説明を開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-004"
+    category: "IFRS 18（財務区分）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 財務区分（Financing Category）の定義と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18の財務区分（Financing Category）に含まれる損益項目の定義と開示要件。
+      財務区分には、①IFRS 9に基づく金融負債（借入金・社債等）の利息費用、
+      ②リース負債の利息（IFRS 16）、③プロビジョンの時の経過による増加額（IAS 37）、
+      ④年金債務の利息費用（IAS 19）等が含まれる。財務区分は本質的に
+      資金調達コストを示すものであり、金融負債に関連する為替差損益の一部も含む場合がある。
+    target_sections:
+      - "損益計算書"
+      - "重要な会計方針"
+      - "金融費用"
+    required_items:
+      - "財務区分に含まれる損益の種類と金額"
+      - "利息費用の内訳（借入金・社債・リース負債別）"
+      - "財務区分の判定に用いた会計方針の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "年金費用のうち利息費用は財務区分、勤務費用は営業区分に分類される（IAS 19）"
+    level_proposals:
+      ume: >
+        損益計算書に財務区分の合計金額を表示。
+        主要な構成要素（支払利息・リース利息等）を簡潔に注記。
+      take: >
+        財務区分の構成要素（借入金利息/社債利息/リース負債利息/
+        年金利息費用/プロビジョン利息等）を種類別に開示。
+      matsu: >
+        財務区分の全構成要素の詳細（負債種類別・通貨別）、
+        財務区分に含めた為替差損益の判定根拠、
+        前期IAS 1との組換え対応表を開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】MPMs（経営上の業績指標 / Management-defined Performance Measures）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-005"
+    category: "IFRS 18（MPMs）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — MPMs（経営上の業績指標）の定義と開示要件概要"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18が新たに導入する経営上の業績指標（MPMs: Management-defined
+      Performance Measures）の開示要件。MPMとは、経営陣が有価証券報告書・
+      プレスリリース・投資家向け説明資料等の「公開の場での対外説明」で
+      使用するIFRS指標以外の財務業績指標（いわゆる非GAAP指標）だ。
+      調整後EBITDA・調整後営業利益・コア利益・有機成長率等がその例。
+      MPMの開示はIFRS 18の財務諸表の注記として義務化される。
+    target_sections:
+      - "注記"
+      - "経営上の業績指標（MPMs）"
+    required_items:
+      - "MPMに該当する指標の一覧と各MPMの定義"
+      - "なぜ経営陣がその指標を使用するか（目的・有用性）の説明"
+      - "各MPMとIFRS基準の対応する指標との調整表"
+      - "MPMに含まれる調整項目（例：リストラ費用・M&A費用）の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "会社内部のみで使用する指標（外部に公表しないもの）はMPMに該当しない"
+    level_proposals:
+      ume: >
+        調整後EBITDAや調整後営業利益等のMPMを使用している場合は、
+        その定義と、対応するIFRS指標への調整表を開示（1指標あたり10行程度）。
+      take: >
+        全MPMの一覧・定義・使用目的・調整表を注記に記載。
+        調整項目（非経常項目・IFRS要求の公正価値変動等）の説明を含める。
+      matsu: >
+        全MPMの調整表（前期比較）、MPMと類似する他のIFRS基準との
+        関係の説明、MPMの変更（指標の追加・廃止・定義変更）の開示、
+        セグメント別MPMとの整合性説明まで含む包括的開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-006"
+    category: "IFRS 18（MPMs調整表）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — MPMとIFRS指標の調整表（Reconciliation）の詳細開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18において義務化されるMPMとIFRS基準の指標との調整表の詳細開示要件。
+      調整表では、MPMを最も近いIFRS基準の指標（例：営業利益・純利益等）から
+      出発して、調整項目ごとに金額を示してMPMの数値に至るプロセスを示す。
+      各調整項目の税効果・非支配持分影響も明示が必要。
+      調整表はMPMと同じ会計期間を対象とし、前期比較も開示することが求められる。
+    target_sections:
+      - "注記"
+      - "経営上の業績指標（MPMs）"
+    required_items:
+      - "IFRS基準の対応指標を起点とした調整表（項目別・金額）"
+      - "各調整項目の税効果額と非支配持分影響額"
+      - "調整項目の性質の説明（一時的・非経常的である根拠等）"
+      - "前期との比較調整表"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "調整表の起点はIFRS基準の指標であり、MPMを起点としてIFRS指標に到達する逆向き表示は不可"
+    level_proposals:
+      ume: >
+        MPMごとに対応するIFRS指標→MPMへの調整表（主要項目のみ）を開示。
+        税効果の調整は合計ベースで記載。
+      take: >
+        全MPMについて詳細な調整表（調整項目別・税前・税効果・税後）を
+        前期比較で開示。各調整項目の性質の説明を付記。
+      matsu: >
+        調整表の前後比較（2〜3期分）、調整項目の変更理由
+        （指標変更・調整項目の追加/削除）、
+        調整項目のキャッシュフロー有無の説明まで含む。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】費用の分解（Disaggregation of Expenses）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-007"
+    category: "IFRS 18（費用分解）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 費用の性質別分解（アドホック分解アプローチ）の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18が導入する費用の追加的な分解（Disaggregation）開示要件。
+      費用を機能別（売上原価/販管費等）で損益計算書に表示する企業（従来のIAS 1の選択）は、
+      さらに費用の性質別内訳（人件費・減価償却費・材料費等）を注記で開示することが
+      求められる。この要件は現行のIAS 1でも存在したが、IFRS 18では
+      費用の合計が一致する完全な表として開示する要件が明確化・強化される。
+    target_sections:
+      - "損益計算書"
+      - "注記（費用の内訳）"
+    required_items:
+      - "費用の性質別内訳（人件費・減価償却費・材料費・外注費等）の金額"
+      - "損益計算書の機能別費用との対応関係の説明"
+      - "前期比較"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "費用を性質別で損益計算書に直接表示する企業は機能別分解の注記が必要（双方向の要件）"
+    level_proposals:
+      ume: >
+        機能別表示企業は費用の性質別内訳表を注記に開示。
+        主要費用カテゴリ（人件費/減価償却費/原材料費）の合計金額を記載。
+      take: >
+        費用の性質別内訳（8〜10カテゴリ）を前期比較で開示。
+        損益計算書の機能別費用との調整表も付記。
+      matsu: >
+        費用の性質別×機能別のマトリクス表、
+        セグメント別の費用性質分解、
+        非現金費用（減価償却費・減損・株式報酬等）の別掲まで開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第4群】注記のグルーピング改善
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-008"
+    category: "IFRS 18（注記構成）"
+    change_type: "修正推奨"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 注記のグルーピング原則（重要性・集約・分解の均衡）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18が強化する注記の構成・グルーピングに関する開示原則。
+      重要性（Materiality）・集約（Aggregation）・分解（Disaggregation）の
+      三つの均衡を保つことが明示的に要求される。類似した性質の項目は集約し、
+      異なる性質・リスクを持つ項目は分解する。過度な一般的記述（boilerplate）を
+      排除し、自社固有の情報を重視した注記構成が求められる。
+      注記の順序についても、財務諸表利用者の観点から最も有用な情報を
+      優先的に配置することが推奨される。
+    target_sections:
+      - "注記"
+      - "財務諸表の構成"
+    required_items:
+      - "注記の構成方針（重要性基準に基づく開示の絞り込み方針）"
+      - "集約・分解の判断基準の説明"
+      - "重要な会計上の見積もりと判断の明確な識別"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IAS 1のアプローチを引き継ぎながら、ボイラープレート排除の実効性を高めた改訂"
+    level_proposals:
+      ume: >
+        注記の先頭に「重要性に基づく開示の方針」を簡潔に記載。
+        定型的な一般記述を削減し、自社固有の判断・見積もりを前面に出す。
+      take: >
+        注記の構成方針と集約・分解の基準を開示。
+        重要な会計上の判断（定性的）と重要な見積もり（定量的感応度付き）を
+        明確に区分して記載。
+      matsu: >
+        注記の全体構造の説明（なぜこの順序で開示するか）、
+        前期からのボイラープレート削減の内容説明、
+        重要性判断の閾値設定プロセスまで開示。
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第5群】キャッシュフロー計算書との整合性
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-009"
+    category: "IFRS 18（CF計算書）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — キャッシュフロー計算書の営業CF区分とP&L営業区分の整合"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18においてキャッシュフロー計算書の営業活動区分と損益計算書の
+      営業区分の整合性を高める要件。現行のIAS 7では利息の受取・支払および
+      配当の受取・支払はどの区分に分類するか選択肢があったが、
+      IFRS 18では分類の一貫性とP&L区分との整合を優先した基準に改訂される。
+      具体的には、P&Lの投資区分に分類した利息・配当の受取は
+      CF計算書でも投資活動に分類することが求められる。
+    target_sections:
+      - "キャッシュフロー計算書"
+      - "重要な会計方針"
+    required_items:
+      - "利息の受取・支払のCF計算書上の分類方針（IFRS 18移行後）"
+      - "配当の受取・支払のCF計算書上の分類方針"
+      - "IAS 7からの変更点の説明（分類変更がある場合）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "利息支払は財務CF（IFRS 18の財務区分との整合）、利息受取は投資CFが基本方針となる"
+    level_proposals:
+      ume: >
+        CF計算書の利息・配当の分類方針をP&L区分との整合を明示して記載。
+        変更がある場合は変更内容と前期比較への影響額を開示。
+      take: >
+        利息・配当の受払の分類（営業/投資/財務）を方針として開示し、
+        IAS 7（現行）からの変更点と移行影響額を前期比較で記載。
+      matsu: >
+        営業CF・投資CF・財務CFへの分類の詳細根拠（項目別）、
+        現行IAS 7との全面比較表、
+        移行による自由キャッシュフロー等の定義変更への影響説明を開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-010"
+    category: "IFRS 18（CF計算書）"
+    change_type: "修正推奨"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 営業活動CF（間接法）における営業利益からの調整開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18において間接法で営業活動CFを表示する場合の出発点の変更に関する開示要件。
+      現行のIAS 7では税前利益または純利益を出発点として調整する方法が一般的だったが、
+      IFRS 18では損益計算書の「営業利益」を出発点とした調整が求められる。
+      これにより、投資区分・財務区分に分類された損益項目の調整が明確化され、
+      営業CF（間接法）とP&L営業利益の関係が透明化される。
+    target_sections:
+      - "キャッシュフロー計算書"
+    required_items:
+      - "間接法CF計算書の出発点（営業利益）と調整項目の構成"
+      - "IFRS 18移行前後の出発点の変更の説明"
+      - "投資区分・財務区分の調整内容"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "直接法でCF計算書を作成する企業（少数）はこの変更の影響を受けない"
+    level_proposals:
+      ume: >
+        CF計算書の営業CF（間接法）の出発点を「営業利益」に変更した旨と
+        前期（IAS 1時代）との金額差異を開示。
+      take: >
+        営業利益→営業CFへの調整表を詳細に開示。
+        投資区分・財務区分の損益がCF計算書の非営業区分に
+        再分類される調整項目を明示。
+      matsu: >
+        CF計算書の全面改訂版（IFRS 18準拠）と
+        IAS 7準拠版の対照表（3期分）、
+        フリーCF等の自社定義のCF指標（MPM）への影響説明も開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第6群】セグメント情報との整合性
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-011"
+    category: "IFRS 18（セグメント）"
+    change_type: "修正推奨"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — セグメント利益とIFRS 18の営業利益の整合表"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18における損益計算書の営業利益とIFRS 8（営業セグメント）の
+      セグメント利益との整合表の開示要件。IFRS 8では「最高経営意思決定者
+      （CODM）が使用する指標」でセグメント利益を定義するため、
+      それがIFRS 18の営業利益と一致しないケースが多い。
+      IFRS 18はこの差異（例：のれん償却費・株式報酬費用・非経常項目）を
+      調整表として開示することを求める。
+    target_sections:
+      - "セグメント情報"
+      - "注記"
+    required_items:
+      - "セグメント利益合計とIFRS 18営業利益との調整表"
+      - "主要な調整項目（セグメント利益に含まれないIFRS調整等）の説明"
+      - "CODMが使用する業績指標とMPMの関係の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "CODMが使用する指標が非GAAP指標の場合、それはMPMにも該当し二重の開示が必要になる"
+    level_proposals:
+      ume: >
+        セグメント利益とIFRS 18営業利益の主要な差異項目と
+        金額を簡潔な調整表で開示。
+      take: >
+        全セグメントの利益合計→IFRS 18営業利益への詳細調整表
+        （項目別・前期比較）を開示。CODMの使用指標とMPMの関係を説明。
+      matsu: >
+        セグメント別調整表、CODMが使用する全指標のMPM判定結果、
+        セグメント開示とMPM開示の重複排除の方針説明、
+        3期分の調整履歴まで開示。
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第7群】移行措置・早期適用
+  # ──────────────────────────────────────────
+
+  - id: "ifrs18-2025-012"
+    category: "IFRS 18（移行措置）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — 移行措置（比較期間の修正再表示）と早期適用の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18の適用に伴う移行措置の開示要件。IFRS 18は原則として
+      遡及適用（比較期間の修正再表示）が求められるが、
+      一部の実務上の困難に対する免除規定（Practical Expedients）も設けられている。
+      早期適用を行う場合（2024年〜2027年1月以前）は早期適用の旨と
+      IFRS 18適用の事実を財務諸表に開示しなければならない。
+      移行影響の定量的な開示（損益計算書・CF計算書の組換え影響）も必要となる。
+    target_sections:
+      - "会計方針の変更"
+      - "IFRS 18適用初年度の開示"
+    required_items:
+      - "IFRS 18の適用開始年度と早期適用の有無"
+      - "比較期間の修正再表示の方針（遡及適用 or 実務上の免除適用）"
+      - "損益計算書の3区分への組換えによる影響額（主要項目）"
+      - "MPMの範囲特定に伴う新規・削除となったMPMの一覧"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "多くの3月決算企業は2027年3月期（2026年4月〜2027年3月）が最初の適用年度"
+    level_proposals:
+      ume: >
+        「当社は20XX年X月期よりIFRS 18を適用した（または適用予定）。
+        比較期間の修正再表示の概要は以下のとおりである。」との記載と
+        主要な組換え影響の金額を開示。
+      take: >
+        IAS 1→IFRS 18への損益計算書の全面組換え表（前期比較）、
+        CF計算書の分類変更の影響、MPMの変更一覧を開示。
+      matsu: >
+        3期分の遡及修正再表示（損益計算書・CF計算書・関連注記）の全体、
+        実務上の免除（Practical Expedients）を適用した場合の内容と
+        免除を使わなかった場合の推定影響、
+        MPM追加/廃止/定義変更の詳細説明を含む包括的開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-013"
+    category: "IFRS 18（移行準備）"
+    change_type: "修正推奨"
+    effective_from: "2025-04-01"
+    title: "IFRS 18 — 適用準備段階（2025〜2026年度）の影響開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      2025〜2026年度（IFRS 18強制適用前の移行準備期間）における
+      IFRS 18の影響開示に関するベストプラクティス。
+      強制適用前であっても、IFRS 18が財務諸表の表示に与える重要な影響が
+      見込まれる場合、IAS 8（会計方針・会計上の見積り）の開示規定に基づき
+      将来公表の基準書の予想影響を注記する任意開示が推奨される。
+      MPMの棚卸し・3区分分類への予備的試算結果を開示することが
+      投資家のIFRS 18移行への理解を助ける。
+    target_sections:
+      - "注記（将来基準の適用影響）"
+    required_items:
+      - "IFRS 18の強制適用予定年度の開示"
+      - "現時点で把握している主要な影響（3区分への分類変更・MPMの特定状況）"
+      - "影響の定量化が困難な場合はその旨と検討状況の説明"
+    applicable_markets:
+      - "プライム"
+    notes: "2025年度の開示は任意だが、影響が重要な場合はIAS 8.30の開示要件が適用される可能性"
+    level_proposals:
+      ume: >
+        「IFRS 18（2027年1月1日発効）の適用を検討中であり、
+        財務諸表への影響を現在調査中である。」の1段落開示。
+      take: >
+        IFRS 18の主要変更点（3区分PL・MPM・CF分類変更）の説明と、
+        現時点での予備的影響試算（定量可能なものは金額、困難なものは定性）を開示。
+      matsu: >
+        IFRS 18移行のプロジェクト計画（システム改修・プロセス変更の概要）、
+        MPMの棚卸し結果（IFRS 18適用後のMPMリストの暫定版）、
+        3区分分類の予備的試算結果（P&L・CF計算書への影響試算）まで開示。
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs18-2025-014"
+    category: "IFRS 18（MPMs運用）"
+    change_type: "追加必須"
+    effective_from: "2027-01-01"
+    title: "IFRS 18 — MPMのガバナンスと更新・廃止・定義変更の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-18-presentation-and-disclosure-in-financial-statements/"
+    source_confirmed: false
+    summary: >
+      IFRS 18が求めるMPMのガバナンス体制および変更（追加・廃止・定義変更）の
+      開示要件。MPMの追加・廃止・定義変更が生じた場合は、
+      変更の理由と変更前後の比較情報の開示が必要だ。
+      また、経営陣が対外説明で使用する指標がMPMに該当するかを
+      継続的にモニタリングする体制（取締役会・開示委員会の関与）も
+      財務諸表利用者の信頼性確保の観点から開示が推奨される。
+    target_sections:
+      - "注記（MPMs）"
+      - "コーポレートガバナンス（開示ガバナンス）"
+    required_items:
+      - "MPMのガバナンス体制の説明（承認プロセス・担当部門）"
+      - "当期に変更（追加・廃止・定義変更）したMPMの一覧と変更理由"
+      - "変更があった場合の前期との比較可能性の確保方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "MPMの比較可能性確保が困難な場合はその旨を記載し、代替的な比較情報を提供することが望ましい"
+    level_proposals:
+      ume: >
+        MPMの承認プロセス（取締役会または開示委員会の関与）を1段落で開示。
+        変更MPMがある場合は変更の事実と理由を記載。
+      take: >
+        MPMの選定・変更のガバナンスプロセス、変更MPMの前後比較、
+        MPMの継続性方針（頻繁な変更を避けるコミットメント）を開示。
+      matsu: >
+        MPMガバナンスの詳細（委員会構成・承認頻度・外部監査人との
+        コミュニケーション状況）、過去3期のMPM変更履歴、
+        投資家・アナリストとのMPMに関するエンゲージメント状況まで開示。
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
