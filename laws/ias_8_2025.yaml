@@ -1,0 +1,301 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（会計方針変更）— IAS 8 Accounting Policies, Changes in Accounting Estimates and Errors
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IAS 8 Accounting Policies, Changes in Accounting Estimates and Errors
+#   (IASB, 改訂2021年2月 / 2023年1月1日以降の事業年度に適用)
+#   IAS 8 Amendment — Definition of Accounting Estimates (IASB, 2021年2月発行)
+#   東京証券取引所 上場規程・開示ガイドライン（IFRSを任意適用する上場会社向け）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】会計方針変更（遡及適用）
+  # ──────────────────────────────────────────
+
+  - id: "ias8-2025-001"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2005-01-01"
+    title: "会計方針変更の遡及適用と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第19条〜31条に基づく会計方針変更（change in accounting policy）の
+      遡及適用と開示要件。会計方針を自発的に変更した場合または新基準の適用により
+      変更が生じた場合、変更の性質・内容・理由、当期および過去期間の各財務諸表
+      表示項目への影響額（影響が計算可能な場合）を開示する。
+      期首残高への累積影響額の調整内容、遡及適用が実務上不可能な場合の
+      代替処理（可能な限り早い期間からの適用）と不可能の理由も開示する。
+      なお2023年1月1日適用の改訂IAS 8では「会計上の見積り」の定義が明確化された。
+    target_sections:
+      - "重要な会計方針"
+      - "会計方針の変更"
+      - "注記事項（会計方針変更）"
+    required_items:
+      - "変更した会計方針の内容（旧方針と新方針）"
+      - "変更の性質・理由（新基準適用 vs 自発的変更）"
+      - "当期および比較期間の各財務諸表項目への影響額"
+      - "期首残高への累積影響額と調整内容"
+      - "遡及適用が実務上不可能な場合の理由と代替処理"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "変更がない場合でも「変更なし」の旨を簡潔に記載することが望ましい"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias8-2025-002"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2023-01-01"
+    title: "会計上の見積り変更の将来的適用と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第32条〜40条（2021年改訂後）に基づく会計上の見積り変更
+      （change in accounting estimate）の将来的適用と開示要件。
+      2023年1月1日適用の改訂IAS 8では「会計上の見積り」の定義が明確化され、
+      会計方針変更との区別基準が精緻化された。見積り変更は将来的に適用し、
+      変更の性質・影響額（当期および将来期間）を開示する。
+      見積り変更が方針変更を伴う場合は遡及適用が求められる部分も存在するため、
+      両者の切り分けに係る判断も重要な開示対象となる。
+    target_sections:
+      - "会計上の見積りの変更"
+      - "重要な会計上の判断・見積り"
+      - "注記事項（見積り変更）"
+    required_items:
+      - "見積り変更の性質・内容の説明"
+      - "変更が会計上の見積り変更に該当する理由（方針変更との区別）"
+      - "当期に認識した影響額"
+      - "将来期間への影響額（特定可能な場合）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "2023年1月1日からの改訂適用。見積りの定義変更による実務影響の確認が必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias8-2025-003"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2005-01-01"
+    title: "誤謬の訂正と遡及修正再表示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第41条〜53条に基づく誤謬（errors）の訂正と遡及修正再表示
+      （restatement of prior period errors）の開示要件。
+      過去期間の財務諸表に重要な誤謬が発見された場合、発見された最も早い
+      比較期間の期首残高を修正再表示する。誤謬の性質・各財務諸表項目への
+      影響額・遡及修正が実務上不可能な場合の理由を開示する。
+      誤謬の訂正は会計方針変更・会計上の見積り変更とは明確に区分して開示し、
+      監査人への事前確認を含む適切なガバナンスプロセスとともに記録する。
+    target_sections:
+      - "誤謬の訂正"
+      - "注記事項（過去期間誤謬）"
+    required_items:
+      - "誤謬の性質・内容の説明"
+      - "修正再表示した各財務諸表項目の影響額"
+      - "遡及修正が実務上不可能な場合の理由と代替処理"
+      - "誤謬の重要性の判断根拠"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "誤謬訂正は投資家への重要な信頼性情報。発生時の開示タイミングと内容の充実が求められる"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】新基準未適用・IFRS 18移行影響
+  # ──────────────────────────────────────────
+
+  - id: "ias8-2025-004"
+    category: "IFRS（会計方針変更）"
+    change_type: "追加必須"
+    effective_from: "2025-01-01"
+    title: "IFRS 18適用前の未適用基準の影響開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第30条に基づく未適用の基準（new IFRS pronouncements not yet effective）の
+      開示要件。特に2027年1月1日強制適用予定のIFRS 18（財務諸表の表示と開示）は、
+      損益計算書の5区分（営業・投資・財務・税金引前・不連続）への再構成、
+      MPMs（経営者が定義する業績指標）の開示義務化、
+      セグメント費用の集計開示など、財務諸表の表示に重大な変更をもたらす。
+      2025年度は早期任意適用の選択肢があるとともに、未適用企業は
+      影響評価の初期開示が求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "未適用基準"
+      - "注記事項（新基準影響）"
+    required_items:
+      - "IFRS 18の適用予定時期と早期適用の選択有無"
+      - "IFRS 18適用による財務諸表への重要な影響の定性的説明"
+      - "MPMs（経営者が定義する業績指標）への影響評価状況"
+      - "損益計算書の5区分再編成が与える影響の初期評価"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IFRS 18は2027年1月1日強制適用。2025年度から影響評価進捗の開示が期待されている"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias8-2025-005"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2005-01-01"
+    title: "自発的な会計方針変更の正当化開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第19条〜21条に基づく自発的な会計方針変更（voluntary change）の
+      正当化開示要件。自発的な変更は、より信頼性が高くかつ目的適合性が高い情報を
+      提供する場合にのみ認められる。変更が信頼性と目的適合性の両面で
+      優れていることを示す正当化の説明、変更による財務的影響の開示が必要となる。
+      頻繁な方針変更（cherry-picking）は認められず、変更の必要性と
+      正当な事業上の理由の説明が監査対象となる重要な開示項目である。
+    target_sections:
+      - "会計方針の変更"
+      - "重要な会計上の判断・見積り"
+    required_items:
+      - "自発的変更の内容（旧方針と新方針の比較）"
+      - "変更が信頼性・目的適合性を向上させる理由の説明"
+      - "変更に伴う財務諸表各項目への影響額"
+      - "過去の同種変更の有無と頻度"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "任意変更は監査で厳格に審査される。変更理由の合理性・一貫性の説明が不可欠"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】見積り感応度・実務上不可能・経過措置
+  # ──────────────────────────────────────────
+
+  - id: "ias8-2025-006"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2023-01-01"
+    title: "見積り変更が将来に与える影響額の定量開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第39条〜40条および IAS 1第125条に基づく見積り変更の将来影響の
+      定量的開示要件。会計上の見積り変更が当期または将来期間に
+      重要な影響を与える場合、その影響額を開示する。
+      特定が困難な場合は、その旨と理由を記載する。
+      減価償却方法の変更・貸倒引当率の変更・公正価値測定インプットの変更など、
+      業績に直結する見積り変更は感応度分析を含む詳細開示が松レベルでは求められる。
+      IAS 1第125条の見積りの不確実性の主要な発生源との統合開示も検討する。
+    target_sections:
+      - "会計上の見積りの変更"
+      - "重要な会計上の判断・見積り"
+      - "注記事項（見積り感応度）"
+    required_items:
+      - "見積り変更の当期影響額"
+      - "将来期間への影響額（特定可能な場合。不可能な場合はその旨と理由）"
+      - "主要な見積りのインプット変数と感応度の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IAS 1第125条との統合開示が効率的。感応度分析は松レベルで特に重要"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias8-2025-007"
+    category: "IFRS（会計方針変更）"
+    change_type: "継続必須"
+    effective_from: "2005-01-01"
+    title: "実務上不可能な場合の代替開示と理由説明"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第23条・第24条・第43条・第44条に基づく実務上不可能
+      （impracticable）の場合の代替開示要件。
+      会計方針の変更の遡及適用、または誤謬の訂正の遡及修正再表示が
+      実務上不可能な場合、以下を開示する：
+      ①不可能と判断した理由、②遡及適用・修正が適用可能な最も早い期間、
+      ③その期間の開始日時点での影響額の説明（可能な範囲で）。
+      「実務上不可能」の基準はIAS 8で厳格に定義されており、
+      過大な費用や労力のみを理由とする免除は認められない。
+    target_sections:
+      - "会計方針の変更"
+      - "誤謬の訂正"
+      - "注記事項（実務上不可能）"
+    required_items:
+      - "実務上不可能と判断した具体的な理由"
+      - "遡及適用・修正が可能な最も早い期間"
+      - "その期間の開始日時点での影響額の説明（可能な範囲）"
+      - "代替処理の内容と適用方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "「実務上不可能」の要件は厳格。単なるシステム制約や費用は原則として免除理由にならない"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias8-2025-008"
+    category: "IFRS（会計方針変更）"
+    change_type: "追加必須"
+    effective_from: "2025-01-01"
+    title: "新基準適用時の経過措置と移行調整の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/"
+    source_confirmed: true
+    summary: >
+      IAS 8第28条〜30条に基づく新基準適用時の経過措置（transition provisions）と
+      移行調整の開示要件。新IFRSを初めて適用する事業年度には、
+      採用した経過措置（完全遡及・修正遡及・将来的適用のいずれか）の内容、
+      および各財務諸表項目への移行影響額を開示する。
+      2025年度に関連する主要な新基準として、IFRS 18（早期適用の場合）、
+      IAS 21改訂（交換可能性の欠如：2025年1月1日適用）、
+      IFRS 17（保険契約：2023年以降適用済）等の移行開示が対象となる。
+      複数シナリオでの影響試算開示は松レベルの要件。
+    target_sections:
+      - "初度適用・経過措置"
+      - "重要な会計方針"
+      - "注記事項（新基準移行）"
+    required_items:
+      - "採用した経過措置の内容（完全遡及 vs 修正遡及 vs 将来的適用）"
+      - "移行日時点での主要な財務諸表項目への影響額"
+      - "比較期間の修正再表示の有無と範囲"
+      - "経過措置の選択が財務諸表の比較可能性に与える影響の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IFRS 18早期適用企業は2025年度中に移行影響の詳細開示が必要。IAS 21改訂も2025年度対象"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
