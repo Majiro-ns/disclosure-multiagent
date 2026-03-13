@@ -57,6 +57,10 @@ class AnalyzeRequest(BaseModel):
     pdf_doc_id: Optional[str] = None
     use_mock: bool = True
     doc_type_code: DocTypeCode = DocTypeCode.yuho
+    profile_name: Optional[str] = Field(
+        None,
+        description="拡張プロファイル名。指定時は profiles/ 配下のYAMLも追加ロード。Noneの場合はOSS標準（laws/のみ）。",
+    )
 
 
 class AnalyzeResponse(BaseModel):

@@ -76,6 +76,7 @@ export async function uploadPdfAnalysis(params: {
   level?: string;
   use_mock?: boolean;
   use_debug?: boolean;
+  profile_name?: string | null;
 }): Promise<{ task_id: string; status: string; message: string }> {
   const form = new FormData();
   form.append('file', params.file);
@@ -85,6 +86,7 @@ export async function uploadPdfAnalysis(params: {
   form.append('level', params.level ?? '竹');
   form.append('use_mock', String(params.use_mock ?? true));
   form.append('use_debug', String(params.use_debug ?? false));
+  if (params.profile_name) form.append('profile_name', params.profile_name);
 
   const res = await fetch(`${API_BASE}/api/analyze/upload`, {
     method: 'POST',

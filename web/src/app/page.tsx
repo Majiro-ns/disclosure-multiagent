@@ -69,6 +69,7 @@ export default function HomePage() {
   const [showDetails, setShowDetails] = useState(false);
   const [useDebug, setUseDebug] = useState(false);
   const [useStepMode, setUseStepMode] = useState(false);
+  const [useProfile, setUseProfile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -136,6 +137,7 @@ export default function HomePage() {
           level,
           use_mock: !useDebug,
           use_debug: useDebug,
+          profile_name: useProfile ? 'extended' : null,
         });
         setTaskId(resp.task_id);
         addHistory({
@@ -283,6 +285,18 @@ export default function HomePage() {
                   <label htmlFor="step-mode" className="flex items-center gap-1.5 text-sm cursor-pointer">
                     <Layers className="size-3.5 text-primary" />
                     <span>ステップ実行モード — 各段階の出力を確認しながら進む</span>
+                  </label>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    id="profile-mode"
+                    type="checkbox"
+                    checked={useProfile}
+                    onChange={(e) => setUseProfile(e.target.checked)}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  <label htmlFor="profile-mode" className="text-sm text-muted-foreground cursor-pointer">
+                    拡張プロファイルを使用 — profiles/ の追加チェック項目も適用
                   </label>
                 </div>
               </CardContent>

@@ -62,6 +62,7 @@ async def start_analysis(
         level=request.level,
         use_mock=request.use_mock,
         doc_type=request.doc_type_code.value,
+        profile_name=request.profile_name,
     )
 
     return AnalyzeResponse(task_id=task_id)
@@ -77,6 +78,7 @@ async def start_analysis_with_upload(
     level: str = Form("竹"),
     use_mock: bool = Form(True),
     use_debug: bool = Form(False),
+    profile_name: Optional[str] = Form(None),
     _auth: None = Depends(verify_api_key),
 ):
     """PDF直接アップロードでパイプライン起動.
@@ -139,6 +141,7 @@ async def start_analysis_with_upload(
         level=level,
         use_mock=use_mock,
         use_debug=use_debug,
+        profile_name=profile_name,
     )
 
     return AnalyzeResponse(task_id=task_id)

@@ -552,6 +552,101 @@ class TestLawsDirectoryLoading(unittest.TestCase):
                            f"デフォルト呼び出しの全エントリ（フィルタ前）が少なすぎます: {len(all_entries)}件")
 
 
+class TestProfileDir(unittest.TestCase):
+    """
+    DIS-C01: profile_dir パラメータのテスト
+
+    テスト:
+      P-01: profile_dir=None の場合は laws/ のみ（後方互換性）
+      P-02: profile_dir に有効なディレクトリを指定すると追加エントリがロードされる
+      P-03: profile_dir に存在しないパスを指定しても例外を起こさず警告のみ
+      P-04: サンプルYAMLのフォーマットが load_law_entries() で正常に読み込める
+    """
+
+    # profiles/ と sample_profile.yaml のパス（プロジェクトルート基準）
+    _PROFILE_DIR = Path(__file__).parent.parent / "profiles"
+    _SAMPLE_YAML = _PROFILE_DIR / "sample_profile.yaml"
+
+    def test_p01_profile_dir_none_uses_laws_only(self):
+        """
+        P-01: profile_dir=None（デフォルト）のとき laws/ のみを使用する。
+        後方互換性: profile_dir なしの呼び出しと同じ結果になること。
+        """
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        ctx_without = load_law_context(2025, 3)
+        ctx_with_none = load_law_context(2025, 3, profile_dir=None)
+
+        self.assertEqual(
+            len(ctx_without.applicable_entries),
+            len(ctx_with_none.applicable_entries),
+            "profile_dir=None と profile_dir未指定で applicable_entries 数が異なる",
+        )
+        print(f"  [PASS] P-01 profile_dir=None: applicable_entries={len(ctx_without.applicable_entries)}件 ✓")
+
+    def test_p02_profile_dir_valid_adds_entries(self):
+        """
+        P-02: profile_dir に profiles/ を指定すると、laws/ のエントリに加えてプロファイルのエントリも追加される。
+
+        手計算:
+          laws/ のエントリ数 + sample_profile.yaml の2エントリ = 合計が増える
+        """
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+        if not self._PROFILE_DIR.exists():
+            self.skipTest(f"profiles/ が存在しません: {self._PROFILE_DIR}")
+        if not self._SAMPLE_YAML.exists():
+            self.skipTest(f"sample_profile.yaml が存在しません: {self._SAMPLE_YAML}")
+
+        ctx_no_profile = load_law_context(2025, 3)
+        ctx_with_profile = load_law_context(2025, 3, profile_dir=str(self._PROFILE_DIR))
+
+        # プロファイル指定時はエントリが増えること
+        self.assertGreaterEqual(
+            len(ctx_with_profile.applicable_entries),
+            len(ctx_no_profile.applicable_entries),
+            "profile_dir 指定後のエントリ数がプロファイルなしより少ない",
+        )
+        print(f"  [PASS] P-02 profile_dir指定: "
+              f"{len(ctx_no_profile.applicable_entries)}件 → {len(ctx_with_profile.applicable_entries)}件 ✓")
+
+    def test_p03_profile_dir_nonexistent_no_exception(self):
+        """
+        P-03: profile_dir に存在しないパスを指定しても FileNotFoundError を起こさない。
+        警告ログを出力してスキップする（後方互換性維持）。
+        """
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        # 存在しないパス → 例外なしで完了すること
+        try:
+            ctx = load_law_context(2025, 3, profile_dir="/nonexistent/profiles/path")
+            self.assertIsNotNone(ctx)
+            print(f"  [PASS] P-03 存在しない profile_dir: 例外なし、applicable_entries={len(ctx.applicable_entries)}件 ✓")
+        except Exception as e:
+            self.fail(f"profile_dir が存在しない場合に予期しない例外: {e}")
+
+    def test_p04_sample_profile_yaml_loads(self):
+        """
+        P-04: profiles/sample_profile.yaml が load_law_entries() で正常に読み込める。
+
+        手計算: sample_profile.yaml には2エントリ定義されている。
+        """
+        if not self._SAMPLE_YAML.exists():
+            self.skipTest(f"sample_profile.yaml が存在しません: {self._SAMPLE_YAML}")
+
+        entries = load_law_entries(self._SAMPLE_YAML)
+
+        self.assertGreaterEqual(len(entries), 2, f"sample_profile.yaml のエントリ数が不足: {len(entries)}件")
+        # IDの存在確認
+        ids = [e.id for e in entries]
+        self.assertIn("PROF_SAMPLE_001", ids, "PROF_SAMPLE_001 が読み込まれていない")
+        self.assertIn("PROF_SAMPLE_002", ids, "PROF_SAMPLE_002 が読み込まれていない")
+        print(f"  [PASS] P-04 sample_profile.yaml: {len(entries)}件読み込み ✓")
+        print(f"         IDs: {ids}")
+
+
 if __name__ == "__main__":
     import os
     loader = unittest.TestLoader()
@@ -563,6 +658,7 @@ if __name__ == "__main__":
         TestWarnings,
         TestM3Integration,
         TestLawsDirectoryLoading,
+        TestProfileDir,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 

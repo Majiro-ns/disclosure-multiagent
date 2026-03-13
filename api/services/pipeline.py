@@ -468,6 +468,7 @@ async def run_pipeline_async(
     use_mock: bool = True,
     doc_type: str = "yuho",
     use_debug: bool = False,
+    profile_name: Optional[str] = None,
 ) -> None:
     """Execute the M1-M5 pipeline in a background thread."""
     task = _tasks.get(task_id)
@@ -480,6 +481,12 @@ async def run_pipeline_async(
             os.environ["USE_DEBUG_LLM"] = "true"
         elif use_mock:
             os.environ["USE_MOCK_LLM"] = "true"
+
+        # Resolve profile_dir: profile_name 指定時は profiles/ ディレクトリを使用
+        _project_root = Path(__file__).parent.parent.parent
+        profile_dir: Optional[str] = None
+        if profile_name is not None:
+            profile_dir = str(_project_root / "profiles")
 
         loop = asyncio.get_event_loop()
 
@@ -498,13 +505,14 @@ async def run_pipeline_async(
         company_display = structured_report.company_name or company_name or "分析対象企業"
         _update_step(task_id, 0, "done", f"{len(structured_report.sections)}セクション検出")
 
-        # Step 2: M2 法令取得
+        # Step 2: M2 法令取得（profile_dir 指定時は profiles/ も追加ロード）
         _update_step(task_id, 1, "running")
         law_context = await loop.run_in_executor(
             None,
             lambda: load_law_context(
                 fiscal_year=fiscal_year,
                 fiscal_month_end=fiscal_month_end,
+                profile_dir=profile_dir,
             ),
         )
         _update_step(task_id, 1, "done", f"{len(law_context.applicable_entries)}件の法令エントリ")
