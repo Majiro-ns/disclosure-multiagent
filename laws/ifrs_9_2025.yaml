@@ -1,0 +1,564 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS 9（金融商品）
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令・基準:
+#   IFRS 9 Financial Instruments（IASB, 2014年7月公表 / 2018年1月1日強制適用）
+#   修正国際基準（JMIS）— ASBJ / FASF（企業会計基準委員会 / 財務会計基準機構）
+#   金融庁「IFRS任意適用拡大に向けた提言」（2025年改訂版）
+#
+# 注意事項:
+#   日本においてIFRS任意適用企業（2025年3月末時点 約270社）が主な対象。
+#   日本基準（J-GAAP）採用企業はIFRS 9ではなく企業会計基準第10号（金融商品）を適用。
+#   JMIS採用企業はIFRS 9と会計基準第10号の差異調整が必要な場合がある。
+#   ECL: Expected Credit Loss（予想信用損失）
+#   SICR: Significant Increase in Credit Risk（信用リスクの重要な増大）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】ECLモデル（3ステージ方式）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-001"
+    category: "IFRS 9（ECLモデル概要）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — ECL（予想信用損失）モデルの概要開示（3ステージ分類体系）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9の中核である予想信用損失（ECL）モデルの全体像を開示する要件。
+      金融資産の信用リスク水準に応じてStage 1（正常先）・Stage 2（要注意先）・
+      Stage 3（不良先）の3区分に分類し、各ステージで計上するECLの範囲
+      （12か月ECL vs 全期間ECL）と利息計算基礎（総額帳簿価額 vs 償却原価）を
+      説明することが求められる。モデルの基本前提・主要パラメータ（PD/LGD/EAD）の
+      概要、フォワードルッキング調整の方針も含めることが望ましい。
+    target_sections:
+      - "重要な会計方針"
+      - "金融商品"
+      - "信用リスク管理"
+    required_items:
+      - "3ステージ分類の定義（Stage 1/2/3の判定基準の概要）"
+      - "各ステージで計上するECLの範囲（12か月ECL / 全期間ECL）"
+      - "利息収益の計算基礎（総額帳簿価額 / 信用調整後実効金利）"
+      - "主要パラメータ（PD・LGD・EAD）の概要説明"
+      - "フォワードルッキング情報（マクロ経済シナリオ）の反映方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IFRS任意適用企業に適用。J-GAAP企業は企業会計基準第10号に従い別途開示"
+    level_proposals:
+      ume: >
+        「金融資産は信用リスク水準に応じてIFRS 9の3ステージに分類し、
+        予想信用損失を計上している。Stage 1は12か月ECL、Stage 2および3は
+        全期間ECLを計上する。」の1段落開示。
+      take: >
+        3ステージ分類の判定基準（SICRの定量・定性基準）、主要パラメータ
+        （PD/LGD/EAD）の概要、マクロ経済シナリオの反映方法を表形式で
+        開示。前期との比較も含める。
+      matsu: >
+        3ステージ別のECL残高・変動表（新規計上/ステージ間移動/償却/回収別）、
+        複数のマクロ経済シナリオ（基本/楽観/悲観）の確率加重計算根拠、
+        モデル検証（バックテスト結果）まで含む包括的開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs9-2025-002"
+    category: "IFRS 9（ECLモデル — Stage 1）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — Stage 1（正常先）: 12か月ECLの計上と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9 Stage 1に分類される金融資産（当初認識後に信用リスクが重要に増大して
+      いないもの）に対する12か月ECL計上の開示要件。
+      12か月ECLとは、当初認識後12か月以内に生じうるデフォルトから発生する
+      予想信用損失の現在価値である。総額帳簿価額に対して実効金利で利息を
+      認識する。12か月PD（デフォルト確率）の算出根拠・更新頻度、
+      マクロ経済変数の反映方法も開示が必要。
+    target_sections:
+      - "金融商品"
+      - "信用リスク管理"
+      - "引当金"
+    required_items:
+      - "Stage 1残高および対応する12か月ECL引当金残高"
+      - "12か月PDの算出方法・データソース"
+      - "Stage 1の対象資産の種類別内訳"
+      - "Stage 2・3への移動額と移動理由"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "Stage 1は信用リスクが低い（低信用リスク免除を適用する場合はその旨記載）"
+    level_proposals:
+      ume: >
+        Stage 1残高とECL引当金計上額を貸借対照表注記または
+        信用リスク表の1行で開示。
+      take: >
+        Stage 1残高・ECL引当金・12か月PDの加重平均値を
+        資産種類別（融資/社債/その他）に開示。前期末との比較表を含める。
+      matsu: >
+        12か月ECLの期中変動（新規認識/ステージ移動/償却/為替影響等）を
+        ロールフォワード形式で開示。PDの感応度分析も含める。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs9-2025-003"
+    category: "IFRS 9（ECLモデル — Stage 2）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — Stage 2（要注意先）: 信用リスクの重要な増大と全期間ECL"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9 Stage 2に分類される金融資産（当初認識後に信用リスクが重要に増大した
+      ものの、客観的な証拠はないもの）に対する全期間ECL計上の開示要件。
+      信用リスクの重要な増大（SICR）の判定に用いた定量基準（PDの相対的増加率等）
+      および定性基準（支払延滞30日超、コベナンツ違反の予兆等）を説明する。
+      全期間ECLを計上する一方、利息は引き続き総額帳簿価額に対して認識する。
+    target_sections:
+      - "金融商品"
+      - "信用リスク管理"
+    required_items:
+      - "SICRの判定基準（定量基準・定性基準の説明）"
+      - "Stage 2残高および対応する全期間ECL引当金残高"
+      - "Stage 1からStage 2への移動額と主要な移動理由"
+      - "30日超延滞の反駁可能な推定（適用している場合その旨）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "SICRは相対的判定（当初認識時点との比較）であり、絶対的な信用品質評価とは異なる"
+    level_proposals:
+      ume: >
+        Stage 2残高とECL引当金残高、SICR判定の基本方針（PDの有意な増加等）
+        を1〜2段落で説明。
+      take: >
+        SICR判定の定量・定性基準を表形式で明示。Stage 2への
+        移動金額・移動理由を前期比較で開示。
+      matsu: >
+        SICR判定モデルの感応度分析（判定閾値を変更した場合のStage 2への
+        移動影響額）、マクロ経済シナリオ別のStage 2残高試算も開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs9-2025-004"
+    category: "IFRS 9（ECLモデル — Stage 3）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — Stage 3（不良先）: 信用減損金融資産と信用調整後実効金利"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9 Stage 3に分類される信用減損金融資産（デフォルト状態にある等の
+      客観的証拠が存在するもの）に対する全期間ECL計上および利息認識変更の開示要件。
+      Stage 3では利息収益を総額帳簿価額ではなく償却原価（総額帳簿価額から
+      ECL引当金を控除した額）に対して信用調整後実効金利で認識する。
+      デフォルトの定義（90日超延滞その他の客観的証拠）、Stage 3移動時の
+      処理（実効金利の信用調整適用）も開示が求められる。
+    target_sections:
+      - "金融商品"
+      - "信用リスク管理"
+      - "引当金"
+    required_items:
+      - "デフォルトの定義（90日超延滞・破産申請等の客観的証拠の列挙）"
+      - "Stage 3残高および個別ECL引当金残高"
+      - "信用調整後実効金利（CEIR）の概要説明"
+      - "償却（Write-off）の方針と当期償却額"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "Stage 3は従来の個別貸倒引当金設定対象に概ね対応するが、定義範囲はIFRS 9に従う"
+    level_proposals:
+      ume: >
+        Stage 3残高・ECL引当金・当期償却額を開示。デフォルトの定義を
+        簡潔に記載（90日超延滞等）。
+      take: >
+        個別に重要な資産の回収可能額算定根拠（担保評価・キャッシュフロー試算）
+        および集合評価の方法を説明。Stage 2からの移動額も開示。
+      matsu: >
+        信用調整後実効金利の算定方法の詳細、
+        Stage 3資産の担保別カバレッジ率（LTV等）、
+        回収シナリオ（最良・悲観シナリオ）別のECL感応度分析を開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】金融資産の分類・測定（AC / FVOCI / FVTPL）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-005"
+    category: "IFRS 9（分類・測定 — 償却原価）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — 金融資産の分類・測定: 償却原価（AC）測定の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9に基づく金融資産の償却原価（AC: Amortised Cost）測定の開示要件。
+      AC測定が適用されるのは、①元本・利息の支払いのみのキャッシュフロー条件
+      （SPPIテスト合格）かつ②収取ビジネスモデル（Contract for Holding）の
+      両条件を満たす場合に限られる。実効金利法による利息収益認識、
+      取得原価と公正価値の差異（プレミアム・ディスカウント）の償却方法、
+      ビジネスモデルの評価頻度・変更時の処理も説明することが求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "金融商品"
+    required_items:
+      - "AC測定の適用条件（SPPIテスト・ビジネスモデル）の説明"
+      - "AC測定対象資産の種類と残高"
+      - "実効金利法による利息収益の認識方法"
+      - "ビジネスモデルの評価方法・頻度"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "ビジネスモデルの変更は稀であり、変更がある場合は再分類の開示が必要"
+    level_proposals:
+      ume: >
+        AC測定資産の残高合計と主要な種類（貸出金/社債等）を開示。
+        SPPIテストおよびビジネスモデルの判定方針を1段落で説明。
+      take: >
+        AC測定資産を種類別に表形式で開示（残高・実効金利・ECL引当金）。
+        前期との比較も含める。ビジネスモデルの評価プロセスを具体的に説明。
+      matsu: >
+        SPPIテストの非充足事例（修正契約・IBOR移行時の判定）とその処理、
+        AC測定資産の金利リスク感応度（+/-100bp時のFV変動）まで開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs9-2025-006"
+    category: "IFRS 9（分類・測定 — FVOCI）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — 金融資産の分類・測定: FVOCI（その他の包括利益を通じた公正価値）測定"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9に基づく金融資産のFVOCI（その他の包括利益を通じた公正価値）測定の開示要件。
+      FVOCI測定は、①SPPIテスト合格かつ②収取・売却ビジネスモデルの場合（負債性金融商品）
+      および資本性金融商品のFVOCI指定（取消不能）の場合に適用される。
+      OCI（その他の包括利益）で認識した未実現損益の累積額、売却時のリサイクリング
+      （負債性のみ）の有無、ECL引当金のOCI・P&L配分方法も開示が求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "金融商品"
+      - "その他の包括利益"
+    required_items:
+      - "FVOCI測定資産の種類・残高および公正価値評価額"
+      - "OCI累積未実現損益の残高"
+      - "当期のOCI計上額（公正価値変動・ECL）"
+      - "資本性金融商品のFVOCI指定の有無とその理由"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "負債性FVOCIはECL引当金をOCIに認識し純損益にリサイクルするが、資本性FVOCIはリサイクル不可"
+    level_proposals:
+      ume: >
+        FVOCI資産の残高とOCI未実現損益累積額を開示。
+        負債性と資本性の区分を明示。
+      take: >
+        FVOCI資産を種類別（国債/社債/株式等）に分類し、
+        取得原価・公正価値・OCI未実現損益を表形式で開示。
+        当期のリサイクリング額（負債性）も含める。
+      matsu: >
+        FVOCI資産の公正価値ヒエラルキー（Level 1/2/3）別残高、
+        ECLの感応度分析、及び資本性FVOCIの個別銘柄開示
+        （重要なものについて取得目的・取得価額・公正価値）を含む。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs9-2025-007"
+    category: "IFRS 9（分類・測定 — FVTPL）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — 金融資産の分類・測定: FVTPL（純損益を通じた公正価値）測定"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9に基づく金融資産のFVTPL（純損益を通じた公正価値）測定の開示要件。
+      FVTPL測定はAC・FVOCI条件を満たさない場合（デフォルト）のほか、
+      会計上のミスマッチ解消のためのFVTPL指定も可能。
+      デリバティブ（ヘッジ指定なし）、トレーディング目的保有資産、
+      クレジットデリバティブなどが主な対象。当期の評価損益の認識額、
+      FVTPL指定の理由（ミスマッチ解消）も開示が求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "金融商品"
+      - "その他の金融収益・費用"
+    required_items:
+      - "FVTPL測定資産の種類・残高"
+      - "当期純損益に計上した評価損益額"
+      - "FVTPL指定を行った資産の概要と指定理由"
+      - "デリバティブのFVTPL残高（ヘッジ指定なし）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "FVTPL測定資産にはECL引当金計上は不要（公正価値評価に信用リスクが反映済み）"
+    level_proposals:
+      ume: >
+        FVTPL資産の残高合計と当期評価損益を開示。
+        種類（トレーディング/指定FVTPL/デリバティブ）の区分を記載。
+      take: >
+        FVTPL資産を種類別に残高・当期評価損益を表形式で開示。
+        ヘッジ指定なしデリバティブの残高と評価損益も区分して記載。
+      matsu: >
+        FVTPL資産の公正価値ヒエラルキー別残高、
+        Level 3資産の評価技法・主要な見積もり不能インプット、
+        感応度分析（主要インプット変動時の評価額への影響）を含む。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】ヘッジ会計
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-008"
+    category: "IFRS 9（ヘッジ会計）"
+    change_type: "修正推奨"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — ヘッジ会計: 有効性テストの簡素化とヘッジ関係の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9のヘッジ会計要件（IAS 39から大幅改訂）に基づく開示要件。
+      IAS 39の80〜125%有効性テストが廃止され、経済的関係の有無・信用リスクの
+      支配性判定・ヘッジ比率設定の3要件に移行した。ヘッジ戦略の目的、
+      指定されたヘッジ手段・被ヘッジリスクの説明、ヘッジの有効性評価方法、
+      OCI（キャッシュフローヘッジ・純投資ヘッジ）の処理、ヘッジ比率の
+      リバランス方針も開示が求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "ヘッジ会計"
+      - "市場リスク管理"
+    required_items:
+      - "ヘッジ戦略の目的および適用するヘッジの種類（CF/FV/純投資）"
+      - "指定ヘッジ手段の種類・残高・公正価値"
+      - "被ヘッジ項目の残高・リスク特性"
+      - "ヘッジ有効性の評価方法とヘッジ比率の設定根拠"
+      - "OCI残高（キャッシュフローヘッジ剰余金）と将来の損益認識見込み額"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IAS 39のヘッジ会計を継続適用するオプションあり（IFRS 9適用後も選択可）"
+    level_proposals:
+      ume: >
+        ヘッジ手段の種類（金利スワップ/通貨先渡等）と対応する被ヘッジリスク、
+        OCI残高を簡潔に開示。
+      take: >
+        ヘッジ手段・被ヘッジ項目の残高・公正価値を表形式で開示。
+        ヘッジ有効性の評価方法（仮定ルックスルー等）を具体的に説明。
+      matsu: >
+        ヘッジ比率の感応度（ヘッジ比率1%変動時のP&L影響）、
+        リバランスの実施状況・理由、ヘッジ中止事由の詳細、
+        満期ラダー別のOCIリサイクリング予定額を開示。
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第4群】信用リスクの重要な増大（SICR）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-009"
+    category: "IFRS 9（SICR判定）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — 信用リスクの重要な増大（SICR）の判定基準詳細開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9 Stage 1からStage 2への移動の鍵となる信用リスクの重要な増大（SICR）の
+      判定基準に関する詳細開示要件。SICRは当初認識時点との相対的比較で判定する。
+      定量基準（例: 生涯PD変化率が一定閾値を超えた場合）と定性基準
+      （例: 支払条件の変更・外部格付けの大幅引下げ・財務上のコベナンツ違反）を
+      組み合わせた判定プロセス、ならびに30日超延滞の反駁可能な推定の適用有無を
+      開示することが求められる。
+    target_sections:
+      - "信用リスク管理"
+      - "金融商品"
+    required_items:
+      - "SICR判定の定量基準（PD変化率・格付け変化の閾値等）"
+      - "SICR判定の定性基準（支払条件変更・コベナンツ違反・延滞等）"
+      - "30日超延滞の反駁可能な推定の適用状況"
+      - "低信用リスク免除の適用有無"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "SICRの判定閾値は資産クラス（法人貸出/住宅ローン/消費者ローン等）ごとに異なる場合がある"
+    level_proposals:
+      ume: >
+        SICRの判定に用いる主要基準（PD変化率の閾値・延滞基準等）を
+        箇条書き相当の一覧で開示。
+      take: >
+        資産クラス別にSICR判定基準（定量・定性）を表形式で開示。
+        前期末と当期末のStage 2残高・移動額の比較も含める。
+      matsu: >
+        SICR判定閾値の感応度分析（閾値±20%変動時のECL影響額）、
+        Stage 2資産のデフォルト移行実績（バックテスト結果）、
+        定性基準の適用事例（匿名化）を含む包括的開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第5群】マクロ経済シナリオ・フォワードルッキング調整
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-010"
+    category: "IFRS 9（フォワードルッキング調整）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — フォワードルッキング情報（マクロ経済シナリオ）のECLへの反映開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 9のECL計算における将来予測情報（フォワードルッキング情報）の反映に関する
+      開示要件。複数のマクロ経済シナリオ（基本シナリオ・楽観シナリオ・悲観シナリオ等）
+      を確率加重してECLに反映する場合、使用したシナリオの内容（GDP成長率・
+      失業率・不動産価格等の主要変数）、各シナリオに付与した確率、非線形性を考慮した
+      複数シナリオ使用の理由も開示が求められる。シナリオの更新頻度・ガバナンス
+      （取締役会・リスク委員会の承認プロセス）も含めることが望ましい。
+    target_sections:
+      - "信用リスク管理"
+      - "引当金"
+      - "重要な会計上の判断・見積もり"
+    required_items:
+      - "使用したマクロ経済シナリオの種類と概要"
+      - "各シナリオの主要な経済変数（GDP・失業率・不動産価格等）"
+      - "各シナリオに付与した確率加重"
+      - "マクロ経済変数とPD/LGDの関係性の説明"
+      - "シナリオ更新の頻度・ガバナンス体制"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "COVID-19以降、非線形性を考慮した複数シナリオの重要性が増加している"
+    level_proposals:
+      ume: >
+        基本・楽観・悲観の3シナリオと各シナリオの確率（合計100%）を
+        簡潔に開示。主要マクロ変数（GDP成長率等）を1〜2個記載。
+      take: >
+        3シナリオの主要経済変数（GDP/失業率/不動産価格等）を
+        1〜3年先まで表形式で開示。確率加重の変更履歴（前期との差異）も含める。
+      matsu: >
+        マクロ経済変数とECLの感応度分析（各変数1%変動時のECL影響額）、
+        シナリオ確率変更の意思決定プロセス、
+        事後検証（前回シナリオの実績との比較）まで開示。
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第6群】公正価値測定（Level 1/2/3ヒエラルキー）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-011"
+    category: "IFRS 9（公正価値測定）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 / IFRS 13 — 金融商品の公正価値ヒエラルキー（Level 1/2/3）開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-13-fair-value-measurement/"
+    source_confirmed: false
+    summary: >
+      IFRS 13（公正価値測定）に基づく金融商品の公正価値ヒエラルキー開示要件。
+      Level 1（活発な市場の相場価格）・Level 2（直接・間接的に観察可能なインプット）・
+      Level 3（観察不能なインプット）に分類し、各レベルの残高と評価技法を開示する。
+      Level 3資産については、評価技法の詳細・主要な見積もり不能インプット、
+      合理的に考えられる代替仮定を用いた場合の公正価値への影響（感応度）、
+      Level 3資産の期中変動（取得・売却・評価損益・レベル間移動）も必要。
+    target_sections:
+      - "公正価値情報"
+      - "金融商品"
+    required_items:
+      - "金融商品のLevel 1/2/3別残高（FVTPL・FVOCI別）"
+      - "Level 2/3の評価技法の概要説明"
+      - "Level 3の主要な見積もり不能インプットと合理的な代替仮定の感応度"
+      - "Level 3資産の期中変動表（期首残高〜期末残高のロールフォワード）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IFRS 7（金融商品：開示）para.27〜28も参照。Level 3比率が高い場合は追加説明が重要"
+    level_proposals:
+      ume: >
+        公正価値ヒエラルキー（Level 1/2/3）別残高を資産・負債合計で開示。
+        Level 3資産の残高と主要評価技法名を記載。
+      take: >
+        Level 1/2/3別残高を金融商品の種類別に表形式で開示。
+        Level 3の主要インプット（割引率・ボラティリティ等）と
+        その感応度（±10%変動時の影響額）を含める。
+      matsu: >
+        Level 3ロールフォワード（購入/売却/評価損益/レベル間移動別）、
+        Level 2の評価技法の詳細説明（インプットの検証方法・
+        独立評価の実施状況）まで含む包括的開示。
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第7群】ECL変動調整表（ロールフォワード）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs9-2025-012"
+    category: "IFRS 9（ECL変動表）"
+    change_type: "追加必須"
+    effective_from: "2025-04-01"
+    title: "IFRS 9 — 予想信用損失引当金の期中変動調整表（ロールフォワード開示）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-9-financial-instruments/"
+    source_confirmed: false
+    summary: >
+      IFRS 7（金融商品：開示）に基づくECL引当金の期中変動調整表（ロールフォワード）
+      の開示要件。期首残高から期末残高への変動を、新規認識・ステージ間移動・
+      パラメータ変更（PD/LGD等モデル変更）・償却（Write-off）・回収・
+      為替影響等の要因別に分解して示す。Stage別（1/2/3）かつ資産クラス別に
+      作成することで、信用品質の変化トレンドと引当金の充足性の分析が可能となる。
+    target_sections:
+      - "信用リスク管理"
+      - "引当金"
+    required_items:
+      - "Stage別ECL引当金の期中変動表（期首・増加・減少・期末）"
+      - "変動要因の内訳（新規認識/ステージ移動/パラメータ変更/償却/回収/為替等）"
+      - "総額帳簿価額のStage別変動表"
+      - "資産クラス別（法人貸出/リテール/有価証券等）のECL残高"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IFRS 7.35H〜35N（2014年改訂）の開示要件に対応。前期比較が投資家にとって特に重要"
+    level_proposals:
+      ume: >
+        Stage別ECL引当金の期首・期末残高と純変動額を開示。
+        主要な変動要因（新規認識・償却等）を簡潔に説明。
+      take: >
+        Stage別・資産クラス別のECL変動表（期首〜期末ロールフォワード）を
+        主要変動要因（7〜8項目）に分解して開示。前期比較も含める。
+      matsu: >
+        Stage別・資産クラス別の完全なロールフォワード（総額帳簿価額・
+        ECL引当金・カバレッジ率を同時開示）、変動要因の四半期別推移、
+        カバレッジ率の業界平均との比較コメントまで含む。
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
