@@ -1,0 +1,428 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（収益認識）— IFRS 15 Revenue from Contracts with Customers
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IFRS 15 Revenue from Contracts with Customers (IASB, 2014年5月発行 / 2018年1月1日以降の事業年度に適用)
+#   IFRS 15 Clarifications to IFRS 15 (IASB, 2016年4月発行)
+#   IFRS 15 IE Illustrative Examples
+#   東京証券取引所 上場規程・開示ガイドライン（IFRSを任意適用する上場会社向け）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】基本的な認識要件（5ステップモデル）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs15-2025-001"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "5ステップモデルの概要と適用方針の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第110条〜111条に基づく収益認識の5ステップモデルの適用方針の開示要件。
+      ①顧客との契約の識別、②履行義務の識別、③取引価格の決定、
+      ④取引価格の履行義務への配分、⑤履行義務の充足時の収益認識の
+      各ステップにおける会計方針の概要を注記する。
+      業種特性・事業特性に応じた適用判断（リテール・SaaS・建設業等）も含め、
+      報告セグメントまたは主要な製品・サービス類型ごとに方針の違いを明示する。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（収益）"
+      - "収益の分解"
+    required_items:
+      - "5ステップモデルの各ステップにおける会計方針の概要"
+      - "業種・事業特性に応じた適用方針の違いの説明"
+      - "主要な製品・サービス類型ごとの収益認識タイミング（一時点 vs 一定期間）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IFRS 15第119条〜120条に基づく重要な会計方針との整合性を確保すること"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-002"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "履行義務の識別と取引価格の配分（独立販売価格・残余アプローチ）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第22条〜30条（履行義務の識別）および第73条〜90条（取引価格の配分）に
+      基づく開示要件。契約内の複数の財・サービスを個別の履行義務として識別する
+      判断基準（独立して提供可能・独立して識別可能の2要件）を説明する。
+      取引価格の配分においては、独立販売価格の見積方法（市場評価法・費用加算法・
+      残余アプローチ）、配分に使用した重要な判断を開示する。
+      バンドル販売・複数年契約等を扱う場合は業種別事例を示すことが望ましい。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（収益）"
+      - "重要な会計上の判断・見積り"
+    required_items:
+      - "履行義務の識別基準（独立して提供可能・独立して識別可能）の説明"
+      - "独立販売価格の見積方法（市場評価法・費用加算法・残余アプローチ等）"
+      - "複数の履行義務がある場合の取引価格配分の方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "残余アプローチは変動対価を含む場合のみ使用可（IFRS 15第78条）"
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-003"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "一時点 vs 一定期間の収益認識判定基準の開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第31条〜38条に基づく収益認識タイミング（一時点 vs 一定期間）の
+      判定基準の開示要件。一定期間にわたる充足の3要件（①顧客が便益を同時に享受・
+      ②資産を顧客が支配・③代替用途なし＋強制力ある支払請求権）のいずれかを
+      満たすか否かの判断、および一時点認識における支配移転の5指標の適用状況を
+      製品・サービス類型ごとに説明する。工事・受託開発等の長期契約は
+      進捗度測定方法（アウトプット法・インプット法）の選択根拠も開示する。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（収益）"
+    required_items:
+      - "一定期間認識の3要件への該当判断の説明"
+      - "一時点認識における支配移転の指標（5つ）の適用"
+      - "長期契約における進捗度測定方法（アウトプット法 vs インプット法）とその根拠"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "建設業・ITサービス業・SaaS等の長期契約を持つ業種は特に詳細な開示が求められる"
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】変動対価・契約コスト
+  # ──────────────────────────────────────────
+
+  - id: "ifrs15-2025-004"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "変動対価の見積りと制限（値引・リベート・ペナルティ・返品）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第50条〜58条に基づく変動対価（variable consideration）の
+      見積りおよび制限（constraint）の開示要件。
+      値引・リベート・返品権・ペナルティ・インセンティブ等の変動対価の性質と
+      規模を説明し、期待値法または最頻値法のいずれの見積方法を採用したか、
+      その理由とともに開示する。収益に含める変動対価の制限（重大な収益の戻入れが
+      生じる可能性が非常に低い範囲のみ計上）の判断基準も記載する。
+      返品引当の設定方法・過去の実績データの活用も含む。
+    target_sections:
+      - "重要な会計方針"
+      - "重要な会計上の判断・見積り"
+      - "注記事項（収益）"
+    required_items:
+      - "変動対価の種類（リベート・値引・返品権・ペナルティ等）の説明"
+      - "見積方法（期待値法 vs 最頻値法）の選択とその理由"
+      - "変動対価制限の適用基準と判断方法"
+      - "返品引当の設定方法（過去実績・見積額）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "製薬業（リベート）・小売業（返品権）・建設業（ペナルティ）は特に詳細開示が必要"
+    tier_requirement:
+      ume: "推奨"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-005"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "契約コスト（獲得コスト・履行コスト）の資産計上と償却"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第91条〜104条に基づく契約コスト（契約獲得コスト・契約履行コスト）の
+      資産計上・償却・減損の開示要件。
+      顧客との契約獲得に直接関連するコスト（販売手数料等）は、
+      回収が見込まれる場合に資産計上し、関連する財・サービスの移転パターンと
+      整合する期間にわたり償却する。実務上の便法として1年以内に償却する
+      コストは費用処理も可能。契約履行コストとして資産計上する条件
+      （特定の契約への直接関連・将来の資源生成・回収可能性）の充足状況も開示する。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（契約コスト）"
+    required_items:
+      - "契約獲得コスト・契約履行コストの資産計上の要件と適用判断"
+      - "償却期間の決定方法（関連する財・サービスの移転期間との整合）"
+      - "実務上の便法（1年以内償却の費用処理）の適用有無"
+      - "資産計上された契約コストの残高と当期償却額"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "SaaS・通信業等の長期顧客契約において重要性が高い項目"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】特定取引類型（本人/代理人・ライセンス・契約変更）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs15-2025-006"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "本人 vs 代理人の判定と総額/純額表示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第B34条〜B38条に基づく本人（principal）対代理人（agent）の
+      判定および収益の総額・純額表示の開示要件。
+      財・サービスが顧客に提供される前に支配しているか否か（本人）、
+      または手配のみを行っているか（代理人）の判断と、その結果としての
+      収益の総額表示または純額（手数料）表示の採用を開示する。
+      プラットフォーマー・EC事業者・旅行代理業・保険代理業等は
+      本人/代理人判定が収益規模に重要な影響を与えるため、判断根拠の
+      詳細開示が特に求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "重要な会計上の判断・見積り"
+      - "注記事項（収益）"
+    required_items:
+      - "本人 vs 代理人の判定基準（支配の有無）の説明"
+      - "総額 vs 純額表示の採用根拠"
+      - "本人/代理人判定の対象となる主要な取引類型の識別"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "EC・プラットフォーム・仲介業は収益計上額に直結する重要な開示項目"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-007"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "ライセンス収益の認識（使用権 vs アクセス権）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第B58条〜B62条に基づくライセンス収益の認識タイミングの開示要件。
+      ライセンスが「使用権（right to use）」か「アクセス権（right to access）」かの
+      判定基準（契約期間中に知的財産が変化するか否か、企業の継続的活動が
+      ライセンスの価値に重要な影響を与えるか否か）と、それに基づく
+      一時点認識（使用権）または一定期間認識（アクセス権）の適用を開示する。
+      知的財産ライセンスを含むすべての産業（技術・メディア・製薬・ゲーム等）に
+      適用され、サブライセンス・ロイヤリティに関する取り扱いも対象となる。
+    target_sections:
+      - "重要な会計方針"
+      - "重要な会計上の判断・見積り"
+      - "注記事項（収益）"
+    required_items:
+      - "使用権 vs アクセス権の判定基準（継続的な活動・知的財産の変化）の説明"
+      - "ライセンス収益の認識タイミング（一時点 vs 一定期間）の適用方針"
+      - "売上高比例ロイヤリティの認識方法（発生時点での認識）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "製薬・技術・メディア・ゲーム業界はライセンス収益の認識が業績に重大な影響を与える"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-008"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "契約変更の会計処理（独立新規契約 vs 既存契約の修正）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第18条〜21条に基づく契約変更（contract modification）の会計処理の
+      開示要件。契約変更が独立した新規契約として処理されるか（追加財・サービスが
+      独立販売価格を反映した価格で追加される場合）、または既存契約の修正として
+      処理されるか（残存履行義務への見通しの変化を反映して取引価格を再配分）の
+      判断基準と適用方針を開示する。変更が既存義務の充足方法に影響する場合の
+      累積的修正（キャッチアップ調整）または見込み調整の選択根拠も開示する。
+    target_sections:
+      - "重要な会計方針"
+      - "重要な会計上の判断・見積り"
+    required_items:
+      - "契約変更の定義と独立新規契約 vs 既存修正の判定基準"
+      - "変更時の取引価格の再配分方法"
+      - "累積キャッチアップ調整 vs 見込み調整の選択方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "長期建設契約・ITプロジェクト・製造請負で契約変更が頻繁に発生する業種は特に重要"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第4群】定量的開示（収益分解・残存義務・契約残高）
+  # ──────────────────────────────────────────
+
+  - id: "ifrs15-2025-009"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "収益の分解情報（セグメント別・地域別・時期別・製品サービス別）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第114条〜115条に基づく収益の分解（disaggregation of revenue）の
+      開示要件。投資家が収益の性質・金額・時期・不確実性を理解できるよう、
+      収益を適切なカテゴリに分解して開示する。分解軸の例として、
+      ①製品またはサービスの種類、②地理的市場、③市場または顧客の種類、
+      ④契約期間（短期 vs 長期）、⑤収益認識タイミング（一時点 vs 一定期間）等がある。
+      IFRS 8のセグメント開示との調整表（reconciliation）も必要。
+    target_sections:
+      - "注記事項（収益）"
+      - "セグメント情報"
+      - "収益の分解"
+    required_items:
+      - "適切な分解軸（製品種類・地域・顧客種類・認識タイミング等）の選択と開示"
+      - "分解した収益額（当期・前期比較）の金額開示"
+      - "IFRS 8セグメント開示との調整表"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "梅レベルでも最低限の収益分解は必須。分解軸は業種特性に応じて選択すること"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-010"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "残存履行義務の開示（金額・充足時期の予想）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第120条〜122条に基づく残存履行義務（remaining performance obligations）の
+      開示要件。報告日時点で未充足または一部未充足の履行義務に配分された
+      取引価格の総額と、その充足が見込まれる時期（1年以内・1〜3年・3年超等の
+      タイムバケット別）を開示する。実務上の便法として、当初の予想契約期間が
+      1年以内の履行義務は開示を省略可能。変動対価部分は不確実性が大きく
+      収益制限（constraint）が適用される場合は開示金額から除外できる。
+    target_sections:
+      - "注記事項（収益）"
+      - "残存履行義務"
+    required_items:
+      - "残存履行義務に配分された取引価格総額"
+      - "充足予定時期別（タイムバケット）の金額内訳"
+      - "実務上の便法（1年以内契約の省略）の適用有無と適用範囲"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "長期保守契約・SaaS・建設契約等では将来収益予測として投資家にとって重要な情報"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第5群】判断・見積り開示と契約残高
+  # ──────────────────────────────────────────
+
+  - id: "ifrs15-2025-011"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "重要な判断と見積りの開示（履行義務識別・変動対価・配分）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第123条〜126条に基づく重要な判断および見積りの開示要件。
+      収益認識において行った重要な判断・仮定として、
+      ①履行義務の識別（特に複合契約でのバンドル処理の判断）、
+      ②収益認識タイミング（支配移転の時点の判断）、
+      ③変動対価の見積りと制限の適用、
+      ④独立販売価格の見積方法と根拠の4点が主要な開示対象となる。
+      IAS 1第122条の「重要な判断」および第125条の「見積りの不確実性の主要な発生源」
+      との統合的な開示を検討する。
+    target_sections:
+      - "重要な会計上の判断・見積り"
+      - "注記事項（収益）"
+    required_items:
+      - "履行義務識別における重要な判断（バンドル処理・独立識別可能性）"
+      - "収益認識タイミングに係る判断（支配移転の指標の適用）"
+      - "変動対価の見積り方法と制限適用の判断根拠"
+      - "独立販売価格の見積方法（採用した方法と根拠）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IAS 1第122条・第125条との統合開示を推奨。具体的な数値・根拠の記載が望ましい"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ifrs15-2025-012"
+    category: "IFRS（収益認識）"
+    change_type: "継続必須"
+    effective_from: "2018-01-01"
+    title: "契約残高（契約資産・契約負債・債権）の期首期末増減"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    source_confirmed: true
+    summary: >
+      IFRS 15第116条〜118条に基づく契約残高（contract balances）の開示要件。
+      契約資産（contract asset）・契約負債（contract liability）・
+      顧客との契約から生じた債権（trade receivables）の
+      期首残高・期末残高を開示する。期首残高に含まれていた契約負債から
+      当期に認識した収益の金額、ならびに過去期間の履行義務の充足（または部分充足）
+      から当期に認識した収益の金額も開示する。
+      残高変動の重要な要因（新規契約・一定期間充足・返金等）の説明も含める。
+    target_sections:
+      - "注記事項（収益）"
+      - "契約資産・契約負債の増減表"
+    required_items:
+      - "契約資産・契約負債・債権の期首・期末残高"
+      - "期首契約負債から当期認識した収益の金額"
+      - "前期以前の履行義務充足から当期認識した収益の金額"
+      - "残高変動の主要因の説明（新規契約・充足進捗・解約・返金等）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "B/Sに計上される契約資産・負債と直接連動する定量開示。前期比較表示が必要"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
