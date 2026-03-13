@@ -1,0 +1,263 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（引当金）
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IAS 37 引当金、偶発負債及び偶発資産（IAS 37 Provisions, Contingent Liabilities and Contingent Assets）
+#   IASB 2025年度確認版（改訂なし、既存要件の適用継続）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】引当金の認識・測定
+  # ──────────────────────────────────────────
+
+  - id: "ias37-2025-001"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 引当金の認識要件（現在の義務・蓋然性・信頼性ある見積り）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      IAS 37に基づく引当金の認識には3要件の充足が必要。①過去の事象から生じる
+      現在の（法的または推定的）義務の存在、②債務を決済するために経済的便益を
+      有する資源の流出が蓋然的（possible より more likely than not）であること、
+      ③債務の金額について信頼性のある見積りが可能であること。3要件のいずれかを
+      充足しない場合は偶発負債として注記開示する。認識した引当金の残高・増減
+      明細（期首残高・追加設定・目的使用・戻入・割引の巻き戻し・期末残高）を
+      類型ごとに表形式で開示することが要求される。
+    target_sections:
+      - "引当金及び偶発負債"
+      - "重要な会計方針"
+      - "財務諸表注記"
+    required_items:
+      - "引当金の期首・期末残高"
+      - "当期増加額（追加設定）"
+      - "当期減少額（目的使用・戻入）"
+      - "割引の巻き戻し額（時間の経過による増加）"
+      - "引当金設定の根拠となる義務の性質"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "IFRS適用企業が対象。日本基準企業は類似開示を引当金注記で対応"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias37-2025-002"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 引当金の測定（最善の見積り・割引現在価値）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      引当金の測定は期末時点における最善の見積り額で行う。将来の支出が
+      複数の結果を取りうる場合は期待値法（加重平均）を適用し、単一の
+      事象に関する引当金は最頻値法を基礎とすることが認められる。
+      資金の時間的価値の影響が重要な場合、将来支出見込みの現在価値で
+      測定し（割引率は税引前の市場レートを使用）、割引の巻き戻し分を
+      金融費用として損益計上する。将来の割引率前提・見積り変更の影響を
+      注記で説明することが求められる。
+    target_sections:
+      - "引当金及び偶発負債"
+      - "会計上の見積りと判断"
+    required_items:
+      - "測定方法（期待値法 / 最頻値法）の説明"
+      - "割引率の前提（税引前市場レート）"
+      - "割引の巻き戻し額の開示"
+      - "見積りの不確実性に関する説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "割引計算が適用される典型例は環境修復引当金・訴訟引当金（長期）"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】偶発負債・偶発資産
+  # ──────────────────────────────────────────
+
+  - id: "ias37-2025-003"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 偶発負債の開示（認識しない理由・最大損失額）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      偶発負債は財務諸表上では認識せず、注記のみで開示する。開示内容として
+      ①債務の性質（訴訟・保証・係争中の規制対応等）、②財務的影響の見積り
+      （最大損失額または見積り不可能である旨）、③経済的資源流出の蓋然性の
+      評価、④当該不確実性の主な性質と状況を記載する。経済的資源の流出が
+      遠い（remote）場合は開示不要。複数の類似する偶発負債はまとめて
+      開示することが認められるが、個々に重大性がある場合は個別開示が必要。
+    target_sections:
+      - "偶発負債"
+      - "引当金及び偶発負債"
+      - "財務諸表注記"
+    required_items:
+      - "偶発負債の性質・内容の説明"
+      - "財務的影響の見積り（最大損失額）"
+      - "経済的資源流出の蓋然性評価"
+      - "不確実性の主な原因の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: >
+      訴訟係属中の案件で開示が会社に重大な不利益をもたらす極めて稀な場合、
+      開示の一般的な性質とその理由を示すことで詳細開示を省略できる（IAS 37.92）
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias37-2025-004"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 偶発資産の開示（実現可能性）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      偶発資産は認識せず、経済的便益の流入が蓋然的（probable）な場合に限り
+      注記で開示する。開示内容は①偶発資産の性質と②可能な場合には財務的影響の
+      見積り。経済的便益の流入が確実（virtually certain）になった時点で
+      資産を財務諸表上で認識する。偶発資産を過大に報告しないよう慎重性を
+      維持することが求められる。逆に経済的便益の流入が蓋然的でない場合は
+      注記も不要（merely possible な場合は開示任意）。
+    target_sections:
+      - "偶発資産"
+      - "財務諸表注記"
+    required_items:
+      - "偶発資産の性質・内容の説明"
+      - "財務的影響の見積り（実現可能な範囲で）"
+      - "経済的便益流入の蓋然性評価"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "保険金請求・係争中の損害賠償請求・税務還付請求が典型例"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】特定類型の引当金
+  # ──────────────────────────────────────────
+
+  - id: "ias37-2025-005"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — リストラクチャリング引当金"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      リストラクチャリング引当金は詳細な公式計画が存在し、かつ実施が確実
+      （従業員への告知または具体的な実施着手）となった時点で認識する。
+      将来の営業損失は引当金として認識できない。開示内容は①リストラの性質
+      （事業セグメント・対象拠点・影響を受ける従業員数と職種・発生予定費用・
+      計画の実施予定期間）、②関連する引当金の増減明細。引当金の目的以外への
+      使用は認められず、引当額を超える実際費用は発生時に費用認識する。
+    target_sections:
+      - "引当金及び偶発負債"
+      - "重要な会計方針"
+      - "特別項目"
+    required_items:
+      - "リストラクチャリングの性質・内容"
+      - "影響を受ける事業・拠点・従業員数"
+      - "発生見込みコストの内訳"
+      - "計画実施予定期間"
+      - "引当金増減明細（リストラ類型単独）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IFRS 5（売却目的保有）との関連も確認が必要な場合がある"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias37-2025-006"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 不利な契約（onerous contracts）の引当金"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      不利な契約（契約上の義務を履行するための回避不能コストが契約から得られる
+      経済的便益を超える契約）がある場合、現在の債務を引当金として認識する。
+      回避不能コストは①契約を履行するコストと②契約不履行時のペナルティ（違約金・
+      損害賠償等）のいずれか低い方で測定。2022年の IAS 37 改訂（コスト充当コストの
+      判定）に基づき、「契約を履行するコスト」は直接的な増分コストと間接費配分の
+      うち適切な部分を含む。開示は不利な契約の性質・残存期間・引当金額。
+    target_sections:
+      - "引当金及び偶発負債"
+      - "会計上の見積りと判断"
+    required_items:
+      - "不利な契約の性質・種類の説明"
+      - "残存契約期間"
+      - "引当金の測定額と測定方法"
+      - "回避不能コストの算定根拠"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "賃貸借（IFRS 16適用後の変動）・長期購入契約・建設請負等で発生頻度高"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias37-2025-007"
+    category: "IFRS（引当金）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 37 — 環境修復・訴訟引当金の個別開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    source_confirmed: true
+    summary: >
+      環境修復引当金（土壌汚染・廃棄物処理・原状回復義務等）と訴訟引当金は
+      金額的重要性が高い場合、他の引当金と分離して個別開示する。環境修復引当金は
+      将来の支払時期が長期にわたるため割引現在価値での測定が一般的であり、
+      割引率前提・将来支出見通し・不確実性の説明が必要。訴訟引当金は
+      弁護士等専門家の見解に基づく損失見込みの根拠を開示する。ESG開示との
+      関連で環境引当金の規模・内容は投資家から注目度が高く、松ティアでは
+      シナリオ分析（炭素価格シナリオ・規制強化シナリオ等）の感応度開示が
+      期待される。
+    target_sections:
+      - "引当金及び偶発負債"
+      - "環境に関する事項（サステナビリティ情報）"
+      - "訴訟の状況"
+    required_items:
+      - "環境修復引当金の残高・増減明細"
+      - "訴訟引当金の残高・増減明細"
+      - "割引率前提と割引計算の影響"
+      - "将来支出の時期・金額の見積り根拠"
+      - "シナリオ感応度分析（松ティア）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: >
+      ISSB IFRS S2（気候関連開示）との整合性確認が必要。環境修復引当金は
+      IFRS S2で開示する移行リスク・物理リスクと連動して説明することが望ましい
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
