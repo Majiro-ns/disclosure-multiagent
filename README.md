@@ -387,6 +387,50 @@ Copy `.env.example` to `.env` to get started.
 
 ---
 
+## A2A (Agent-to-Agent) Protocol Support
+
+disclosure-multiagent は [A2A プロトコル](https://google.github.io/A2A/) に対応しており、
+外部エージェントから直接呼び出すことができます。
+
+### Agent Card 取得
+
+```bash
+curl http://localhost:8000/.well-known/agent-card.json
+```
+
+### 外部エージェントからの接続
+
+```python
+import httpx
+import uuid
+
+# A2A タスクを送信
+task = {
+    "id": str(uuid.uuid4()),
+    "contextId": str(uuid.uuid4()),
+    "message": {
+        "messageId": str(uuid.uuid4()),
+        "role": "user",
+        "parts": [{"kind": "text", "text": "EDINETコード E12345 の有価証券報告書を松竹梅分析してください"}]
+    }
+}
+resp = httpx.post("http://localhost:8000/a2a/execute", json=task)
+result = resp.json()
+print(result["artifacts"][0]["parts"][0]["text"])
+```
+
+### 利用可能なスキル
+
+| スキルID | 説明 | 入力例 |
+|----------|------|--------|
+| `analyze_disclosure` | 有価証券報告書の松竹梅分析 | 「EDINETコード E12345 を分析してください」 |
+| `edinet_search` | EDINET書類検索 | 「証券コード 7203 の有価証券報告書を検索」 |
+| `matsu_take_ume_scoring` | テキストの松竹梅スコアリング | 「スコアリング対象: 離職率3.5%（目標2025年度）」 |
+
+スキルは `skillId` で明示指定するか、入力テキストのキーワードで自動振り分けされます。
+
+---
+
 ## 関連OSS
 
 同作者が開発する財務・AI品質系OSSのエコシステムです。
