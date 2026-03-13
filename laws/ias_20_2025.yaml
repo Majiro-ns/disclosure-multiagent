@@ -1,0 +1,171 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（政府補助金）— IAS 20 Accounting for Government Grants and Disclosure of Government Assistance
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IAS 20 Accounting for Government Grants and Disclosure of Government Assistance
+#   (IASB, 1983年4月発行 / 最終改訂2008年)
+#   東京証券取引所 上場規程・開示ガイドライン（IFRSを任意適用する上場会社向け）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】認識要件・表示選択
+  # ──────────────────────────────────────────
+
+  - id: "ias20-2025-001"
+    category: "IFRS（政府補助金）"
+    change_type: "継続必須"
+    effective_from: "1984-01-01"
+    title: "政府補助金の認識要件（合理的保証）と収益認識 vs 資産控除の選択"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-20-accounting-for-government-grants-and-disclosure-of-government-assistance/"
+    source_confirmed: true
+    summary: >
+      IAS 20第7条〜22条に基づく政府補助金（government grants）の認識要件と
+      表示選択の開示要件。政府補助金は①補助金に付随する条件を企業が遵守する
+      合理的保証（reasonable assurance）があること、②補助金を受領する
+      合理的保証があることの両方を満たした場合に認識する。
+      認識した補助金は性質に応じて資産関連補助金（asset-related grants）と
+      収益関連補助金（income-related grants）に区分する。
+      資産関連補助金は繰延収益として負債計上する方法と資産帳簿価額から
+      直接控除する方法の選択適用が認められる。
+      収益関連補助金は関連費用と対応する期間に損益認識する。
+      採用した会計方針（表示方法の選択）の説明が開示の起点となる。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（政府補助金）"
+    required_items:
+      - "政府補助金の認識基準（合理的保証の判断）の会計方針説明"
+      - "資産関連 vs 収益関連の分類基準"
+      - "採用した表示方法の選択（繰延収益法 vs 資産控除法）とその理由"
+      - "当期に認識した補助金収益の総額と種類別内訳"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "補助金の性質（条件の有無・返還リスク）により認識タイミングが異なる。慎重な判断が必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias20-2025-002"
+    category: "IFRS（政府補助金）"
+    change_type: "継続必須"
+    effective_from: "1984-01-01"
+    title: "資産関連補助金の表示（繰延収益法 vs 資産控除法）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-20-accounting-for-government-grants-and-disclosure-of-government-assistance/"
+    source_confirmed: true
+    summary: >
+      IAS 20第24条〜28条に基づく資産関連補助金の貸借対照表表示と
+      損益認識の開示要件。資産関連補助金の表示は2つの方法から選択する：
+      ①繰延収益法（deferred income approach）：補助金を繰延収益として
+      負債計上し、関連資産の耐用年数にわたり規則的に損益認識する。
+      ②資産控除法（deduction from asset approach）：補助金を資産の
+      帳簿価額から直接控除し、資産の耐用年数にわたる減少した減価償却費を
+      通じて間接的に損益認識する。
+      選択した方法と各期の損益認識額、繰延収益残高（繰延収益法の場合）、
+      または関連資産の補助金控除前後の帳簿価額（資産控除法の場合）を開示する。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（政府補助金）"
+      - "繰延収益"
+    required_items:
+      - "採用した表示方法（繰延収益法 vs 資産控除法）"
+      - "繰延収益法の場合：繰延収益の期首・期末残高と当期認識額"
+      - "資産控除法の場合：資産の帳簿価額（補助金控除後）と控除額"
+      - "当期に損益認識した補助金の金額と損益計算書上の表示箇所"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "繰延収益法と資産控除法は損益認識タイミングが同じだが、B/S表示・財務指標に差異が生じる"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】収益対応・返還義務
+  # ──────────────────────────────────────────
+
+  - id: "ias20-2025-003"
+    category: "IFRS（政府補助金）"
+    change_type: "継続必須"
+    effective_from: "1984-01-01"
+    title: "収益関連補助金の対応費用との期間対応"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-20-accounting-for-government-grants-and-disclosure-of-government-assistance/"
+    source_confirmed: true
+    summary: >
+      IAS 20第29条〜31条に基づく収益関連補助金（income-related grants）の
+      損益認識と開示要件。収益関連補助金は、補助対象の費用が発生する期間に
+      わたり規則的な方法で損益認識する（費用との対応原則）。
+      補助金が特定の費用項目の補填を目的とする場合は、その費用認識と
+      同一期間に損益認識する。特定の費用と紐付けられない補助金
+      （一般的な事業支援補助金等）は、企業が補助金の条件を満たすことが
+      合理的に見込まれる期間に認識する。
+      損益計算書上の表示は「その他収益」として総額表示、または
+      関連費用から直接控除する純額表示の選択が認められる。
+      採用した表示方法の一貫性と開示の明確性が求められる。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（政府補助金）"
+      - "その他収益"
+    required_items:
+      - "収益関連補助金の損益認識基準（費用対応 vs 条件充足期間）"
+      - "損益計算書上の表示方法（総額 vs 関連費用から控除）"
+      - "当期に認識した収益関連補助金の種類・金額・対応費用"
+      - "未認識の補助金残高（条件未充足部分）の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "研究開発補助金・雇用創出補助金・グリーンエネルギー補助金等は対応費用との整合性が特に重要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias20-2025-004"
+    category: "IFRS（政府補助金）"
+    change_type: "継続必須"
+    effective_from: "1984-01-01"
+    title: "補助金の返還義務発生時の会計処理と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-20-accounting-for-government-grants-and-disclosure-of-government-assistance/"
+    source_confirmed: true
+    summary: >
+      IAS 20第32条〜33条に基づく政府補助金の返還（repayment）が必要となった
+      場合の会計処理と開示要件。返還義務が生じた補助金は、
+      会計上の見積りの変更（IAS 8）として処理する：
+      ①収益関連補助金の返還：まず認識済み未償却繰延収益から控除し、
+      超過分は即時に費用認識する。
+      ②資産関連補助金の返還：繰延収益残高を超える返還額は資産の
+      帳簿価額（繰延収益法）または資産の増加（資産控除法）として調整し、
+      増加した累積減価償却費は即時に費用認識する。
+      返還の可能性が高いがまだ確定していない場合は偶発負債として開示する
+      （IAS 37との整合）。補助金条件の変更・未充足リスクの定性的説明も必要。
+    target_sections:
+      - "注記事項（政府補助金）"
+      - "偶発負債"
+      - "重要な会計上の判断・見積り"
+    required_items:
+      - "返還義務発生時の会計処理方針"
+      - "当期に発生した返還額と損益計算書への影響"
+      - "返還の可能性がある未確定補助金の開示（偶発負債）"
+      - "補助金条件の充足状況と未充足リスクの説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "補助金条件は産業政策・雇用維持・地域立地等の多様な条件が付されるため、条件管理の体制開示も重要"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
