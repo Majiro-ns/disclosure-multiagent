@@ -1,0 +1,266 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（為替）
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IAS 21 外国為替レート変動の影響（IAS 21 The Effects of Changes in Foreign Exchange Rates）
+#   IASB 改訂「交換可能性の欠如」（Lack of Exchangeability）: 2023年8月公表、2025年1月1日以降強制適用
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】機能通貨・換算の基本原則
+  # ──────────────────────────────────────────
+
+  - id: "ias21-2025-001"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 機能通貨の決定方法と根拠開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      機能通貨は各企業（在外営業活動体を含む）が主として事業活動を行う経済環境の
+      通貨として決定する。主要な判定指標は①財貨・サービスの販売価格に最も影響する
+      通貨、②労務費・原材料費等を支配する通貨。補助指標として③財務活動（借入・
+      配当）に使用される通貨、④営業活動からの収入を通常保持する通貨も参照する。
+      機能通貨の決定は経営の実態を反映するものであり、経営者の裁量で変更することは
+      認められない（経済環境の実質的変化がある場合のみ変更可能）。開示として
+      機能通貨と表示通貨が異なる理由、機能通貨の変更があった場合はその事実と理由を
+      注記する。
+    target_sections:
+      - "重要な会計方針"
+      - "外国為替"
+      - "財務諸表注記"
+    required_items:
+      - "機能通貨の開示（主要な事業会社ごと）"
+      - "表示通貨と機能通貨が異なる場合の理由説明"
+      - "機能通貨変更の事実・理由・変更前後の影響（変更がある場合）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "在外子会社が多い多国籍企業では各子会社の機能通貨の決定根拠が重要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias21-2025-002"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 外貨建取引の換算（取引日レート・決算日レート）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      外貨建取引は取引日の直物為替レートで機能通貨に換算する（週次・月次の
+      平均レートも当該期間中に為替レートが著しく変動しない場合は使用可能）。
+      報告日現在の換算処理は①貨幣性項目（現金・売掛金・借入金等）は決算日の
+      直物レート（クロージングレート：CR）で再換算、②非貨幣性項目のうち
+      取得原価評価のものは取引日レート（ヒストリカルレート：HR）のまま、
+      ③非貨幣性項目のうち公正価値評価のものは公正価値決定日のレートを使用。
+      為替差損益（貨幣性項目の再換算差額および決済差額）は発生期間の損益に認識する。
+    target_sections:
+      - "重要な会計方針"
+      - "外国為替"
+      - "為替差損益"
+    required_items:
+      - "外貨建取引の換算方針の説明（取引日レート・CR/HRの使い分け）"
+      - "当期に損益認識した為替差損益の金額"
+      - "適用した為替レートの種別（直物・平均・週次等）の方針"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "非貨幣性項目の評価差額がOCIに計上される場合、関連する為替差額もOCIに計上"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias21-2025-003"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 在外営業活動体の換算（資産負債=CR／PL=AR／資本=HR）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      在外営業活動体（子会社・関連会社・共同支配事業体等）の財務諸表を
+      表示通貨に換算する際の方法：①資産および負債は決算日の直物レート（CR）、
+      ②収益および費用は取引日レートまたは期中平均レート（AR）、③資本は
+      取得時またはそれ以降の拠出時の為替レート（ヒストリカルレート：HR）を使用。
+      上記換算から生じる差額（換算差額）は発生期間に損益認識せず、その他の
+      包括利益（OCI）として認識し、在外営業活動体の処分まで累積する
+      （換算差額累計額をOCI内の外貨換算調整勘定として表示）。
+    target_sections:
+      - "重要な会計方針"
+      - "在外営業活動体"
+      - "外国為替"
+    required_items:
+      - "在外営業活動体の換算方針（CR/AR/HRの適用）の説明"
+      - "換算に使用した為替レート（主要通貨・期末レート・平均レート）"
+      - "主要な在外営業活動体の機能通貨の一覧"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "ハイパーインフレ国子会社はIAS 29適用後にIAS 21換算を行う（二段階処理）"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】OCI・リサイクリング
+  # ──────────────────────────────────────────
+
+  - id: "ias21-2025-004"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 為替換算差額のOCI認識と累計額開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      在外営業活動体の財務諸表換算から生じる為替換算差額は、その他の包括利益
+      （OCI）として認識し、累計額を純資産の部に「外貨換算調整勘定」または
+      「為替換算差額累計額」として区分表示する。開示として①当期OCI計上額
+      （税効果控除前・後）、②前期末・当期末の累計残高、③非支配持分に
+      帰属する部分の金額を示す。グループ内の貨幣性項目（長期性融資等）で
+      決済の見込みがない場合、関連する為替差額は連結財務諸表上でOCI処理する。
+      換算差額累計が重要な場合、通貨別内訳の開示が推奨される（竹・松ティア）。
+    target_sections:
+      - "その他の包括利益"
+      - "純資産の部"
+      - "在外営業活動体"
+    required_items:
+      - "当期の為替換算差額（OCI計上額）"
+      - "外貨換算調整勘定の期首・期末残高"
+      - "非支配持分への帰属額"
+      - "税効果前・後の金額の開示"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: >
+      ネット投資ヘッジに関連する金融商品の為替差額もOCIに計上し、
+      換算差額累計額と合算または区分して開示
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias21-2025-005"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 在外営業活動体の処分時のリサイクリング"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      在外営業活動体を処分（売却・清算・資本の払戻等）する際、それまでOCIに
+      累積していた外貨換算調整勘定の累計額を損益に振り替える（リサイクリング）。
+      一部処分の場合、関連する累計換算差額の比例部分のみを損益に振り替える。
+      関連会社や共同支配事業体への適用も同様（持分法適用範囲内の為替換算差額の
+      累積分を処分損益に含める）。開示として処分期に損益リサイクリングした
+      換算差額の金額を、処分損益の内訳または注記として開示する。
+    target_sections:
+      - "在外営業活動体の処分"
+      - "特別損益または営業外損益"
+      - "財務諸表注記"
+    required_items:
+      - "処分時にリサイクリングした換算差額の金額"
+      - "処分した在外営業活動体の名称・所在国"
+      - "損益計算書上の計上区分の説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: "IFRS 5（売却目的保有）との連動確認が必要。処分前に減損認識がある場合も考慮"
+    tier_requirement:
+      ume: "任意"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】2025年改正・リスク管理
+  # ──────────────────────────────────────────
+
+  - id: "ias21-2025-006"
+    category: "IFRS（為替）"
+    change_type: "新規要件（2025年改正）"
+    effective_from: "2025-01-01"
+    title: "IAS 21 改正 — 交換可能性の判定（交換制限国の子会社）"
+    source: "https://www.ifrs.org/projects/completed/lack-of-exchangeability-amendments-to-ias-21/"
+    source_confirmed: true
+    summary: >
+      IASBは2023年8月に「交換可能性の欠如（Lack of Exchangeability）」に関する
+      IAS 21改正を公表（2025年1月1日以降強制適用）。通貨の交換可能性の定義を
+      明確化し、エンティティが報告日において（i）ある通貨を別の通貨に交換する
+      能力を有するか、（ii）その交換が市場における通常の条件（orderly conditions）
+      のもとで行えるかを評価する。いずれか一方でも充足しない場合、その通貨は
+      「交換不能」と判定する。交換不能と判定した場合の為替レートの見積り方法
+      （観察可能な取引・購買力平価・ブラック市場レート等の根拠）および使用した
+      推定レートを開示する。外貨換算差額への影響額と重要な仮定の感応度も開示。
+    target_sections:
+      - "重要な会計方針"
+      - "外国為替"
+      - "会計上の見積りと判断"
+    required_items:
+      - "交換不能と判定した通貨の一覧"
+      - "使用した推定為替レートと決定方法の説明"
+      - "交換制限に関する規制・状況の説明"
+      - "換算に用いたレートが交換可能な場合との差異（感応度）"
+      - "財務諸表への重要な影響額の定量開示"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: >
+      2025年1月1日以降の年次報告期間から強制適用（早期適用可）。
+      ロシア・アルゼンチン・ナイジェリア・エジプト等の通貨制限国に
+      子会社・関連会社を持つ企業は特に対応が必要
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias21-2025-007"
+    category: "IFRS（為替）"
+    change_type: "継続要件"
+    effective_from: "2025-04-01"
+    title: "IAS 21 — 為替リスク管理方針と感応度分析"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-21-the-effects-of-changes-in-foreign-exchange-rates/"
+    source_confirmed: true
+    summary: >
+      為替リスクに関する定性・定量開示（IFRS 7との連携）。定性開示として
+      為替リスク管理の目的・方針・主要なエクスポージャー通貨を説明する。
+      定量開示として①報告日における主要通貨建て残高（資産・負債）、
+      ②主要通貨の為替レートが仮に一定幅変動した場合の損益・純資産への
+      影響額（感応度分析：一般的に±10%または±5%の変動を想定）。
+      松ティアでは複数シナリオ（円高シナリオ・円安シナリオ・通貨危機シナリオ）
+      による分析、ヘッジ有無別の効果分析、在外営業活動体の換算差額への
+      影響の定量化が期待される。
+    target_sections:
+      - "金融リスク管理"
+      - "市場リスク"
+      - "為替リスク"
+    required_items:
+      - "為替リスク管理方針の定性説明"
+      - "主要エクスポージャー通貨と残高"
+      - "感応度分析（±変動幅・影響額）"
+      - "ヘッジ適用状況と有効性評価の概要"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+    notes: >
+      IFRS 7（金融商品開示）との重複整理が必要。為替ヘッジ（CF ヘッジ・
+      ネット投資ヘッジ）はIFRS 9とIAS 21の双方で開示要求が発生する
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
