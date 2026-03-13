@@ -1,0 +1,236 @@
+# disclosure-multiagent — 法令・ガイダンス情報 YAML
+# カテゴリ: IFRS（関連当事者）— IAS 24 Related Party Disclosures
+# 対象期間: 2025年度（2025-04-01〜2026-03-31）
+# スキーマ定義: docs/law_yaml_schema.md
+# 作成者: Majiro-ns
+#
+# 根拠法令:
+#   IAS 24 Related Party Disclosures (IASB, 改訂2009年11月 / 2011年1月1日以降適用)
+#   IAS 24 Amendment — Key Management Personnel (IASB, 2013年12月発行)
+#   東京証券取引所 上場規程・開示ガイドライン（IFRSを任意適用する上場会社向け）
+
+version: "1.0"
+effective_period:
+  from: "2025-04-01"
+  to: "2026-03-31"
+
+amendments:
+
+  # ──────────────────────────────────────────
+  # 【第1群】関連当事者の定義・識別
+  # ──────────────────────────────────────────
+
+  - id: "ias24-2025-001"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "関連当事者の定義と識別（親会社・子会社・関連会社・KMP・近親者）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第9条〜11条に基づく関連当事者（related party）の定義と識別の開示要件。
+      関連当事者に該当するのは①支配・共同支配・重要な影響力の関係にある企業
+      （親会社・子会社・持分法適用会社・ジョイントベンチャー・共同支配企業）、
+      ②主要な経営幹部（KMP: Key Management Personnel）およびその近親者、
+      ③KMPまたはその近親者が支配・共同支配・重要な影響力を持つ企業。
+      同一グループ企業間取引は連結財務諸表では消去されるが、個別財務諸表では
+      全額開示対象となる。IAS 27・IAS 28・IFRS 10・IFRS 11との整合的な
+      関連当事者の識別が求められ、識別漏れは重要な会計上の誤謬リスクとなる。
+    target_sections:
+      - "重要な会計方針"
+      - "注記事項（関連当事者）"
+      - "関連当事者の識別"
+    required_items:
+      - "関連当事者の範囲（親子会社・持分法会社・KMP等）の定義と会計方針"
+      - "識別された関連当事者の一覧（企業名・関係の種類）"
+      - "KMPの範囲（取締役・執行役員等の定義）"
+      - "近親者の範囲の会計方針説明"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "関連当事者の識別漏れは監査上の重要な指摘事項。グループ再編後は特に精査が必要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第2群】KMP報酬・関連当事者取引
+  # ──────────────────────────────────────────
+
+  - id: "ias24-2025-002"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "KMP報酬の開示（短期給付・退職後給付・株式報酬・解雇給付・その他長期給付）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第17条に基づく主要な経営幹部（KMP）報酬の開示要件。
+      KMP報酬の合計額を以下5区分に分けて開示する：
+      ①短期従業員給付（基本給・賞与・社会保険等）、
+      ②退職後給付（確定給付・確定拠出）、
+      ③その他長期従業員給付（長期インセンティブ・長期休暇）、
+      ④解雇給付（退職加算金等）、
+      ⑤株式報酬（ストックオプション・株式付与・IFRS 2に基づく給付）。
+      個人別の開示はIAS 24では要求されないが、日本の会社法・有価証券報告書規則
+      等の国内規制との整合性も考慮する。2013年改訂で管理サービス会社
+      （management entity）経由のKMP報酬の取扱いも明確化された。
+    target_sections:
+      - "注記事項（関連当事者）"
+      - "役員報酬"
+    required_items:
+      - "KMP報酬の5区分合計額（短期給付・退職後・長期・解雇・株式報酬）"
+      - "KMPの範囲（対象人員数の説明）"
+      - "管理サービス会社経由のKMP報酬の扱い（該当する場合）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "日本の有報では役員個人別の報酬開示も要求される。IAS 24の区分と有報規則の整合に注意"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias24-2025-003"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "関連当事者取引の開示（取引内容・金額・残高・条件）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第18条〜24条に基づく関連当事者取引（related party transactions）の
+      開示要件。関連当事者との間に取引が存在した場合、報告企業と各関連当事者の
+      関係・取引の性質・金額・未決済残高（期末残高・条件・担保の有無・
+      貸倒引当金の設定状況）・費用認識額（貸倒損失含む）を開示する。
+      取引の種類別（商品の売買・サービス提供・資金貸借・保証・リース等）に
+      集約して開示することが認められるが、関係の種類（親会社/子会社/関連会社/
+      KMP）ごとに区分して開示する。重要性のない取引は省略可能だが、
+      類似した性質の取引は合算できる。
+    target_sections:
+      - "注記事項（関連当事者）"
+      - "関連当事者取引"
+    required_items:
+      - "関連当事者の関係の種類（親会社/子会社/関連会社/KMP等）"
+      - "取引の種類別・相手先別の取引金額"
+      - "期末未決済残高（債権・債務・保証・コミットメント）"
+      - "取引条件（独立第三者間条件との比較の有無）"
+      - "貸倒引当金の設定状況"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "連結消去後も親会社と子会社の個別財務諸表では全額開示が必要。グループ内取引の網羅性確認が重要"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  # ──────────────────────────────────────────
+  # 【第3群】政府関連免除・親会社情報・独立性比較
+  # ──────────────────────────────────────────
+
+  - id: "ias24-2025-004"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "政府関連企業の免除規定と開示"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第25条〜27条に基づく政府関連企業（government-related entities）の
+      免除規定と開示要件。政府が支配・共同支配または重要な影響力を持つ企業は、
+      同じ政府の支配下にある他の企業との取引について、個別取引の詳細開示を
+      免除し、代わりに①政府と関連当事者の関係の性質、②重要な取引および
+      取引残高の定性的・定量的な情報（重要性に基づく判断）を開示できる。
+      免除規定の適用は任意であり、適用する場合はその旨と適用根拠を明示する。
+      日本の政府系金融機関・国有企業・上場国営企業等は特に検討が必要な項目。
+    target_sections:
+      - "注記事項（関連当事者）"
+      - "政府関連企業との取引"
+    required_items:
+      - "政府関連企業免除規定の適用有無と根拠"
+      - "適用する場合：政府と当該企業の関係の性質"
+      - "適用する場合：重要な個別取引（金額・性質・条件）の定性的説明"
+      - "適用する場合：その他の取引の定量的集計情報"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "日本では政府持ち株の上場企業（NTT・JR・日本郵政等）は免除規定の適用検討が必要"
+    tier_requirement:
+      ume: "任意"
+      take: "推奨"
+      matsu: "必須"
+
+  - id: "ias24-2025-005"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "親会社情報の開示（最終的な支配企業含む）"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第13条〜16条に基づく親会社情報の開示要件。
+      報告企業の財務諸表が公表されている場合、報告企業を支配する親会社の名称、
+      および親会社が存在する場合の最終的な支配企業（ultimate controlling party）
+      の名称を開示する。最終支配企業が財務諸表を公表していない場合は、
+      財務諸表を公表している次に近い上位の親会社の名称を開示する。
+      日本の上場会社においてはコーポレートガバナンス・コードの観点からも
+      支配株主（親会社）との関係透明性が重視されており、グループ上場の文脈で
+      特に重要な開示項目となっている。
+    target_sections:
+      - "注記事項（関連当事者）"
+      - "親会社情報"
+      - "企業集団の概要"
+    required_items:
+      - "直接の親会社の名称"
+      - "最終的な支配企業の名称（親会社と異なる場合）"
+      - "最終支配企業が財務諸表を未公表の場合の次位上位親会社の名称"
+      - "親会社による支配の性質（議決権保有比率等）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "グループ上場・親子上場企業は親会社との利益相反管理の観点からも詳細開示が求められる"
+    tier_requirement:
+      ume: "必須"
+      take: "必須"
+      matsu: "必須"
+
+  - id: "ias24-2025-006"
+    category: "IFRS（関連当事者）"
+    change_type: "継続必須"
+    effective_from: "2011-01-01"
+    title: "関連当事者間の取引条件の独立第三者比較"
+    source: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    source_confirmed: true
+    summary: >
+      IAS 24第23条に基づく関連当事者取引が独立第三者間条件（arm's length terms）
+      で行われたか否かの開示要件。関連当事者取引について、取引が独立第三者間
+      条件で行われた旨の表明は、その事実が証明できる場合にのみ記載できる。
+      証明できない場合は当該記述を省略しなければならない。取引条件の概要
+      （価格決定方式・信用条件・担保要件・利率水準等）を具体的に開示し、
+      同種の市場取引との比較可能性を確保する。移転価格税制との整合性確認、
+      グループ内取引価格ポリシー（インターカンパニープライシング）の説明も
+      松レベルでは重要な開示要素となる。
+    target_sections:
+      - "注記事項（関連当事者）"
+      - "関連当事者取引条件"
+    required_items:
+      - "取引条件（価格・利率・信用条件等）の概要"
+      - "独立第三者間条件との比較（証明可能な場合のみ言及）"
+      - "グループ内取引価格設定ポリシーの概要（重要な場合）"
+      - "移転価格税制との整合性に関する方針（松レベル）"
+    applicable_markets:
+      - "プライム"
+      - "スタンダード"
+      - "グロース"
+    notes: "「独立第三者間条件」の記述は証明不可な場合に記載すると虚偽表示となる。記載の有無の判断は慎重に"
+    tier_requirement:
+      ume: "推奨"
+      take: "必須"
+      matsu: "必須"
