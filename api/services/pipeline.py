@@ -482,11 +482,12 @@ async def run_pipeline_async(
         elif use_mock:
             os.environ["USE_MOCK_LLM"] = "true"
 
-        # Resolve profile_dir: profile_name 指定時は profiles/ ディレクトリを使用
+        # Resolve profile_dir: profile_name 指定時は profiles/{profile_name}/ を優先、なければ profiles/
         _project_root = Path(__file__).parent.parent.parent
         profile_dir: Optional[str] = None
         if profile_name is not None:
-            profile_dir = str(_project_root / "profiles")
+            _sub = _project_root / "profiles" / profile_name
+            profile_dir = str(_sub) if _sub.is_dir() else str(_project_root / "profiles")
 
         loop = asyncio.get_event_loop()
 
