@@ -1,0 +1,62 @@
+{
+  "name": "disclosure-multiagent",
+  "description": "松竹梅エンジンによる有価証券報告書開示ギャップ分析エージェント。EDINET連携・XBRL解析・松竹梅3段階スコアリングを提供。",
+  "url": "http://localhost:8000",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+  "skills": [
+    {
+      "id": "analyze_disclosure",
+      "name": "開示書類分析（松竹梅スコアリング）",
+      "description": "有価証券報告書PDFまたはEDINETコードを受け取り、松（理想）・竹（標準）・梅（60点合格）の3段階でギャップ分析・改善提案を生成する",
+      "tags": ["disclosure", "yuho", "edinet", "ssbj", "matsu-take-ume", "scoring"],
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "examples": [
+        {
+          "input": "EDINETコード E12345 の有価証券報告書を松竹梅分析してください",
+          "output": "【松竹梅分析結果】竹レベル達成。人的資本開示に改善余地あり..."
+        }
+      ]
+    },
+    {
+      "id": "edinet_search",
+      "name": "EDINET書類検索",
+      "description": "証券コードまたは企業名でEDINETの有価証券報告書・決算短信を検索して返す",
+      "tags": ["edinet", "search", "disclosure", "annual-report"],
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "examples": [
+        {
+          "input": "証券コード 7203 の最新有価証券報告書を検索",
+          "output": "【EDINET検索結果】トヨタ自動車 有価証券報告書 2025年3月期..."
+        }
+      ]
+    },
+    {
+      "id": "matsu_take_ume_scoring",
+      "name": "松竹梅スコアリング",
+      "description": "開示書類テキストに対して松竹梅チェックリスト評価を実行し、各項目のスコアと改善ポイントを返す",
+      "tags": ["scoring", "checklist", "matsu-take-ume", "compliance"],
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "examples": [
+        {
+          "input": "人的資本の記述: 「当社では多様な人材の育成に努めています」",
+          "output": "【スコアリング結果】梅レベル（60点）。具体的数値・KPI・目標年度の記載が必要..."
+        }
+      ]
+    }
+  ],
+  "provider": {
+    "organization": "disclosure-multiagent OSS",
+    "url": "https://github.com/Majiro-ns/disclosure-multiagent"
+  }
+}

@@ -16,10 +16,13 @@ if str(_SCRIPTS_DIR) not in sys.path:
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
+import json
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from api.routers import edinet, analyze, status, checklist, checklist_eval, checklist_stats, scoring, step_execute
+from api.routers import edinet, analyze, status, checklist, checklist_eval, checklist_stats, scoring, step_execute, a2a
 
 app = FastAPI(
     title="disclosure-multiagent API",
@@ -49,6 +52,16 @@ app.include_router(checklist_eval.router)
 app.include_router(checklist_stats.router)
 app.include_router(scoring.router)
 app.include_router(step_execute.router)
+app.include_router(a2a.router)
+
+
+@app.get("/.well-known/agent-card.json", include_in_schema=False)
+async def agent_card_well_known():
+    """A2A Agent Card を標準パス /.well-known/agent-card.json で提供する。"""
+    _card_path = _PROJECT_ROOT / ".well-known" / "agent-card.json"
+    if not _card_path.exists():
+        return JSONResponse(status_code=404, content={"detail": "Agent Card not found"})
+    return JSONResponse(content=json.loads(_card_path.read_text(encoding="utf-8")))
 
 
 @app.get("/api/health")
