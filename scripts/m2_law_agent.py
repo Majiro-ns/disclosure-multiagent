@@ -276,6 +276,7 @@ def load_law_context(
     yaml_path: Optional[Path] = None,
     categories: Optional[list[str]] = None,
     industry: Optional[str] = None,
+    profile_dir: Optional[str] = None,
 ) -> LawContext:
     """
     対象年度・決算月から法令コンテキスト（LawContext）を生成するメインAPI（設計書 Section 4-2）。
@@ -294,6 +295,9 @@ def load_law_context(
         yaml_path: 法令YAMLのパス（Noneの場合はLAW_YAML_FILE定数を使用）
         categories: フィルタカテゴリ（Noneの場合は全カテゴリ）
         industry: 業種（例: "銀行業"）。Noneの場合は業種固有法令を除外する。
+        profile_dir: 拡張プロファイルディレクトリのパス文字列（Noneの場合はlaws/のみ）。
+            指定時は profiles/*.yaml も applicable_entries に追加ロードする。
+            後方互換: Noneのときは従来通り laws/ のみ使用。
 
     Returns:
         LawContext（applicable_entries, law_yaml_as_of, warnings等を含む）
@@ -312,6 +316,16 @@ def load_law_context(
         all_entries = load_law_entries(target_yaml)
     else:
         all_entries, target_yaml = _load_all_from_dir(LAW_YAML_DIR)
+
+    # STEP 1b: 拡張プロファイル追加ロード（profile_dir 指定時のみ）
+    if profile_dir is not None:
+        profile_path = Path(profile_dir)
+        if profile_path.is_dir():
+            profile_entries, _ = _load_all_from_dir(profile_path)
+            all_entries = all_entries + profile_entries
+            logger.info("プロファイルエントリ追加: %d件 (%s)", len(profile_entries), profile_path)
+        else:
+            logger.warning("profile_dir が存在しないためスキップ: %s", profile_path)
 
     # STEP 2: 法令参照期間の算出（m3のcalc_law_ref_periodを使用）
     ref_start, ref_end = calc_law_ref_period(fiscal_year, fiscal_month_end)

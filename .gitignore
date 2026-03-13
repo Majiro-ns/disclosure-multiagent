@@ -80,3 +80,6 @@ DEMO.md
 docs/article_*.md
 00_Requirements_Definition.md
 samples/70_Samples_MatsuTakeUme.md
+
+# ─── 拡張プロファイル（非公開・Big4対応等） ─────────────
+profiles/
