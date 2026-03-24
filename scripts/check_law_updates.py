@@ -1,6 +1,6 @@
 """法令更新チェックスクリプト (DIS-C09)
 
-e-Gov Law API v2 で開示府令の更新を検知し、
+e-Gov Law API v2 + FSA RSS で開示府令の更新を検知し、
 変更があれば GitHub Issue を自動作成する。
 
 使い方:
@@ -27,6 +27,7 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import date, timedelta
+from email.utils import parsedate
 from typing import Optional
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -131,6 +132,109 @@ def filter_watched_laws(updates: list[dict]) -> list[dict]:
     return matched
 
 
+# ─── FSA RSS ─────────────────────────────────────────────────────────────────
+
+FSA_RSS_URL = "https://www.fsa.go.jp/fsaNewsListAll_rss2.xml"
+FSA_TIMEOUT = 30  # seconds
+
+# 開示・法令改正関連キーワード（タイトルに含まれる場合に関連記事と判断）
+FSA_DISCLOSURE_KEYWORDS: list[str] = [
+    "開示", "府令", "有価証券", "財務諸表", "連結", "IFRS",
+    "企業会計", "サステナビリティ", "内閣府令", "法律",
+]
+
+
+def fetch_fsa_rss() -> str:
+    """FSA新着情報RSSフィード（RSS 2.0）を取得する。
+
+    Returns:
+        RSSフィードXMLテキスト。
+
+    Raises:
+        urllib.error.URLError: ネットワークエラー。
+    """
+    logger.info("FSA RSS リクエスト: %s", FSA_RSS_URL)
+    req = urllib.request.Request(
+        FSA_RSS_URL,
+        headers={"User-Agent": "disclosure-multiagent/check_law_updates"},
+    )
+    with urllib.request.urlopen(req, timeout=FSA_TIMEOUT) as resp:
+        return resp.read().decode("utf-8")
+
+
+def parse_fsa_rss(rss_text: str) -> list[dict]:
+    """FSA RSS 2.0 XMLをパースしてアイテムリストを返す。
+
+    Args:
+        rss_text: FSA RSSフィードのXMLテキスト。
+
+    Returns:
+        [{"title": str, "link": str, "pub_date": str}, ...] のリスト。
+        パースエラーの場合は空リスト。
+    """
+    try:
+        root = ET.fromstring(rss_text)
+    except ET.ParseError as e:
+        logger.error("FSA RSS XMLパースエラー: %s", e)
+        return []
+
+    items: list[dict] = []
+    for item_el in root.findall(".//item"):
+        title = _text(item_el, "title")
+        link = _text(item_el, "link")
+        pub_date = _text(item_el, "pubDate")
+        if title or link:
+            items.append({"title": title, "link": link, "pub_date": pub_date})
+
+    logger.info("FSA RSS 取得件数: %d 件", len(items))
+    return items
+
+
+def _parse_rss_date(pub_date_str: str) -> Optional[date]:
+    """RSS pubDate（RFC 2822形式）を date 型に変換する。
+
+    例: "Tue, 24 Mar 2026 17:00:00 JST" → date(2026, 3, 24)
+
+    Args:
+        pub_date_str: pubDate文字列。
+
+    Returns:
+        date オブジェクト。パース失敗時は None。
+    """
+    t = parsedate(pub_date_str)
+    if t is None:
+        return None
+    try:
+        return date(t[0], t[1], t[2])
+    except (ValueError, IndexError):
+        return None
+
+
+def filter_disclosure_rss(items: list[dict], since_date: date) -> list[dict]:
+    """FSA RSSアイテムから開示関連記事を抽出する。
+
+    条件:
+      - pub_date が since_date 以降
+      - タイトルに FSA_DISCLOSURE_KEYWORDS のいずれかを含む
+
+    Args:
+        items: parse_fsa_rss() の返り値。
+        since_date: 対象開始日（この日以降の記事を対象）。
+
+    Returns:
+        条件に一致したアイテムのリスト。
+    """
+    matched: list[dict] = []
+    for item in items:
+        item_date = _parse_rss_date(item.get("pub_date", ""))
+        if item_date is None or item_date < since_date:
+            continue
+        title = item.get("title", "")
+        if any(kw in title for kw in FSA_DISCLOSURE_KEYWORDS):
+            matched.append(item)
+    return matched
+
+
 # ─── GitHub Issue 作成 ────────────────────────────────────────────────────────
 
 GITHUB_API_BASE = "https://api.github.com"
@@ -181,12 +285,17 @@ def create_github_issue(
         return None
 
 
-def build_issue_body(updates: list[dict], since_date: date) -> str:
-    """更新法令リストから GitHub Issue 本文を生成する。
+def build_issue_body(
+    updates: list[dict],
+    since_date: date,
+    fsa_items: Optional[list[dict]] = None,
+) -> str:
+    """更新法令リスト + FSA RSS記事から GitHub Issue 本文を生成する。
 
     Args:
         updates: filter_watched_laws() の返り値。
         since_date: 更新チェック開始日。
+        fsa_items: filter_disclosure_rss() の返り値（省略可）。
 
     Returns:
         Markdown 形式の Issue 本文。
@@ -195,19 +304,35 @@ def build_issue_body(updates: list[dict], since_date: date) -> str:
         f"## 法令更新検知レポート",
         f"",
         f"**チェック期間**: {since_date} 以降",
-        f"**検知件数**: {len(updates)} 件",
+        f"**e-Gov 検知件数**: {len(updates)} 件",
+        f"**FSA RSS 検知件数**: {len(fsa_items) if fsa_items else 0} 件",
         f"",
-        f"### 更新された監視対象法令",
+        f"### 更新された監視対象法令（e-Gov）",
         f"",
     ]
-    for u in updates:
-        lines.append(f"- **{u['watched_name']}**")
-        lines.append(f"  - 法令ID: `{u['law_id']}`")
-        if u.get("law_title"):
-            lines.append(f"  - 法令名: {u['law_title']}")
-        if u.get("promulgation_date"):
-            lines.append(f"  - 公布日: {u['promulgation_date']}")
-        lines.append(f"  - e-Gov: https://laws.e-gov.go.jp/law/{u['law_id']}")
+    if updates:
+        for u in updates:
+            lines.append(f"- **{u['watched_name']}**")
+            lines.append(f"  - 法令ID: `{u['law_id']}`")
+            if u.get("law_title"):
+                lines.append(f"  - 法令名: {u['law_title']}")
+            if u.get("promulgation_date"):
+                lines.append(f"  - 公布日: {u['promulgation_date']}")
+            lines.append(f"  - e-Gov: https://laws.e-gov.go.jp/law/{u['law_id']}")
+            lines.append(f"")
+    else:
+        lines.append(f"（監視対象法令の更新なし）")
+        lines.append(f"")
+
+    if fsa_items:
+        lines += [
+            f"### FSA新着（開示関連）",
+            f"",
+        ]
+        for item in fsa_items:
+            lines.append(f"- [{item['title']}]({item['link']})")
+            if item.get("pub_date"):
+                lines.append(f"  - 公開日: {item['pub_date']}")
         lines.append(f"")
 
     lines += [
@@ -234,7 +359,7 @@ def build_issue_body(updates: list[dict], since_date: date) -> str:
 
 
 def run(since_date: date, dry_run: bool = False) -> int:
-    """法令更新チェックを実行する。
+    """法令更新チェックを実行する（e-Gov API + FSA RSS 両方）。
 
     Args:
         since_date: 更新チェック開始日。
@@ -256,24 +381,40 @@ def run(since_date: date, dry_run: bool = False) -> int:
     # ③ 監視対象のみフィルタ
     matched = filter_watched_laws(all_updates)
 
-    if not matched:
-        logger.info("監視対象法令の更新なし（%s 以降）", since_date)
+    # ④ FSA RSS チェック（ベストエフォート: 失敗しても継続）
+    fsa_matched: list[dict] = []
+    try:
+        rss_text = fetch_fsa_rss()
+        rss_items = parse_fsa_rss(rss_text)
+        fsa_matched = filter_disclosure_rss(rss_items, since_date)
+    except Exception as e:
+        logger.warning("FSA RSS 取得スキップ: %s", e)
+
+    # 両方とも更新なしなら終了
+    if not matched and not fsa_matched:
+        logger.info("監視対象の更新なし（%s 以降）", since_date)
         return 0
 
-    # ④ 結果表示
-    print(f"\n✅ {len(matched)} 件の監視対象法令更新を検知:")
-    for u in matched:
-        print(f"  - {u['watched_name']} ({u['law_id']})")
-        if u.get("promulgation_date"):
-            print(f"    公布日: {u['promulgation_date']}")
+    # ⑤ 結果表示
+    if matched:
+        print(f"\n✅ {len(matched)} 件の監視対象法令更新を検知（e-Gov）:")
+        for u in matched:
+            print(f"  - {u['watched_name']} ({u['law_id']})")
+            if u.get("promulgation_date"):
+                print(f"    公布日: {u['promulgation_date']}")
+
+    if fsa_matched:
+        print(f"\n📰 {len(fsa_matched)} 件の開示関連FSA新着を検知:")
+        for item in fsa_matched:
+            print(f"  - {item['title']}")
 
     if dry_run:
         print("\n[dry-run] Issue作成をスキップ")
         print("\n--- Issue 本文プレビュー ---")
-        print(build_issue_body(matched, since_date))
+        print(build_issue_body(matched, since_date, fsa_items=fsa_matched))
         return 0
 
-    # ⑤ GitHub Issue 作成
+    # ⑥ GitHub Issue 作成
     token = os.environ.get("GITHUB_TOKEN", "")
     repo = os.environ.get("GITHUB_REPO", "")
     if not token or not repo:
@@ -283,8 +424,9 @@ def run(since_date: date, dry_run: bool = False) -> int:
         )
         return 1
 
-    title = f"[法令更新] {len(matched)} 件の監視対象法令更新を検知 ({since_date})"
-    body = build_issue_body(matched, since_date)
+    total = len(matched) + len(fsa_matched)
+    title = f"[法令更新] {total} 件の更新を検知（e-Gov:{len(matched)} / FSA:{len(fsa_matched)}）({since_date})"
+    body = build_issue_body(matched, since_date, fsa_items=fsa_matched)
     issue_url = create_github_issue(token, repo, title, body)
     if issue_url:
         print(f"\nGitHub Issue 作成: {issue_url}")
