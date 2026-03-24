@@ -1,9 +1,11 @@
 # disclosure-multiagent
 
+> **日本語をお使いの方は [こちら（日本語セクション）](#日本語セクション) へどうぞ。**
+
 [![CI](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml/badge.svg)](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-408%2B%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-637%2B%20passing-brightgreen)](tests/)
 [![Mock Mode](https://img.shields.io/badge/mock%20mode-no%20API%20key%20needed-orange)](docs/)
 
 **Drop your annual securities report PDF. Get a 3-tier improvement plan — no consulting required.**
@@ -174,6 +176,8 @@ docker-compose down   # Stop all services
 ---
 
 ## 🚀 UIクイックスタート（Docker不要・npm版）
+
+> ポートについて: Dockerビルド版は http://localhost:3010 / npm run dev版は http://localhost:3000 を使用します。
 
 ### 方法A（UI閲覧のみ・APIキー不要）
 
