@@ -81,6 +81,15 @@ class ChangeType(str, Enum):
     ADD_MANDATORY = "追加必須"
     MODIFY_RECOMMENDED = "修正推奨"
     REFERENCE = "参考"
+    # IFRS・拡張法令ファイルで使われる追加値（cmd_588k A8 修正）
+    CONTINUE_MANDATORY = "継続必須"
+    EXISTING_MANDATORY = "既存必須"
+    CONTINUE_REQUIREMENT = "継続要件"
+    ADD_RECOMMENDED = "追加推奨"
+    NEW_MANDATORY = "新規必須"
+    REVISION_RESPONSE = "改訂対応"
+    NEW_ADDITION = "新規追加"
+    NEW_REQUIREMENT = "新規要件（2025年改正）"
 
 
 class Confidence(str, Enum):
