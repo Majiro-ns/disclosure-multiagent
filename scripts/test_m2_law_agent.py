@@ -18,6 +18,7 @@ disclosure-multiagent Phase 1-M2: 法令収集エージェント テスト
 
 import sys
 import unittest
+import yaml
 from pathlib import Path
 from datetime import date
 from unittest.mock import patch
@@ -647,6 +648,148 @@ class TestProfileDir(unittest.TestCase):
         print(f"         IDs: {ids}")
 
 
+class TestIndustryProfiles(unittest.TestCase):
+    """
+    DIS-C05: 業界別プロファイル（banking / manufacturing / it_services）のテスト
+
+    テスト:
+      IP-01: banking.yaml が 15 エントリ以上読み込める（BANK- プレフィックス確認）
+      IP-02: manufacturing.yaml が 20 エントリ以上読み込める（MFG- プレフィックス確認）
+      IP-03: it_services.yaml が 15 エントリ以上読み込める（IT- プレフィックス確認）
+      IP-04: banking.yaml の全エントリに tier_requirement フィールドが存在する
+      IP-05: manufacturing.yaml のカテゴリが 3 種類以上存在する（多様性確認）
+      IP-06: it_services.yaml の全エントリ profile_name が "it_services"
+    """
+
+    _PROFILE_DIR = Path(__file__).parent.parent / "profiles"
+    _BANKING_YAML = _PROFILE_DIR / "banking.yaml"
+    _MANUFACTURING_YAML = _PROFILE_DIR / "manufacturing.yaml"
+    _IT_SERVICES_YAML = _PROFILE_DIR / "it_services.yaml"
+
+    @staticmethod
+    def _load_yaml_entries(path: Path) -> list:
+        """YAMLファイルからエントリ辞書リストを直接読み込む"""
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return data.get("entries", [])
+
+    def test_ip01_banking_yaml_15_entries(self):
+        """
+        IP-01: banking.yaml が 15 エントリ以上読み込める。
+        手計算: BANK-CAP-001 〜 BANK-SUST-001 の 15 エントリを定義済み。
+        """
+        if not self._BANKING_YAML.exists():
+            self.skipTest(f"banking.yaml が存在しません: {self._BANKING_YAML}")
+
+        entries = load_law_entries(self._BANKING_YAML)
+
+        self.assertGreaterEqual(len(entries), 15,
+                                f"banking.yaml のエントリ数が不足: {len(entries)}件")
+        ids = [e.id for e in entries]
+        bank_ids = [i for i in ids if i.startswith("BANK-")]
+        self.assertGreaterEqual(len(bank_ids), 15,
+                                f"BANK- プレフィックスのエントリが不足: {len(bank_ids)}件")
+        print(f"  [PASS] IP-01 banking.yaml: {len(entries)}件（BANK-プレフィックス: {len(bank_ids)}件）✓")
+
+    def test_ip02_manufacturing_yaml_20_entries(self):
+        """
+        IP-02: manufacturing.yaml が 20 エントリ以上読み込める。
+        手計算: MFG-COST-001 〜 MFG-IMPAIR-001 の 20 エントリを定義済み。
+        """
+        if not self._MANUFACTURING_YAML.exists():
+            self.skipTest(f"manufacturing.yaml が存在しません: {self._MANUFACTURING_YAML}")
+
+        entries = load_law_entries(self._MANUFACTURING_YAML)
+
+        self.assertGreaterEqual(len(entries), 20,
+                                f"manufacturing.yaml のエントリ数が不足: {len(entries)}件")
+        ids = [e.id for e in entries]
+        mfg_ids = [i for i in ids if i.startswith("MFG-")]
+        self.assertGreaterEqual(len(mfg_ids), 20,
+                                f"MFG- プレフィックスのエントリが不足: {len(mfg_ids)}件")
+        print(f"  [PASS] IP-02 manufacturing.yaml: {len(entries)}件（MFG-プレフィックス: {len(mfg_ids)}件）✓")
+
+    def test_ip03_it_services_yaml_15_entries(self):
+        """
+        IP-03: it_services.yaml が 15 エントリ以上読み込める。
+        手計算: IT-HC-001 〜 IT-INFRA-002 の 15 エントリを定義済み。
+        """
+        if not self._IT_SERVICES_YAML.exists():
+            self.skipTest(f"it_services.yaml が存在しません: {self._IT_SERVICES_YAML}")
+
+        entries = load_law_entries(self._IT_SERVICES_YAML)
+
+        self.assertGreaterEqual(len(entries), 15,
+                                f"it_services.yaml のエントリ数が不足: {len(entries)}件")
+        ids = [e.id for e in entries]
+        it_ids = [i for i in ids if i.startswith("IT-")]
+        self.assertGreaterEqual(len(it_ids), 15,
+                                f"IT- プレフィックスのエントリが不足: {len(it_ids)}件")
+        print(f"  [PASS] IP-03 it_services.yaml: {len(entries)}件（IT-プレフィックス: {len(it_ids)}件）✓")
+
+    def test_ip04_banking_tier_requirement_all_entries(self):
+        """
+        IP-04: banking.yaml の全エントリに tier_requirement フィールド（ume/take/matsu）が存在する。
+        手計算: 15 エントリ全てに tier_requirement を定義済み。
+        YAML直接読込でチェック（LawEntry非保持フィールドのため）。
+        """
+        if not self._BANKING_YAML.exists():
+            self.skipTest(f"banking.yaml が存在しません: {self._BANKING_YAML}")
+
+        raw_entries = self._load_yaml_entries(self._BANKING_YAML)
+        missing_tier = []
+        for entry in raw_entries:
+            entry_id = entry.get("id", "UNKNOWN")
+            tr = entry.get("tier_requirement")
+            if not tr or not isinstance(tr, dict):
+                missing_tier.append(entry_id)
+            elif not all(k in tr for k in ("ume", "take", "matsu")):
+                missing_tier.append(entry_id)
+
+        self.assertEqual(len(missing_tier), 0,
+                         f"tier_requirement (ume/take/matsu) が不完全なエントリ: {missing_tier}")
+        print(f"  [PASS] IP-04 banking.yaml tier_requirement: 全{len(raw_entries)}件✓")
+
+    def test_ip05_manufacturing_id_group_diversity(self):
+        """
+        IP-05: manufacturing.yaml の ID グループ（MFG-XXX の XXX 部分）が 5 種類以上存在する。
+        手計算: COST/INV/CAPEX/RD/ENV/QC/FX/HR/SUPPLY/CARBON/WATER/DIGITAL/GLOBAL で 13 種類定義済み。
+        YAML直接読込でIDから抽出する。
+        """
+        if not self._MANUFACTURING_YAML.exists():
+            self.skipTest(f"manufacturing.yaml が存在しません: {self._MANUFACTURING_YAML}")
+
+        raw_entries = self._load_yaml_entries(self._MANUFACTURING_YAML)
+        groups = set()
+        for entry in raw_entries:
+            entry_id = entry.get("id", "")
+            parts = entry_id.split("-")
+            if len(parts) >= 2:
+                groups.add(parts[1])  # "COST" from "MFG-COST-001"
+
+        self.assertGreaterEqual(len(groups), 5,
+                                f"manufacturing.yaml の ID グループ種類が少なすぎる: {groups}")
+        print(f"  [PASS] IP-05 manufacturing.yaml ID グループ: {len(groups)}種類 - {groups} ✓")
+
+    def test_ip06_it_services_profile_name(self):
+        """
+        IP-06: it_services.yaml の全エントリ profile_name が 'it_services'。
+        手計算: 全 15 エントリに profile_name: it_services を設定済み。
+        YAML直接読込でチェック（LawEntry非保持フィールドのため）。
+        """
+        if not self._IT_SERVICES_YAML.exists():
+            self.skipTest(f"it_services.yaml が存在しません: {self._IT_SERVICES_YAML}")
+
+        raw_entries = self._load_yaml_entries(self._IT_SERVICES_YAML)
+        wrong_profile = [e.get("id", "UNKNOWN")
+                         for e in raw_entries
+                         if e.get("profile_name") != "it_services"]
+
+        self.assertEqual(len(wrong_profile), 0,
+                         f"profile_name が 'it_services' でないエントリ: {wrong_profile}")
+        print(f"  [PASS] IP-06 it_services.yaml profile_name: 全{len(raw_entries)}件 'it_services' ✓")
+
+
 if __name__ == "__main__":
     import os
     loader = unittest.TestLoader()
@@ -659,6 +802,7 @@ if __name__ == "__main__":
         TestM3Integration,
         TestLawsDirectoryLoading,
         TestProfileDir,
+        TestIndustryProfiles,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 
