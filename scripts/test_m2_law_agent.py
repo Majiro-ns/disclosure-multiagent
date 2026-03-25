@@ -790,6 +790,58 @@ class TestIndustryProfiles(unittest.TestCase):
         print(f"  [PASS] IP-06 it_services.yaml profile_name: 全{len(raw_entries)}件 'it_services' ✓")
 
 
+class TestBigFourProfilesPhaseC(unittest.TestCase):
+    """
+    DIS-C06: Big4プロファイル PhaseC-06 追加エントリ検証テスト
+
+    テスト:
+      BPC-01: deloitte_profile.yaml が 17 エントリ以上（DTT-RISK-003/004/005 追加後）
+      BPC-02: kpmg_profile.yaml が 17 エントリ以上（KPMG-CG-005/MD-005/ESG-004 追加後）
+      BPC-03: pwc_profile.yaml が 17 エントリ以上（PwC-GG-002/003/PF-005 追加後）
+    """
+
+    _PROFILE_DIR = Path(__file__).parent.parent / "profiles"
+    _DELOITTE_YAML = _PROFILE_DIR / "deloitte" / "deloitte_profile.yaml"
+    _KPMG_YAML = _PROFILE_DIR / "kpmg" / "kpmg_profile.yaml"
+    _PWC_YAML = _PROFILE_DIR / "pwc" / "pwc_profile.yaml"
+
+    @staticmethod
+    def _load_yaml_entries(path: Path) -> list:
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return data.get("entries", [])
+
+    def test_bpc01_deloitte_17_entries(self):
+        """BPC-01: deloitte_profile.yaml が 17 エントリ以上（DTT-プレフィックス確認）"""
+        if not self._DELOITTE_YAML.exists():
+            self.skipTest(f"deloitte_profile.yaml が存在しません: {self._DELOITTE_YAML}")
+        entries = load_law_entries(self._DELOITTE_YAML)
+        dtt_entries = [e for e in entries if e.id.startswith("DTT-")]
+        self.assertGreaterEqual(len(dtt_entries), 17,
+                                f"deloitte_profile.yaml のDTT-エントリ数が不足: {len(dtt_entries)}件")
+        print(f"  [PASS] BPC-01 deloitte_profile.yaml: {len(dtt_entries)}件（DTT-）≥17 ✓")
+
+    def test_bpc02_kpmg_17_entries(self):
+        """BPC-02: kpmg_profile.yaml が 17 エントリ以上（KPMG-プレフィックス確認）"""
+        if not self._KPMG_YAML.exists():
+            self.skipTest(f"kpmg_profile.yaml が存在しません: {self._KPMG_YAML}")
+        entries = load_law_entries(self._KPMG_YAML)
+        kpmg_entries = [e for e in entries if e.id.startswith("KPMG-")]
+        self.assertGreaterEqual(len(kpmg_entries), 17,
+                                f"kpmg_profile.yaml のKPMG-エントリ数が不足: {len(kpmg_entries)}件")
+        print(f"  [PASS] BPC-02 kpmg_profile.yaml: {len(kpmg_entries)}件（KPMG-）≥17 ✓")
+
+    def test_bpc03_pwc_17_entries(self):
+        """BPC-03: pwc_profile.yaml が 17 エントリ以上（PwC-プレフィックス確認）"""
+        if not self._PWC_YAML.exists():
+            self.skipTest(f"pwc_profile.yaml が存在しません: {self._PWC_YAML}")
+        entries = load_law_entries(self._PWC_YAML)
+        pwc_entries = [e for e in entries if e.id.startswith("PwC-")]
+        self.assertGreaterEqual(len(pwc_entries), 17,
+                                f"pwc_profile.yaml のPwC-エントリ数が不足: {len(pwc_entries)}件")
+        print(f"  [PASS] BPC-03 pwc_profile.yaml: {len(pwc_entries)}件（PwC-）≥17 ✓")
+
+
 if __name__ == "__main__":
     import os
     loader = unittest.TestLoader()
@@ -803,6 +855,7 @@ if __name__ == "__main__":
         TestLawsDirectoryLoading,
         TestProfileDir,
         TestIndustryProfiles,
+        TestBigFourProfilesPhaseC,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 
