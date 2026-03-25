@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - PhaseC Extensions
+
+### Added
+
+#### PhaseC: Big4 Enhanced Profiles
+
+- **Big4 プロファイル拡張** (`profiles/deloitte/`, `profiles/kpmg/`, `profiles/pwc/`, `profiles/ey/`): Big4監査法人のベスト・イン・クラス開示事例をYAMLプロファイルとして収録。各社17件以上。
+  - `PhaseC-02`: EY / PwC プロファイル強化（各+3エントリ）— `TestBigFourProfilesPhaseCEY`, `TestBigFourProfilesPhaseCPwC`
+  - `PhaseC-05`: 業界別プロファイル3種（金融・製造・IT）— `TestIndustryProfiles`
+  - `PhaseC-06`: Deloitte / KPMG / PwC 各+3エントリ（各社17件到達）— `TestBigFourProfilesPhaseC` (BPC-01〜03)
+- **テスト拡充**: 637 → 705 件 (+68)
+
+#### Infrastructure
+
+- FSA RSS対応 法令更新パイプライン拡張 (`m6_law_url_collector.py`)
+- A2A通信テスト (`tests/test_a2a.py`)
+
+---
+
 ## [1.0.0] - 2026-03-07
 
 ### Added
