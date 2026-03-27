@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import pathlib
+import tempfile
 from datetime import date
 from unittest.mock import MagicMock, patch
 
@@ -12,8 +14,10 @@ from check_law_updates import (
     build_issue_body,
     create_github_issue,
     filter_watched_laws,
+    notify_discord,
     parse_law_updates,
     run,
+    write_update_candidates_yaml,
 )
 
 # ─── サンプルXML（e-Gov API v2 モック応答） ──────────────────────────────────
@@ -437,3 +441,174 @@ class TestBuildIssueBodyWithFsa:
     def test_empty_egov_with_fsa_shows_no_update_text(self):
         body = build_issue_body([], date(2026, 1, 1), fsa_items=self._sample_fsa_items())
         assert "更新なし" in body
+
+
+# ─── TestWriteUpdateCandidatesYaml ────────────────────────────────────────────
+
+class TestWriteUpdateCandidatesYaml:
+    """write_update_candidates_yaml() のユニットテスト。"""
+
+    def _sample_updates(self):
+        return [
+            {
+                "law_id": "348M50000040005",
+                "law_title": "企業内容等の開示に関する内閣府令",
+                "promulgation_date": "2026-01-15",
+                "watched_name": "企業内容等の開示に関する内閣府令（開示府令）",
+            }
+        ]
+
+    def _sample_fsa_items(self):
+        return [
+            {
+                "title": "開示府令改正について",
+                "link": "https://www.fsa.go.jp/news/test.html",
+                "pub_date": "Mon, 15 Jan 2026 17:00:00 JST",
+            }
+        ]
+
+    def test_returns_path_when_updates_exist(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                self._sample_updates(), date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+        assert out is not None
+
+    def test_filename_contains_since_date(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                self._sample_updates(), date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+        assert "2026-01-01" in out.name
+
+    def test_returns_none_when_no_updates(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                [], date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+        assert out is None
+
+    def test_file_contains_auto_write_prohibited(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                self._sample_updates(), date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+            content = out.read_text(encoding="utf-8")
+        assert "auto_write_prohibited" in content
+
+    def test_file_contains_law_id(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                self._sample_updates(), date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+            content = out.read_text(encoding="utf-8")
+        assert "348M50000040005" in content
+
+    def test_fsa_items_included(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                [], date(2026, 1, 1), fsa_items=self._sample_fsa_items(),
+                output_dir=pathlib.Path(tmpdir)
+            )
+            content = out.read_text(encoding="utf-8")
+        assert "fsa_rss" in content
+
+    def test_warning_message_included(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_update_candidates_yaml(
+                self._sample_updates(), date(2026, 1, 1), output_dir=pathlib.Path(tmpdir)
+            )
+            content = out.read_text(encoding="utf-8")
+        assert "人間レビュー" in content
+
+
+# ─── TestNotifyDiscord ────────────────────────────────────────────────────────
+
+class TestNotifyDiscord:
+    """notify_discord() のユニットテスト。"""
+
+    def _sample_updates(self):
+        return [
+            {
+                "law_id": "348M50000040005",
+                "watched_name": "開示府令",
+                "promulgation_date": "2026-01-15",
+            }
+        ]
+
+    def test_returns_true_on_success(self):
+        mock_resp = MagicMock()
+        mock_resp.status = 204
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = MagicMock(return_value=False)
+        with patch("urllib.request.urlopen", return_value=mock_resp):
+            result = notify_discord(
+                "https://discord.com/api/webhooks/test",
+                self._sample_updates(),
+                date(2026, 1, 1),
+            )
+        assert result is True
+
+    def test_returns_false_on_network_error(self):
+        import urllib.error
+        with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("refused")):
+            result = notify_discord(
+                "https://discord.com/api/webhooks/test",
+                self._sample_updates(),
+                date(2026, 1, 1),
+            )
+        assert result is False
+
+    def test_does_not_raise_on_failure(self):
+        """通知失敗時は例外を投げず False を返す（non-fatal）。"""
+        with patch("urllib.request.urlopen", side_effect=Exception("unexpected")):
+            result = notify_discord(
+                "https://discord.com/api/webhooks/test",
+                [],
+                date(2026, 1, 1),
+            )
+        assert result is False
+
+    def test_payload_contains_law_name(self):
+        """Discordに送信するペイロードに法令名が含まれること。"""
+        captured = []
+
+        def mock_open(req, timeout):
+            # JSON デコードして中身を確認
+            payload = json.loads(req.data.decode("utf-8"))
+            captured.append(payload)
+            mock_resp = MagicMock()
+            mock_resp.status = 204
+            mock_resp.__enter__ = lambda s: s
+            mock_resp.__exit__ = MagicMock(return_value=False)
+            return mock_resp
+
+        with patch("urllib.request.urlopen", side_effect=mock_open):
+            notify_discord(
+                "https://discord.com/api/webhooks/test",
+                self._sample_updates(),
+                date(2026, 1, 1),
+            )
+        assert captured
+        assert "開示府令" in captured[0]["content"]
+
+
+# ─── TestRunWithYamlOnly ──────────────────────────────────────────────────────
+
+class TestRunWithYamlOnly:
+    """run() の yaml_only パラメータのテスト。"""
+
+    def test_yaml_only_returns_0_on_match(self):
+        with patch("check_law_updates.fetch_egov_updates", return_value=_XML_WITH_TARGET):
+            with patch("check_law_updates.fetch_fsa_rss", side_effect=Exception("skip")):
+                with patch("check_law_updates.write_update_candidates_yaml", return_value=None):
+                    result = run(date(2026, 1, 1), yaml_only=True)
+        assert result == 0
+
+    def test_yaml_only_does_not_call_create_github_issue(self):
+        with patch("check_law_updates.fetch_egov_updates", return_value=_XML_WITH_TARGET):
+            with patch("check_law_updates.fetch_fsa_rss", side_effect=Exception("skip")):
+                with patch("check_law_updates.write_update_candidates_yaml", return_value=None):
+                    with patch("check_law_updates.create_github_issue") as mock_issue:
+                        run(date(2026, 1, 1), yaml_only=True)
+        mock_issue.assert_not_called()

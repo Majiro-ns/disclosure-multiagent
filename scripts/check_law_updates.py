@@ -2,20 +2,26 @@
 
 e-Gov Law API v2 + FSA RSS で開示府令の更新を検知し、
 変更があれば GitHub Issue を自動作成する。
+また、更新候補タスクを queue/backlog/ に YAML 形式で出力し、
+Discord Webhook に通知する（任意）。
 
 使い方:
     # 直近30日の更新チェック（dry-run）
     python3 check_law_updates.py --dry-run
 
-    # 指定日以降の更新チェック + Issue作成
+    # 指定日以降の更新チェック + Issue作成 + YAML出力
     python3 check_law_updates.py --since 2026-01-01
+
+    # YAML候補ファイルのみ出力（Issue作成なし）
+    python3 check_law_updates.py --since 2025-04-01 --yaml-only
 
     # 手動実行（dry-run）
     python3 check_law_updates.py --since 2025-04-01 --dry-run
 
 環境変数:
-    GITHUB_TOKEN : GitHub API トークン（Issue作成に必要）
-    GITHUB_REPO  : "owner/repo" 形式（Issue作成先）
+    GITHUB_TOKEN       : GitHub API トークン（Issue作成に必要）
+    GITHUB_REPO        : "owner/repo" 形式（Issue作成先）
+    DISCORD_WEBHOOK_URL: Discord Webhook URL（通知に使用、省略可）
 """
 from __future__ import annotations
 
@@ -23,12 +29,19 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import date, timedelta
 from email.utils import parsedate
 from typing import Optional
+
+try:
+    import yaml as _yaml_module
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -358,12 +371,145 @@ def build_issue_body(
 # ─── メイン ───────────────────────────────────────────────────────────────────
 
 
-def run(since_date: date, dry_run: bool = False) -> int:
+# ─── YAML候補ファイル出力 ─────────────────────────────────────────────────────
+
+def write_update_candidates_yaml(
+    updates: list[dict],
+    since_date: date,
+    fsa_items: Optional[list[dict]] = None,
+    output_dir: Optional[pathlib.Path] = None,
+) -> Optional[pathlib.Path]:
+    """更新候補タスクを YAML ファイルとして queue/backlog/ に出力する。
+
+    ⚠️ このファイルは「更新候補の通知」であり、laws/ への自動書き込みは行わない。
+    人間がレビューした上で手動で laws/ を更新すること。
+
+    Args:
+        updates: filter_watched_laws() の返り値（e-Gov 検知分）。
+        since_date: 更新チェック開始日。
+        fsa_items: filter_disclosure_rss() の返り値（FSA RSS 検知分）。
+        output_dir: 出力ディレクトリ（省略時はスクリプト起点の ../queue/backlog/）。
+
+    Returns:
+        書き込んだファイルの Path。更新がない場合 / 書き込み失敗時は None。
+    """
+    if not updates and not fsa_items:
+        return None
+
+    # デフォルト出力先: scripts/../queue/backlog/
+    if output_dir is None:
+        output_dir = pathlib.Path(__file__).parent.parent / "queue" / "backlog"
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"law_update_candidates_{since_date.isoformat()}.yaml"
+    output_path = output_dir / filename
+
+    # YAML データ構造
+    candidates: list[dict] = []
+    for u in updates:
+        candidates.append({
+            "source": "egov",
+            "law_id": u["law_id"],
+            "law_name": u.get("watched_name", u.get("law_title", "")),
+            "promulgation_date": u.get("promulgation_date", ""),
+            "egov_url": f"https://laws.e-gov.go.jp/law/{u['law_id']}",
+            "action_required": "laws/ 配下の対応YAMLを確認し、必要に応じて手動更新せよ",
+            "auto_write_prohibited": True,
+        })
+
+    for item in (fsa_items or []):
+        candidates.append({
+            "source": "fsa_rss",
+            "title": item.get("title", ""),
+            "link": item.get("link", ""),
+            "pub_date": item.get("pub_date", ""),
+            "action_required": "FSA通知内容を確認し、laws/ または profiles/ の更新要否を判断せよ",
+            "auto_write_prohibited": True,
+        })
+
+    data = {
+        "generated_at": date.today().isoformat(),
+        "since_date": since_date.isoformat(),
+        "egov_count": len(updates),
+        "fsa_count": len(fsa_items) if fsa_items else 0,
+        "warning": "laws/ への自動書き込みは禁止。必ず人間レビュー後に手動更新すること。",
+        "candidates": candidates,
+    }
+
+    try:
+        if _YAML_AVAILABLE:
+            with open(output_path, "w", encoding="utf-8") as f:
+                _yaml_module.dump(data, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
+        else:
+            # PyYAML 非インストール時は JSON 形式で書き込む
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        logger.info("YAML候補ファイル出力: %s", output_path)
+        return output_path
+    except OSError as e:
+        logger.error("YAML出力失敗: %s", e)
+        return None
+
+
+# ─── Discord Webhook 通知 ─────────────────────────────────────────────────────
+
+DISCORD_TIMEOUT = 15  # seconds
+
+
+def notify_discord(
+    webhook_url: str,
+    updates: list[dict],
+    since_date: date,
+    fsa_items: Optional[list[dict]] = None,
+    yaml_path: Optional[pathlib.Path] = None,
+) -> bool:
+    """Discord Webhook に法令更新検知を通知する。
+
+    Args:
+        webhook_url: Discord Webhook URL。
+        updates: filter_watched_laws() の返り値。
+        since_date: 更新チェック開始日。
+        fsa_items: filter_disclosure_rss() の返り値（省略可）。
+        yaml_path: write_update_candidates_yaml() が返したファイルパス（省略可）。
+
+    Returns:
+        送信成功時 True、失敗時 False。
+    """
+    total = len(updates) + len(fsa_items or [])
+    title = f"📋 法令更新検知: {total} 件 (e-Gov:{len(updates)} / FSA:{len(fsa_items or [])})"
+
+    lines = [f"**{title}**", f"チェック期間: {since_date} 以降", ""]
+    for u in updates:
+        lines.append(f"• **{u.get('watched_name', u['law_id'])}** — {u.get('promulgation_date', '')}")
+    for item in (fsa_items or []):
+        lines.append(f"• [FSA] {item.get('title', '')}")
+    if yaml_path:
+        lines.append(f"\n📄 候補ファイル: `{yaml_path.name}`")
+    lines.append("\n> ⚠️ laws/ の自動更新は禁止。人間レビュー後に手動更新すること。")
+
+    payload = json.dumps({"content": "\n".join(lines)}).encode("utf-8")
+    req = urllib.request.Request(
+        webhook_url,
+        data=payload,
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=DISCORD_TIMEOUT) as resp:
+            logger.info("Discord通知送信: HTTP %d", resp.status)
+            return True
+    except Exception as e:
+        logger.warning("Discord通知失敗（継続）: %s", e)
+        return False
+
+
+def run(since_date: date, dry_run: bool = False, yaml_only: bool = False) -> int:
     """法令更新チェックを実行する（e-Gov API + FSA RSS 両方）。
 
     Args:
         since_date: 更新チェック開始日。
-        dry_run: True の場合 Issue を作成せずに結果を表示のみ。
+        dry_run: True の場合 Issue を作成せずに結果を表示のみ（YAML出力・Discord通知も行わない）。
+        yaml_only: True の場合 YAML候補ファイル出力 + Discord通知のみ行い、Issue作成はスキップ。
 
     Returns:
         終了コード（0: 正常, 1: エラー）。
@@ -409,18 +555,35 @@ def run(since_date: date, dry_run: bool = False) -> int:
             print(f"  - {item['title']}")
 
     if dry_run:
-        print("\n[dry-run] Issue作成をスキップ")
+        print("\n[dry-run] Issue作成・YAML出力・Discord通知をスキップ")
         print("\n--- Issue 本文プレビュー ---")
         print(build_issue_body(matched, since_date, fsa_items=fsa_matched))
         return 0
 
-    # ⑥ GitHub Issue 作成
+    # ⑥ YAML候補ファイル出力（laws/ への自動書き込みは禁止）
+    yaml_path = write_update_candidates_yaml(matched, since_date, fsa_items=fsa_matched)
+    if yaml_path:
+        print(f"\n📄 更新候補ファイル出力: {yaml_path}")
+        print("   ⚠️  laws/ の自動更新は禁止。このファイルを確認の上、人間が手動更新すること。")
+
+    # ⑦ Discord Webhook 通知（任意: DISCORD_WEBHOOK_URL 未設定時はスキップ）
+    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
+    if webhook_url:
+        notify_discord(webhook_url, matched, since_date, fsa_items=fsa_matched, yaml_path=yaml_path)
+    else:
+        logger.info("DISCORD_WEBHOOK_URL 未設定のため Discord 通知をスキップ")
+
+    if yaml_only:
+        print("\n[yaml-only] GitHub Issue 作成をスキップ")
+        return 0
+
+    # ⑧ GitHub Issue 作成
     token = os.environ.get("GITHUB_TOKEN", "")
     repo = os.environ.get("GITHUB_REPO", "")
     if not token or not repo:
         logger.error(
             "GITHUB_TOKEN と GITHUB_REPO の環境変数が必要です。"
-            "dry-run モードには --dry-run を指定してください。"
+            "dry-run モードには --dry-run を、YAML出力のみには --yaml-only を指定してください。"
         )
         return 1
 
@@ -444,7 +607,12 @@ def main() -> None:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Issue を作成せずに結果表示のみ",
+        help="Issue を作成せずに結果表示のみ（YAML出力・Discord通知も行わない）",
+    )
+    parser.add_argument(
+        "--yaml-only",
+        action="store_true",
+        help="YAML候補ファイル出力 + Discord通知のみ行い、GitHub Issue作成はスキップ",
     )
     args = parser.parse_args()
 
@@ -456,7 +624,7 @@ def main() -> None:
     else:
         since_date = date.today() - timedelta(days=30)
 
-    exit(run(since_date, dry_run=args.dry_run))
+    exit(run(since_date, dry_run=args.dry_run, yaml_only=args.yaml_only))
 
 
 if __name__ == "__main__":
