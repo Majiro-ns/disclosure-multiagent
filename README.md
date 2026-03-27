@@ -5,7 +5,7 @@
 [![CI](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml/badge.svg)](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-705%2B%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-715%2B%20passing-brightgreen)](tests/)
 [![Mock Mode](https://img.shields.io/badge/mock%20mode-no%20API%20key%20needed-orange)](docs/)
 
 **Drop your annual securities report PDF. Get a 3-tier improvement plan — no consulting required.**
@@ -278,7 +278,7 @@ Annual Report PDF
 | `m8_multiyear_agent.py` | Multi-year comparison | 15 |
 | `m9_document_exporter.py` | Word / Excel export | 12 |
 
-**Total: 705+ tests, all passing**
+**Total: 715+ tests, all passing**
 
 ---
 

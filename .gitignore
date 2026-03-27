@@ -1,6 +1,7 @@
 # ─── Python ───────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+.venv/
 *$py.class
 *.so
 .Python
@@ -83,3 +84,5 @@ samples/70_Samples_MatsuTakeUme.md
 
 # ─── 拡張プロファイル（非公開・Big4対応等） ─────────────
 profiles/
+!profiles/README.md
+!profiles/sample_profile.yaml.example

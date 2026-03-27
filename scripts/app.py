@@ -108,6 +108,7 @@ def run_full_pipeline(
     company_name: str,
     progress_bar,
     status_text,
+    profile_dir: Optional[str] = None,
 ) -> str:
     """
     フルパイプライン: PDF → M1 → M2 → M3 → M4 → M5
@@ -154,6 +155,7 @@ def run_full_pipeline(
     law_context = load_law_context(
         fiscal_year=fiscal_year,
         fiscal_month_end=fiscal_month_end,
+        profile_dir=profile_dir,
     )
     progress_bar.progress(40)
 
@@ -218,6 +220,17 @@ def render_upload() -> None:
         "有価証券報告書（公開済み）を入力すると、次期有報に必要な変更箇所を松竹梅で提案します。"
         " PDFを省略した場合はデモデータで動作します。"
     )
+
+    # サイドバー: 拡張プロファイル選択（フォーム外で状態維持）
+    _profiles_dir = Path(__file__).parent.parent / "profiles"
+    _yaml_files = sorted(_profiles_dir.glob("*.yaml")) if _profiles_dir.exists() else []
+    _profile_options = ["プロファイルなし"] + [f.stem for f in _yaml_files]
+    selected_profile = st.sidebar.selectbox(
+        "拡張プロファイル",
+        options=_profile_options,
+        help="profiles/ ディレクトリの追加チェック項目を使用する場合は選択してください",
+    )
+    profile_dir: Optional[str] = str(_profiles_dir) if selected_profile != "プロファイルなし" else None
 
     with st.form("upload_form"):
         # ① PDFアップロード（任意 — 未アップロードは Demo モード）
@@ -304,6 +317,7 @@ def render_upload() -> None:
                 company_name=company_name,
                 progress_bar=progress_bar,
                 status_text=status_text,
+                profile_dir=profile_dir,
             )
 
         st.session_state.result_md = report_md

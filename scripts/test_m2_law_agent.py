@@ -647,6 +647,257 @@ class TestProfileDir(unittest.TestCase):
         print(f"  [PASS] P-04 sample_profile.yaml: {len(entries)}件読み込み ✓")
         print(f"         IDs: {ids}")
 
+    def test_p05_empty_dir_returns_base(self):
+        """
+        P-05: 空の一時ディレクトリを profile_dir に指定しても追加エントリが増えないこと。
+        """
+        import tempfile
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ctx_no_profile = load_law_context(2025, 3)
+            ctx_empty_dir = load_law_context(2025, 3, profile_dir=tmpdir)
+
+        self.assertEqual(
+            len(ctx_no_profile.applicable_entries),
+            len(ctx_empty_dir.applicable_entries),
+            "空ディレクトリ指定で applicable_entries 数が変わってはならない",
+        )
+        print(f"  [PASS] P-05 空dir: applicable_entries={len(ctx_empty_dir.applicable_entries)}件（変化なし） ✓")
+
+    def test_p06_custom_yaml_in_tempdir(self):
+        """
+        P-06: 独自 yaml を tempdir に置くと entries が追加されること。
+        """
+        import tempfile
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        custom_yaml_content = {
+            "entries": [
+                {
+                    "id": "CUSTOM_TEST_001",
+                    "title": "カスタムテストエントリ",
+                    "category": "テストカテゴリ",
+                    "change_type": "参考",
+                    "disclosure_items": ["テスト項目"],
+                    "source": "https://example.com/custom",
+                    "source_confirmed": False,
+                    "summary": "カスタムテスト用エントリ",
+                    "law_name": "（テスト）",
+                    "effective_from": "2024-01-01",
+                }
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            custom_yaml_path = Path(tmpdir) / "custom_test.yaml"
+            import yaml as _yaml
+            custom_yaml_path.write_text(
+                _yaml.dump(custom_yaml_content, allow_unicode=True), encoding="utf-8"
+            )
+            ctx_no_profile = load_law_context(2025, 3)
+            ctx_with_custom = load_law_context(2025, 3, profile_dir=tmpdir)
+
+        self.assertGreater(
+            len(ctx_with_custom.applicable_entries),
+            len(ctx_no_profile.applicable_entries),
+            "カスタムyaml追加後にエントリが増えていない",
+        )
+        custom_ids = [e.id for e in ctx_with_custom.applicable_entries]
+        self.assertIn("CUSTOM_TEST_001", custom_ids, "CUSTOM_TEST_001 が applicable_entries に存在しない")
+        print(f"  [PASS] P-06 カスタムyaml: {len(ctx_no_profile.applicable_entries)}件 → {len(ctx_with_custom.applicable_entries)}件 ✓")
+
+    def test_p07_profile_entry_in_range_included(self):
+        """
+        P-07: effective_from が参照期間内のエントリは applicable_entries に含まれること。
+        2025年度3月決算の参照期間（2025-04-01〜2026-03-31）内の effective_from を使用。
+        """
+        import tempfile
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        in_range_yaml = {
+            "entries": [
+                {
+                    "id": "RANGE_IN_001",
+                    "title": "参照期間内エントリ",
+                    "category": "テスト",
+                    "change_type": "参考",
+                    "disclosure_items": ["テスト"],
+                    "source": "https://example.com",
+                    "source_confirmed": False,
+                    "summary": "参照期間内テスト",
+                    "law_name": "（テスト）",
+                    "effective_from": "2025-06-01",  # 2025年度3月決算の期間内
+                }
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir) / "range_test.yaml"
+            import yaml as _yaml
+            p.write_text(_yaml.dump(in_range_yaml, allow_unicode=True), encoding="utf-8")
+            ctx = load_law_context(2025, 3, profile_dir=tmpdir)
+
+        ids = [e.id for e in ctx.applicable_entries]
+        self.assertIn("RANGE_IN_001", ids, "期間内エントリが applicable_entries に含まれていない")
+        print(f"  [PASS] P-07 期間内エントリ: RANGE_IN_001 が applicable に含まれる ✓")
+
+    def test_p08_profile_entry_out_of_range_excluded(self):
+        """
+        P-08: effective_from が参照期間外のエントリは applicable_entries に含まれないこと。
+        2025年度3月決算の参照期間より後の日付を使用。
+        """
+        import tempfile
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        out_of_range_yaml = {
+            "entries": [
+                {
+                    "id": "RANGE_OUT_001",
+                    "title": "参照期間外エントリ",
+                    "category": "テスト",
+                    "change_type": "参考",
+                    "disclosure_items": ["テスト"],
+                    "source": "https://example.com",
+                    "source_confirmed": False,
+                    "summary": "参照期間外テスト",
+                    "law_name": "（テスト）",
+                    "effective_from": "2030-01-01",  # 遠い将来 → 期間外
+                }
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir) / "out_range_test.yaml"
+            import yaml as _yaml
+            p.write_text(_yaml.dump(out_of_range_yaml, allow_unicode=True), encoding="utf-8")
+            ctx = load_law_context(2025, 3, profile_dir=tmpdir)
+
+        ids = [e.id for e in ctx.applicable_entries]
+        self.assertNotIn("RANGE_OUT_001", ids, "期間外エントリが applicable_entries に含まれてはならない")
+        print(f"  [PASS] P-08 期間外エントリ: RANGE_OUT_001 が applicable に含まれない ✓")
+
+    def test_p09_sample_example_file_exists(self):
+        """
+        P-09: profiles/sample_profile.yaml.example が存在すること（git追跡可能なスキーマ例）。
+        """
+        example_path = self._PROFILE_DIR / "sample_profile.yaml.example"
+        self.assertTrue(
+            example_path.exists(),
+            f"profiles/sample_profile.yaml.example が存在しません: {example_path}",
+        )
+        # YAMLとして正常にパースできること
+        import yaml as _yaml
+        with open(example_path, encoding="utf-8") as f:
+            data = _yaml.safe_load(f)
+        self.assertIn("entries", data, "sample_profile.yaml.example に 'entries' キーがない")
+        self.assertGreaterEqual(len(data["entries"]), 2, "example ファイルのエントリ数が不足")
+        print(f"  [PASS] P-09 sample_profile.yaml.example 存在確認: {len(data['entries'])}件 ✓")
+
+    def test_p10_profile_dir_as_path_object_str(self):
+        """
+        P-10: str 型パスを profile_dir に渡したとき load_law_context が正常動作すること。
+        """
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        # str型で渡す（Path型ではない）
+        profile_dir_str = str(self._PROFILE_DIR)
+        self.assertIsInstance(profile_dir_str, str)
+        try:
+            ctx = load_law_context(2025, 3, profile_dir=profile_dir_str)
+            self.assertIsNotNone(ctx)
+            print(f"  [PASS] P-10 str型パス: applicable_entries={len(ctx.applicable_entries)}件 ✓")
+        except Exception as e:
+            self.fail(f"str型 profile_dir でエラー: {e}")
+
+    def test_p11_profile_entries_merge_not_replace(self):
+        """
+        P-11: profile_dir を指定した後も laws/ のエントリが保持されること（マージ動作）。
+        """
+        import tempfile
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+
+        ctx_laws_only = load_law_context(2025, 3)
+        laws_entry_count = len(ctx_laws_only.applicable_entries)
+
+        # 空ディレクトリで profile_dir を指定 → laws/ エントリは消えないこと
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ctx_with_empty = load_law_context(2025, 3, profile_dir=tmpdir)
+
+        self.assertEqual(
+            laws_entry_count,
+            len(ctx_with_empty.applicable_entries),
+            "profile_dir（空）指定で laws/ エントリが消えた（replaceになっている）",
+        )
+        print(f"  [PASS] P-11 マージ動作: laws/エントリ={laws_entry_count}件が保持される ✓")
+
+    def test_p12_readme_not_loaded_as_entry(self):
+        """
+        P-12: profiles/README.md は LawEntry として解釈されないこと。
+        load_law_context が .yaml 以外のファイルをスキップすること。
+        """
+        if not LAW_YAML_DIR.exists():
+            self.skipTest(f"laws/ が存在しません: {LAW_YAML_DIR}")
+        if not self._PROFILE_DIR.exists():
+            self.skipTest(f"profiles/ が存在しません: {self._PROFILE_DIR}")
+
+        # README.md があっても例外が起きないこと
+        try:
+            ctx = load_law_context(2025, 3, profile_dir=str(self._PROFILE_DIR))
+            self.assertIsNotNone(ctx)
+            # README.md が entry として混入していないこと
+            readme_ids = [e.id for e in ctx.applicable_entries if "README" in e.id]
+            self.assertEqual(len(readme_ids), 0, f"README.md 由来のエントリが混入: {readme_ids}")
+            print(f"  [PASS] P-12 README.md スキップ: README由来エントリ={len(readme_ids)}件 ✓")
+        except Exception as e:
+            self.fail(f"README.md 存在時に例外: {e}")
+
+    def test_p13_sample_yaml_required_fields(self):
+        """
+        P-13: profiles/sample_profile.yaml の各エントリに必須フィールドが存在すること。
+        必須フィールド: id, title, category, change_type, disclosure_items, source, summary, law_name, effective_from
+        """
+        if not self._SAMPLE_YAML.exists():
+            self.skipTest(f"sample_profile.yaml が存在しません: {self._SAMPLE_YAML}")
+
+        required_fields = [
+            "id", "title", "category", "change_type",
+            "disclosure_items", "source", "summary", "law_name", "effective_from"
+        ]
+        import yaml as _yaml
+        with open(self._SAMPLE_YAML, encoding="utf-8") as f:
+            data = _yaml.safe_load(f)
+
+        entries = data.get("entries", [])
+        self.assertGreater(len(entries), 0, "sample_profile.yaml にエントリがない")
+
+        for entry in entries:
+            for field in required_fields:
+                self.assertIn(
+                    field, entry,
+                    f"エントリ '{entry.get('id', '?')}' に必須フィールド '{field}' がない",
+                )
+        print(f"  [PASS] P-13 必須フィールド確認: {len(entries)}エントリ × {len(required_fields)}フィールド ✓")
+
+    def test_p14_gitignore_allows_example_file(self):
+        """
+        P-14: .gitignore に !profiles/sample_profile.yaml.example の例外が記載されていること。
+        """
+        gitignore_path = Path(__file__).parent.parent / ".gitignore"
+        if not gitignore_path.exists():
+            self.skipTest(f".gitignore が存在しません: {gitignore_path}")
+
+        content = gitignore_path.read_text(encoding="utf-8")
+        self.assertIn(
+            "!profiles/sample_profile.yaml.example",
+            content,
+            ".gitignore に '!profiles/sample_profile.yaml.example' がない",
+        )
+        print(f"  [PASS] P-14 .gitignore 例外パターン確認 ✓")
+
 
 class TestIndustryProfiles(unittest.TestCase):
     """
