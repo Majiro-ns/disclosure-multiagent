@@ -1,28 +1,29 @@
 # disclosure-multiagent
 
-> **日本語をお使いの方は [こちら（日本語セクション）](#日本語セクション) へどうぞ。**
-
 [![CI](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml/badge.svg)](https://github.com/Majiro-ns/disclosure-multiagent/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-715%2B%20passing-brightgreen)](tests/)
-[![Mock Mode](https://img.shields.io/badge/mock%20mode-no%20API%20key%20needed-orange)](docs/)
+[![Tests](https://img.shields.io/badge/tests-735%20passing-brightgreen)](scripts/)
+[![Mock Mode](https://img.shields.io/badge/mock%20mode-APIキー不要-orange)](docs/)
 
-**Drop your annual securities report PDF. Get a 3-tier improvement plan — no consulting required.**
+EDINETから有価証券報告書を取得し、Big4観点でAI開示チェックを行うOSSツール。
 
-> 「100点の開示事例は金融庁が教えてくれる。60点で確実に法令を超える方法は、誰も教えてくれない。」
-> *The FSA shows you 100-point disclosure. Nobody teaches you how to reliably clear 60 points.*
+> 「**松の事例は国も教えてくれるが、竹や梅は決して教えてくれない。**」
+>
+> 100点（松）の開示事例は金融庁も教えてくれる。
+> 60点（梅）で確実に法令を超える方法・80点（竹）の業界標準水準は、誰も教えてくれない。
+> コンサルを呼ばなくても、自社の開示担当者が自力で改善点を把握できるツールを目指しています。
 
 ---
 
-## 30秒で何ができるか
+## できること（30秒）
 
 ```
-あなたの有報PDF を入力
+有価証券報告書 PDF を入力
         ↓
 ① PDF読取   — 有報のセクションを自動抽出
         ↓
-② 法令確認  — 最新の開示規制YAMLと照合
+② 法令確認  — 最新の開示規制 YAML と照合
         ↓
 ③ ギャップ分析 — 「何が足りないか」を検出
         ↓
@@ -31,80 +32,86 @@
 ⑤ レポート生成 — Markdown レポートとして出力
 ```
 
-→ **Web UI起動後** ブラウザで `/sample` を開くと架空企業データの分析結果（ギャップ5件・松竹梅提案・全文レポート）を即確認できます
-→ **CLIで試したい場合** は `tests/fixtures/sample_yuho.pdf`（架空有報）をそのまま使えます（[サンプルデータ詳細](web/public/sample_report.json)）
+| 水準 | スコア | 説明 |
+|------|--------|------|
+| 梅 | 60点 | **法令準拠ライン** — これだけやれば監督官庁から指摘されない |
+| 竹 | 80点 | **業界標準** — 同業他社と遜色ない水準 |
+| 松 | 100点 | **先進開示** — 機関投資家から評価される水準 |
 
 ---
 
-## What is this?
+## 特徴
 
-`disclosure-multiagent` is an open-source AI pipeline that analyzes Japanese corporate disclosure documents (有価証券報告書 / 株主総会招集通知) and generates a **松竹梅 (3-tier) improvement plan** showing exactly what to add, fix, or enhance.
-
-| Tier | Score | Description |
-|------|-------|-------------|
-| 梅 *Ume* | 60 pts | **Compliance baseline** — do this and you won't be flagged |
-| 竹 *Take* | 80 pts | **Industry standard** — on par with your peers |
-| 松 *Matsu* | 100 pts | **Best-in-class** — recognized by institutional investors |
-
-**No API key needed to try it** — mock mode is built in.
+- **EDINET API 対応** — 有価証券報告書 PDF の一括自動取得（M7）
+- **Big4 視点の開示チェックプロファイル** — KPMG / EY / PwC / Deloitte 各社のベスト・イン・クラス事例を YAML プロファイルとして収録
+- **マルチエージェント構成（M1〜M9）** — PDF解析 → 法令照合 → ギャップ分析 → 松竹梅提案 → レポート出力 → Word/Excel エクスポートまで一貫
+- **735テスト / `USE_MOCK_LLM=true` でAPIキー不要** — クローン直後に全テストを実行できる
+- **A2A プロトコル対応** — 外部エージェントからの直接呼び出しが可能
+- **法令 YAML 拡張可能** — `laws/` にファイルを追加するだけで新規規制を取り込める
 
 ---
 
-## Three Ways to Use It
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  Layer 1 │  OSS Library     pip install disclosure-multiagent       │
-│          │  Use M1-M9 agents directly in your Python code           │
-├─────────────────────────────────────────────────────────────────────┤
-│  Layer 2 │  CLI Tool        disclosure-check your_yuho.pdf          │
-│          │  One command → Markdown report (no server needed)        │
-├─────────────────────────────────────────────────────────────────────┤
-│  Layer 3 │  Web UI          docker compose up                       │
-│          │  Full stack: browser UI + REST API + PDF upload          │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Quick Start
-
-> **APIキー不要で今すぐ試せます。** `USE_MOCK_LLM=true`（デフォルト）でモックLLMが起動し、
-> PDF読取 → 法令確認 → ギャップ分析 → 改善提案 → レポート生成 が全て動きます。
-> 本番LLMに切り替えるには `ANTHROPIC_API_KEY` を設定するだけです。
-
----
-
-### Layer 1 — OSS Library (Python, 3 lines)
+## インストール
 
 ```bash
-pip install disclosure-multiagent
+git clone https://github.com/Majiro-ns/disclosure-multiagent.git
+cd disclosure-multiagent
+pip install -e ".[dev]"
 ```
 
-```python
-# Minimum working example — copy and paste as-is
-import os; os.environ.setdefault("USE_MOCK_LLM", "true")
-from scripts.m1_pdf_agent import extract_report
-report = extract_report("your_report.pdf")
-print(report.company_name, "—", len(report.sections), "sections extracted")
+または Poetry を使用する場合:
+
+```bash
+poetry install
 ```
 
-> `USE_MOCK_LLM` defaults to `true` — no API key needed.
-> Pass `company_name` and `fiscal_year` for a richer report:
+**最小限インストール（コアパイプラインのみ）:**
+
+```bash
+pip install pymupdf pyyaml
+```
+
+**本番LLM対応（Claude API）:**
+
+```bash
+pip install "disclosure-multiagent[llm]"
+```
+
+---
+
+## クイックスタート
+
+> **APIキー不要で今すぐ試せます。**
+> `USE_MOCK_LLM=true`（デフォルト）でモックLLMが起動し、PDF読取 → 法令確認 → ギャップ分析 → 改善提案 → レポート生成が全て動きます。
+
+### CLI（1コマンド）
+
+```bash
+# APIキー不要（USE_MOCK_LLM=true がデフォルト）
+disclosure-check your_report.pdf --level 竹
+
+# 会社名・年度を指定
+disclosure-check your_report.pdf --company-name "株式会社A" --fiscal-year 2025 --level 竹
+
+# 本番LLM（Claude API）を使う場合
+export ANTHROPIC_API_KEY=sk-ant-xxx
+USE_MOCK_LLM=false disclosure-check your_report.pdf --level 松
+```
+
+### Python API（3行）
 
 ```python
 import os; os.environ.setdefault("USE_MOCK_LLM", "true")
 from scripts.m1_pdf_agent import extract_report
 report = extract_report("your_report.pdf", company_name="株式会社A", fiscal_year=2025)
-print(report.company_name, "—", len(report.sections), "sections")
-# → For the full 松竹梅 gap analysis pipeline, see example below
+print(report.company_name, "—", len(report.sections), "sections extracted")
 ```
 
-Full pipeline (M1→M5 individually):
+### フルパイプライン（M1→M5）
 
 ```python
 import os
-os.environ["USE_MOCK_LLM"] = "true"  # remove this line when using real Claude API
+os.environ["USE_MOCK_LLM"] = "true"  # 本番LLMを使う場合はこの行を削除
 
 from scripts.m1_pdf_agent import extract_report
 from scripts.m2_law_agent import load_law_context
@@ -120,374 +127,189 @@ markdown   = generate_report(report, law_ctx, gap_result, proposals, level="竹"
 print(markdown)
 ```
 
----
-
-### Layer 2 — CLI Tool (one command)
+### Web UI（Docker）
 
 ```bash
-pip install disclosure-multiagent
+cp .env.example .env   # APIキーは任意（モックで動作）
+docker compose up --build
 ```
 
-```bash
-# Mock mode — no API key needed (USE_MOCK_LLM=true is the default)
-disclosure-check your_report.pdf --level 竹
-
-# With company name and fiscal year
-disclosure-check your_report.pdf --company-name "株式会社A" --fiscal-year 2025 --level 竹
-
-# → Markdown report saved to scripts/reports/report_株式会社A_2025_<timestamp>.md
-```
-
-```bash
-# Real LLM mode — requires Claude API key
-export ANTHROPIC_API_KEY=sk-ant-xxx
-USE_MOCK_LLM=false disclosure-check your_report.pdf --level 松
-```
+| サービス | URL | 説明 |
+|----------|-----|------|
+| Web UI | http://localhost:3010 | PDF アップロード → ブラウザでレポート確認 |
+| サンプル | http://localhost:3010/sample | PDFなしで分析結果を即確認 |
+| REST API | http://localhost:8010 | JSON API（自動化用） |
+| API仕様 | http://localhost:8010/docs | Swagger UI |
 
 ---
 
-### Layer 3 — Web UI (Docker, full stack)
+## テスト実行
 
 ```bash
-git clone https://github.com/Majiro-ns/disclosure-multiagent.git
-cd disclosure-multiagent
+# APIキー不要でテスト全件実行（735テスト）
+USE_MOCK_LLM=true python3 -m pytest -x -q
 
-# Configure (API key optional — mock works without it)
-cp .env.example .env
-
-# Start (docker-compose v1) or (docker compose v2)
-docker-compose up --build
-# docker compose up --build   ← use this if docker-compose v1 is not installed
+# 特定ファイルのみ
+USE_MOCK_LLM=true python3 -m pytest scripts/test_m3_gap_analysis.py -v
 ```
 
-Open in browser (ready in ~30–60 seconds after first build):
+> `testpaths = ["tests", "scripts"]` が `pyproject.toml` に設定済みのため、パス指定なしで全テストを収集します。
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Web UI** | http://localhost:3010 | PDF upload → report in browser |
-| **Sample** | http://localhost:3010/sample | Interactive sample report — no PDF needed |
-| REST API | http://localhost:8010 | JSON API for automation |
-| API Docs | http://localhost:8010/docs | Swagger UI |
+---
 
-```bash
-docker-compose down   # Stop all services
+## プロジェクト構造
+
+```
+disclosure-multiagent/
+├── scripts/                 # M1〜M9 エージェント本体 + テスト
+│   ├── m1_pdf_agent.py      # PDF解析・セクション抽出
+│   ├── m2_law_agent.py      # 法令YAML読込・照合
+│   ├── m3_gap_analysis_agent.py  # ギャップ分析（LLM）
+│   ├── m4_proposal_agent.py # 松竹梅提案生成
+│   ├── m5_report_agent.py   # Markdownレポート出力
+│   ├── m6_law_url_collector.py   # 法令URL自動収集
+│   ├── m7_edinet_client.py  # EDINET PDF取得
+│   ├── m8_multiyear.py      # 複数年比較
+│   ├── m9_document_exporter.py   # Word/Excel出力
+│   └── test_*.py            # テスト（723件）
+├── tests/                   # 追加テスト（A2A等）
+│   └── test_a2a.py          # A2Aプロトコルテスト
+├── laws/                    # 法令マスターYAML
+│   ├── human_capital_2024.yaml
+│   ├── ssbj_2025.yaml       # SSBJ最終基準25件
+│   └── shoshu_notice_2025.yaml
+├── profiles/                # Big4開示チェックプロファイル
+│   ├── deloitte/
+│   ├── kpmg/
+│   ├── pwc/
+│   └── ey/
+├── api/                     # FastAPI REST API
+├── web/                     # Next.js フロントエンド
+├── docs/                    # ドキュメント
+└── pyproject.toml
 ```
 
 ---
 
-## 🚀 UIクイックスタート（Docker不要・npm版）
-
-> ポートについて: Dockerビルド版は http://localhost:3010 / npm run dev版は http://localhost:3000 を使用します。
-
-### 方法A（UI閲覧のみ・APIキー不要）
-
-```bash
-cd disclosure-multiagent/web
-npm install && npm run dev
-```
-
-→ http://localhost:3000 で確認（`/sample` ページはAPIなしで閲覧可）
-
-### 方法B（フルスタック・AI分析も動作）
-
-```powershell
-# ターミナル1（バックエンド）
-$env:USE_MOCK_LLM='true'; python -m uvicorn api.main:app --port 8010
-```
-
-```bash
-# ターミナル2（フロントエンド）
-cd web && npm run dev
-```
-
-→ http://localhost:3000 で PDF アップロード + AI 分析が全て動作
-
----
-
-## Sample Output
-
-Running `disclosure-check` produces a Markdown report. Here is a representative excerpt:
-
-```markdown
-# 開示ギャップ分析レポート — 株式会社サンプル商事（2024年度）
-
-**提案レベル**: 竹（業界標準水準）　**ギャップ数**: 3件検出
-
-## ギャップ概要
-
-| # | 項目 | 判定 | 優先度 |
-|---|------|------|--------|
-| 1 | 従業員エンゲージメント指標 | 修正必須（義務規定） | 高 |
-| 2 | 人材育成投資額（数値開示） | 強化推奨 | 中 |
-| 3 | 温室効果ガス排出量 Scope1/2 | 強化推奨 | 中 |
-
-## 改善提案（竹水準 — 業界標準）
-
-### GAP-001: 従業員エンゲージメント指標の開示
-
-**現状**: 記載なし（義務規定・対応必須）
-
-**改善案（竹）**:
-当社は、従業員エンゲージメントを経営の重要指標と位置づけ、年1回の全社サーベイを実施しております。
-直近のエンゲージメントスコアは[数値]点であり、前年度比[増減]点の[改善／低下]となりました。
-
-*根拠: 内閣官房「人的資本可視化指針」§4（2022年8月）*
-```
-
-→ **[Full sample report (JSON)](web/public/sample_report.json)**
-→ **Interactive version**: `docker compose up` 後 http://localhost:3010/sample でギャップ一覧・提案・全文レポートをブラウザで確認できます
-
----
-
-## Architecture
+## アーキテクチャ（M1〜M9）
 
 ```
-Annual Report PDF
+有価証券報告書 PDF
       │
       ▼
-[M1] PDF Parser          — Section extraction (有報 / 招集通知)
+[M1] PDF パーサ          — セクション抽出（有報 / 招集通知）
       │
       ├──────────────────────────────────────┐
       ▼                                      ▼
-[M2] Law Context Loader  — YAML law master  [M8] Multi-Year Comparator
-      │                                          — YearDiff / trend detection
+[M2] 法令コンテキスト読込  — 法令YAML照合   [M8] 複数年比較
+                                             — 年度差・トレンド検出
       ▼
-[M3] Gap Analyzer        — LLM: required / recommended / reference
+[M3] ギャップ分析器        — LLM: 必須 / 推奨 / 参考
       │
       ▼
-[M4] Proposal Generator  — 松竹梅 (3-tier) improvement text
+[M4] 提案生成器            — 松竹梅 3段階の改善文案
       │
       ▼
-[M5] Report Assembler    — Markdown report with disclaimer
+[M5] レポート組立          — Markdown レポート出力
       │
       ├──────────┐
       ▼          ▼
-[M9] Word/Excel  [M7] EDINET Client  — auto-download annual report PDFs
-                 [M6] Law URL Collector — auto-fetch FSA / e-Gov URLs
+[M9] Word/Excel  [M7] EDINET クライアント — 有報PDF自動取得
+                 [M6] 法令URL収集 — 金融庁/e-Gov URL自動取得
 ```
 
-| Module | Role | Tests |
-|--------|------|-------|
-| `m1_pdf_agent.py` | PDF parsing, section splitting | 47 |
-| `m2_law_agent.py` | Law YAML loading, reference period calc | 26 |
-| `m3_gap_analysis_agent.py` | Gap analysis via LLM | 23 |
-| `m4_proposal_agent.py` | 松竹梅 proposal generation | 48 |
-| `m5_report_agent.py` | Report assembly | 46 |
-| `m6_law_url_collector.py` | FSA / e-Gov URL collection | 13 |
-| `m7_edinet_client.py` | EDINET PDF download | 15 |
-| `m8_multiyear_agent.py` | Multi-year comparison | 15 |
-| `m9_document_exporter.py` | Word / Excel export | 12 |
+| モジュール | 役割 | テスト数 |
+|-----------|------|---------|
+| `m1_pdf_agent.py` | PDF解析・セクション分割 | 47 |
+| `m2_law_agent.py` | 法令YAML読込・参照期間計算 | 26 |
+| `m3_gap_analysis_agent.py` | LLMによるギャップ分析 | 23 |
+| `m4_proposal_agent.py` | 松竹梅提案生成 | 48 |
+| `m5_report_agent.py` | レポート組立 | 46 |
+| `m6_law_url_collector.py` | 金融庁/e-Gov URL収集 | 13 |
+| `m7_edinet_client.py` | EDINET PDF取得 | 15 |
+| `m8_multiyear_agent.py` | 複数年比較分析 | 15 |
+| `m9_document_exporter.py` | Word/Excel エクスポート | 12 |
 
-**Total: 715+ tests, all passing**
+**合計: 735テスト、全件PASS**
 
 ---
 
-## Installation
+## 環境変数
 
-### Minimal (core pipeline only)
+| 変数 | デフォルト | 説明 |
+|------|-----------|------|
+| `USE_MOCK_LLM` | `true` | `true` = APIキー不要でテスト・デモ実行可 |
+| `ANTHROPIC_API_KEY` | — | 本番LLM使用時に必要（`USE_MOCK_LLM=false` 時） |
+| `EDINET_SUBSCRIPTION_KEY` | — | 任意 — EDINET検索API（M7-2）で必要。[申請はこちら](https://disclosure2.edinet-fsa.go.jp/WZEK0010.aspx) |
+| `LAW_YAML_DIR` | `laws/` | カスタム法令YAMLディレクトリ |
 
-```bash
-pip install pymupdf pyyaml
-```
-
-### With real LLM support
-
-```bash
-pip install "disclosure-multiagent[llm]"
-# or: pip install pymupdf pyyaml anthropic
-```
-
-### Full install (API server + dev tools)
-
-```bash
-pip install "disclosure-multiagent[llm,api,dev]"
-```
-
-### From source
-
-```bash
-git clone https://github.com/Majiro-ns/disclosure-multiagent.git
-cd disclosure-multiagent
-pip install -e ".[dev]"
-```
+`.env.example` を `.env` にコピーしてください。
 
 ---
 
-## Document Types
+## EDINET から有報PDFを取得する方法
 
-| `doc_type` | Document | Notes |
-|------------|----------|-------|
-| `"yuho"` | 有価証券報告書 (Annual Securities Report) | Default |
-| `"shoshu"` | 株主総会招集通知 (Notice of General Meeting) | AGM-specific sections |
+EDINETは金融庁が提供する無料の開示書類システムです。
 
-```python
-from scripts.m1_pdf_agent import extract_report
+→ **[docs/how_to_get_yuho.md](docs/how_to_get_yuho.md)** に手順を記載しています。
 
-# Annual report (default)
-report = extract_report("yuho.pdf", company_name="株式会社A", fiscal_year=2025)
-
-# Notice of general meeting
-report = extract_report("shoshu.pdf", company_name="株式会社A", fiscal_year=2025, doc_type="shoshu")
-```
-
----
-
-## Law YAML (`laws/`)
-
-The `laws/` directory contains law master YAML files. All files are auto-loaded at startup.
-
-| File | Items | Coverage |
-|------|-------|---------|
-| `human_capital_2024.yaml` | 8 | Human capital disclosure (FSA 2024) + SSBJ 2024 |
-| `ssbj_2025.yaml` | 25 | SSBJ 2025 standards (sb-2025-001 to sb-2025-025) |
-| `shareholder_notice_2025.yaml` | 16 | AGM disclosure + governance |
-| `banking_2025.yaml` | — | Banking-sector specifics |
-
-**Data as of 2024. PRs to update are welcome.**
-
-To add a new regulation, drop a YAML file into `laws/` — no restart needed.
-Schema: [`docs/law_yaml_schema.md`](docs/law_yaml_schema.md)
-
----
-
-## Getting Annual Report PDFs
-
-You can download annual report PDFs from EDINET (Financial Services Agency's disclosure system) for free.
-
-See **[docs/how_to_get_yuho.md](docs/how_to_get_yuho.md)** for step-by-step instructions.
-
-Or use the built-in M7 client:
+または M7 クライアントで直接取得:
 
 ```python
 from scripts.m7_edinet_client import EdinetClient
 client = EdinetClient()
-pdf_path = client.download_latest_yuho("E02142")  # Toyota Motor
+pdf_path = client.download_latest_yuho("E02142")  # トヨタ自動車
 ```
-
----
-
-## Streamlit UI
-
-```bash
-cd scripts/
-streamlit run app.py
-# → http://localhost:8501
-```
-
-Upload a PDF → M1–M5 full pipeline runs in browser.
-
----
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `USE_MOCK_LLM` | `true` | `true` = no API key needed |
-| `ANTHROPIC_API_KEY` | — | Required when `USE_MOCK_LLM=false` |
-| `EDINET_SUBSCRIPTION_KEY` | — | Optional — for EDINET search API (M7-2). [Apply here →](https://disclosure2.edinet-fsa.go.jp/WZEK0010.aspx) |
-| `LAW_YAML_DIR` | `laws/` | Custom law YAML directory |
-
-Copy `.env.example` to `.env` to get started.
-
----
-
-## A2A (Agent-to-Agent) Protocol Support
-
-disclosure-multiagent は [A2A プロトコル](https://google.github.io/A2A/) に対応しており、
-外部エージェントから直接呼び出すことができます。
-
-### Agent Card 取得
-
-```bash
-curl http://localhost:8000/.well-known/agent-card.json
-```
-
-### 外部エージェントからの接続
-
-```python
-import httpx
-import uuid
-
-# A2A タスクを送信
-task = {
-    "id": str(uuid.uuid4()),
-    "contextId": str(uuid.uuid4()),
-    "message": {
-        "messageId": str(uuid.uuid4()),
-        "role": "user",
-        "parts": [{"kind": "text", "text": "EDINETコード E12345 の有価証券報告書を松竹梅分析してください"}]
-    }
-}
-resp = httpx.post("http://localhost:8000/a2a/execute", json=task)
-result = resp.json()
-print(result["artifacts"][0]["parts"][0]["text"])
-```
-
-### 利用可能なスキル
-
-| スキルID | 説明 | 入力例 |
-|----------|------|--------|
-| `analyze_disclosure` | 有価証券報告書の松竹梅分析 | 「EDINETコード E12345 を分析してください」 |
-| `edinet_search` | EDINET書類検索 | 「証券コード 7203 の有価証券報告書を検索」 |
-| `matsu_take_ume_scoring` | テキストの松竹梅スコアリング | 「スコアリング対象: 離職率3.5%（目標2025年度）」 |
-
-スキルは `skillId` で明示指定するか、入力テキストのキーワードで自動振り分けされます。
 
 ---
 
 ## 関連OSS
 
-同作者が開発する財務・AI品質系OSSのエコシステムです。
+同作者が開発する財務・AI品質系 OSS のエコシステムです。
 
 | OSS | 説明 | 状態 |
 |-----|------|------|
 | [fixed-asset-agentic](https://github.com/Majiro-ns/fixed-asset-agentic) | 固定資産台帳AI解析（償却計算・異常検知） | 公開中 |
 | [agent-quality-gate](https://github.com/Majiro-ns/agent-quality-gate) | AIエージェント品質ゲート（自信度・クロスレビュー検証） | 公開中 |
 | [xbrl-ai-analyzer](https://github.com/Majiro-ns/xbrl-ai-analyzer) | XBRL財務データAI解析（EDINETデータ構造化） | 準備中 |
+| [nencho](https://github.com/Majiro-ns/nencho) | 年末調整AI支援スキルパッケージ | 公開中 |
 
 ---
 
-## Contributing
+## コントリビューション
 
-Pull requests are welcome, especially for:
+Pull Request 歓迎です。特に以下を歓迎します:
 
-- **Law YAML updates** — regulations change every year
-- **New doc_type support** — integrated reports, sustainability reports
-- **Test fixtures** — sample PDFs under `tests/fixtures/`
-- **Bug fixes and performance improvements**
+- **法令YAMLの更新** — 規制は毎年改正されます
+- **新しい `doc_type` 対応** — 統合報告書・サステナビリティレポート等
+- **テストフィクスチャ** — `tests/fixtures/` 配下のサンプルPDF
+- **バグ修正・パフォーマンス改善**
 
-Please run `pytest` before submitting a PR.
+PR前に `USE_MOCK_LLM=true python3 -m pytest -q` の全件PASSを確認してください。
+
+詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
 ---
 
-## License
+## 免責事項
+
+本ツールはPoC（概念実証）です。税務・法律上の判断には必ず専門家の確認が必要です。
+本ツールが生成した分析結果は、提出前に**必ずご自身で内容を確認**してください。
+税制・開示規制は毎年改正されます。本ツールが参照する法令データの更新状況を確認の上ご利用ください。
+
+---
+
+## ライセンス
 
 MIT License — Copyright 2026 Majiro-ns
 
-See [LICENSE](LICENSE) for full text.
+詳細は [LICENSE](LICENSE) を参照してください。
 
 ---
 
-## 日本語セクション
+## 謝辞・参考
 
-### このツールでできること
-
-自社の有価証券報告書（有報）PDFを入れるだけで、人的資本開示・SSBJなどの法令要件に対して **何が足りないか・どう改善すればいいか** を松竹梅3段階で自動生成します。
-
-- **梅（60点）**: 法令準拠ライン。これだけやれば監督官庁から指摘されない
-- **竹（80点）**: 業界標準。同業他社と遜色ない水準
-- **松（100点）**: 先進開示。機関投資家から評価される水準
-
-### なぜこれを作ったか
-
-> 「**松の事例は国も教えてくれるが、竹や梅は決して教えてくれない。**」
-
-100点（松）の開示事例は金融庁も教えてくれる。60点（梅）で確実に法令を超える方法・80点（竹）の業界標準水準は、誰も教えてくれない。コンサルを呼ばなくても、自社の開示担当者が自力で改善点を把握できるツールを目指しています。
-
-### EDINET から有報PDFを取得する方法
-
-→ [docs/how_to_get_yuho.md](docs/how_to_get_yuho.md) を参照してください。
-
-### 免責事項
-
-本ツールはPoC（概念実証）です。税務・法律上の判断には必ず専門家の確認が必要です。
+- [EDINET API](https://disclosure2.edinet-fsa.go.jp/) — 金融庁 電子開示システム
+- [SSBJ（サステナビリティ基準委員会）最終基準](https://www.ssb-j.org/) — 2025年3月施行
+- [内閣官房 人的資本可視化指針](https://www.cas.go.jp/jp/houdou/220830jinzai.html)（2022年8月）
+- [金融庁 企業内容等の開示に関する内閣府令](https://www.fsa.go.jp/policy/disclosure/index.html)

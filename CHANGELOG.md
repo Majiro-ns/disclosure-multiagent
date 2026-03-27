@@ -15,7 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PhaseC-02`: EY / PwC プロファイル強化（各+3エントリ）— `TestBigFourProfilesPhaseCEY`, `TestBigFourProfilesPhaseCPwC`
   - `PhaseC-05`: 業界別プロファイル3種（金融・製造・IT）— `TestIndustryProfiles`
   - `PhaseC-06`: Deloitte / KPMG / PwC 各+3エントリ（各社17件到達）— `TestBigFourProfilesPhaseC` (BPC-01〜03)
-- **テスト拡充**: 637 → 705 件 (+68)
+  - `PhaseC-07`: EY リスク管理・内部統制拡張プロファイル（`profiles/ey/ey_risk_control_profile.yaml`）20件 — IC/DX/SC/NR/AQ 5カテゴリ — `TestBigFourProfilesPhaseCEYRiskControl`
+- **テスト拡充**: 637 → 735 件 (+98)
+
+#### OSS公開品質整備
+
+- `README.md` 日本語全面改訂: 9セクション完備（概要/特徴/インストール/クイックスタート/テスト実行/プロジェクト構造/アーキテクチャ/環境変数/ライセンス）
+- バッジ更新: `tests-735 passing`
 
 #### Infrastructure
 
