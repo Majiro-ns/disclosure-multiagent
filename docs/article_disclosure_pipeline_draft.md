@@ -662,9 +662,9 @@ python3 -m pytest scripts/test_m1_pdf_agent.py -v
 USE_MOCK_LLM=true python3 -m pytest scripts/test_m3_gap_analysis.py -v
 # → 30 passed in 0.2s
 
-# 全テスト（408 passed, 19 skipped・モックモード）
+# 全テスト（735 passed, 3 skipped・モックモード）
 USE_MOCK_LLM=true python3 -m pytest scripts/ -v
-# → 408 passed, 19 skipped
+# → 735 passed, 3 skipped
 ```
 
 ---
@@ -755,7 +755,7 @@ M1-M5パイプラインが実現した設計上の成果をまとめる。
 | M4 松竹梅提案 | GapItems→文案 | ✅ Haiku | ✅ USE_MOCK_LLM=true |
 | M5 レポート統合 | 全出力→Markdown | なし | ✅ pipeline_mock() |
 
-**単一責務 × インターフェース契約 × モック設計**の3原則が、408 passed, 19 skipped のテストを持つ保守可能なコードベースを実現した。
+**単一責務 × インターフェース契約 × モック設計**の3原則が、735 passed, 3 skipped のテストを持つ保守可能なコードベースを実現した。
 
 ### 次回予告
 

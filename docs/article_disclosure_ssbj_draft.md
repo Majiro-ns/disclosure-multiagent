@@ -292,7 +292,7 @@ sys.path.insert(0, "scripts")
 
 os.environ["USE_MOCK_LLM"] = "true"  # 開発時はモックモード
 
-from m1_pdf_agent import StructuredReport, SectionData
+from m3_gap_analysis_agent import StructuredReport, SectionData  # StructuredReport/SectionDataはm3で定義
 from m2_law_agent import load_law_context
 from m3_gap_analysis_agent import analyze_gaps
 
