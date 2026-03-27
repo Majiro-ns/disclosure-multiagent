@@ -1093,6 +1093,69 @@ class TestBigFourProfilesPhaseC(unittest.TestCase):
         print(f"  [PASS] BPC-03 pwc_profile.yaml: {len(pwc_entries)}件（PwC-）≥17 ✓")
 
 
+class TestPwCExtendedProfiles(unittest.TestCase):
+    """
+    AUTO-DIS-C04: PwC拡張プロファイル（人的資本・ガバナンス/リスク）検証テスト
+
+    テスト:
+      PEP-01: pwc_human_capital.yaml が 6 エントリ以上かつ PwC-HC- プレフィックス確認
+      PEP-02: pwc_governance_risk.yaml が 7 エントリ以上かつ PwC-GR-/PwC-RM- プレフィックス確認
+      PEP-03: 全エントリに source_confirmed=true かつ profile_name='pwc' が設定されている
+    """
+
+    _PROFILE_DIR = Path(__file__).parent.parent / "profiles" / "pwc"
+    _HC_YAML = _PROFILE_DIR / "pwc_human_capital.yaml"
+    _GR_YAML = _PROFILE_DIR / "pwc_governance_risk.yaml"
+
+    @staticmethod
+    def _load_raw_entries(path: Path) -> list:
+        if not path.exists():
+            return []
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return data.get("entries", [])
+
+    def test_pep01_human_capital_entries(self):
+        """PEP-01: pwc_human_capital.yaml が 6 エントリ以上（PwC-HC- プレフィックス）"""
+        if not self._HC_YAML.exists():
+            self.skipTest(f"pwc_human_capital.yaml が存在しません: {self._HC_YAML}")
+        entries = self._load_raw_entries(self._HC_YAML)
+        hc_entries = [e for e in entries if str(e.get("id", "")).startswith("PwC-HC-")]
+        self.assertGreaterEqual(len(hc_entries), 6,
+                                f"pwc_human_capital.yaml のPwC-HC-エントリ数が不足: {len(hc_entries)}件")
+        print(f"  [PASS] PEP-01 pwc_human_capital.yaml: {len(hc_entries)}件（PwC-HC-）≥6 ✓")
+
+    def test_pep02_governance_risk_entries(self):
+        """PEP-02: pwc_governance_risk.yaml が 7 エントリ以上（PwC-GR-/PwC-RM- プレフィックス）"""
+        if not self._GR_YAML.exists():
+            self.skipTest(f"pwc_governance_risk.yaml が存在しません: {self._GR_YAML}")
+        entries = self._load_raw_entries(self._GR_YAML)
+        gr_entries = [e for e in entries
+                      if str(e.get("id", "")).startswith("PwC-GR-")
+                      or str(e.get("id", "")).startswith("PwC-RM-")]
+        self.assertGreaterEqual(len(gr_entries), 7,
+                                f"pwc_governance_risk.yaml のPwC-GR-/PwC-RM-エントリ数が不足: {len(gr_entries)}件")
+        print(f"  [PASS] PEP-02 pwc_governance_risk.yaml: {len(gr_entries)}件（PwC-GR-/PwC-RM-）≥7 ✓")
+
+    def test_pep03_source_confirmed_and_profile_name(self):
+        """PEP-03: 全エントリに source_confirmed=true かつ profile_name='pwc'"""
+        for yaml_path in [self._HC_YAML, self._GR_YAML]:
+            if not yaml_path.exists():
+                continue
+            entries = self._load_raw_entries(yaml_path)
+            for e in entries:
+                eid = e.get("id", "?")
+                self.assertTrue(
+                    e.get("source_confirmed", False),
+                    f"{yaml_path.name} エントリ {eid}: source_confirmed が true でない"
+                )
+                self.assertEqual(
+                    e.get("profile_name"), "pwc",
+                    f"{yaml_path.name} エントリ {eid}: profile_name が 'pwc' でない"
+                )
+        print(f"  [PASS] PEP-03 source_confirmed=true & profile_name='pwc' 全エントリ ✓")
+
+
 if __name__ == "__main__":
     import os
     loader = unittest.TestLoader()
@@ -1107,6 +1170,7 @@ if __name__ == "__main__":
         TestProfileDir,
         TestIndustryProfiles,
         TestBigFourProfilesPhaseC,
+        TestPwCExtendedProfiles,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 
