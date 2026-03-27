@@ -279,4 +279,4 @@ def load_all_laws(laws_dir: Path, reference_date: date | None = None) -> list[di
 
 | 日付 | 変更内容 | 担当 |
 |------|----------|------|
-| 2026-02-27 | 初版作成 | ashigaru2（cmd_081） |
+| 2026-02-27 | 初版作成 | Majiro-ns |

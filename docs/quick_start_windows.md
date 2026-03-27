@@ -10,7 +10,7 @@
 ### エクスプローラーでダブルクリック
 
 ```
-C:\Users\user\Desktop\llama3_wallthinker\disclosure-multiagent\start_disclosure.bat
+C:\path\to\disclosure-multiagent\start_disclosure.bat
 ```
 
 1. `start_disclosure.bat` をダブルクリック
@@ -52,7 +52,7 @@ http://localhost:3000
 3. 以下のサンプルファイルを選択：
 
 ```
-C:\Users\user\Desktop\llama3_wallthinker\disclosure-multiagent\samples\sample_yuho.pdf
+C:\path\to\disclosure-multiagent\samples\sample_yuho.pdf
 ```
 
 4. 「分析開始」ボタンをクリック
@@ -128,4 +128,4 @@ wsl bash -c "pkill -f 'uvicorn api.main' 2>/dev/null; pkill -f 'next dev' 2>/dev
 
 ---
 
-*作成: 2026-03-17 / 足軽4 / cmd_375k_a4_ui*
+*作成: 2026-03-17 / Majiro-ns*

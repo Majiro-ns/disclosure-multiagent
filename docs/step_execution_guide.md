@@ -212,4 +212,4 @@ curl http://localhost:8010/api/status/abc123
 
 ---
 
-*作成者: Majiro-ns / 2026-03-14 / cmd_360k_a8b → a8c*
+*作成者: Majiro-ns / 2026-03-14*

@@ -1,7 +1,7 @@
 # disclosure-multiagent デモ動作確認チェックリスト
 
 **確認日**: 2026-03-12
-**確認者**: ashigaru7 (cmd_353k_2_a7b)
+**確認者**: Majiro-ns
 **対象**: GitHub Public化後の初回ユーザー体験（3/14 公開予定）
 
 ---
@@ -48,7 +48,7 @@ disclosure-check your_report.pdf --level 竹
 ```
 
 **確認事項**:
-- [x] `disclosure-check --help` 正常動作確認済み（ashigaru3） ✅
+- [x] `disclosure-check --help` 正常動作確認済み ✅
 - [x] モックモードがデフォルトで APIキー不要 ✅
 - [x] レポート出力先パスが明示されている ✅
 

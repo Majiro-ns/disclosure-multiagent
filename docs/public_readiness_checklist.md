@@ -1,7 +1,7 @@
 # disclosure-multiagent GitHub Public化 前提条件チェックリスト
 
 **確認日**: 2026-03-12
-**確認者**: ashigaru3 (cmd_353k_a3)
+**確認者**: Majiro-ns
 **対象バージョン**: v1.0.0 (commit 136aefb → subtree push 後: 8bdbfa7 remote HEAD)
 
 ---
