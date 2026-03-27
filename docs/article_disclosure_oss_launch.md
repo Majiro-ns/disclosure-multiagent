@@ -118,7 +118,7 @@ docker compose up --build
 - **言語**: Python 3.10+
 - **主要ライブラリ**: PyMuPDF, FastAPI, Anthropic Claude API
 - **WebUI**: Next.js 15 + Tailwind CSS
-- **テスト**: 718件のテストが全PASS（モックモードでAPIキー不要）
+- **テスト**: 735件のテストが全PASS（3件スキップ、モックモードでAPIキー不要）
 - **ライセンス**: MIT
 
 法令データはYAMLで管理されており、現在以下をカバーしています。
@@ -128,7 +128,7 @@ docker compose up --build
 | human_capital_2024.yaml | 8件 | 人的資本開示（金融庁2024改正） |
 | ssbj_2025.yaml | 25件 | SSBJ2025基準 |
 | shareholder_notice_2025.yaml | 16件 | 株主総会招集通知 |
-| banking_2025.yaml | — | 銀行業種特有の開示項目 |
+| banking_2025.yaml | 10件 | 銀行業種特有の開示項目 |
 
 PRによる法令YAMLの追加・更新を歓迎します。法令は毎年改正されるものであり、コミュニティで維持することが現実的です。
 

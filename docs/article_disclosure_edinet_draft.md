@@ -689,7 +689,7 @@ print(f"検出ギャップ: {gap_result.summary.total_gaps} 件")
 書類管理番号（S + 7桁）さえ分かれば、`disclosure2dl.edinet-fsa.go.jp` から直接取得できます。有報の定期的な自動収集に活用できます。
 
 **② モック設計で開発コストを最小化**
-`USE_MOCK_EDINET=true` / `USE_MOCK_LLM=true` で EDINET API キーも Claude API キーも不要でローカル開発・テストが完結します。CI/CD でも全テストがパスします（プロジェクト全体 600 テスト ALL PASS 確認済み）。
+`USE_MOCK_EDINET=true` / `USE_MOCK_LLM=true` で EDINET API キーも Claude API キーも不要でローカル開発・テストが完結します。CI/CD でも全テストがパスします（プロジェクト全体 735 テスト ALL PASS 確認済み）。
 
 **③ SSBJ 対応は 2027 年 3 月期から必須**
 大規模プライム企業には Scope1/2/3 GHG 排出量・移行計画・ガバナンス体制の開示が義務化されます。今から自動チェック体制を整備しておくことを強く推奨します。
