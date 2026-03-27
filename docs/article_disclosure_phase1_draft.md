@@ -43,7 +43,7 @@ published: false
 1. **法令情報のYAML化**: 各法令改正・ガイダンスの要求事項を検出キーワードと共にYAMLで管理
 2. **M1〜M5のパイプライン**: PDF解析→法令照合→ギャップ分析→提案文生成→レポート出力
 3. **LLMの活用と幻覚対策**: Claude Haiku を活用しつつ、4層の幻覚防止機構を実装
-4. **テスト駆動**: 715 passed, 3 skipped のテストで品質を担保
+4. **テスト駆動**: 718 passed のテストで品質を担保
 
 ---
 
@@ -183,7 +183,7 @@ use_mock = os.environ.get("USE_MOCK_LLM", "").lower() in ("true", "1", "yes")
 # use_mock=False（デフォルト: 環境変数未設定）のときは実Claude Haiku API呼び出し
 ```
 
-`USE_MOCK_LLM`環境変数は**デフォルト未設定（本番モード）**です。テスト時は`USE_MOCK_LLM=true`を明示設定することでAPIキーなしで全テストが通ります（715 passed, 3 skipped）。本番環境では`USE_MOCK_LLM`を設定しないことで実LLM呼び出しが行われます。
+`USE_MOCK_LLM`環境変数は**デフォルト未設定（本番モード）**です。テスト時は`USE_MOCK_LLM=true`を明示設定することでAPIキーなしで全テストが通ります（718 passed）。本番環境では`USE_MOCK_LLM`を設定しないことで実LLM呼び出しが行われます。
 
 **第3層: 根拠ID付き出力**
 
@@ -353,7 +353,7 @@ python3 scripts/run_e2e.py \
 
 - M1〜M5のパイプラインで、PDF入力からMarkdownレポート出力までエンドツーエンドで動作
 - トヨタ自動車の有報に対して7件の開示漏れ・改善点を自動検出
-- 715 passed, 3 skipped（`USE_MOCK_LLM=true`でAPIキー不要）
+- 718 passed（`USE_MOCK_LLM=true`でAPIキー不要）
 - 法令情報はYAML管理で、コード変更なしに法令追加・更新が可能
 - 幻覚対策の4層構造により、実務担当者が使える精度を実現
 

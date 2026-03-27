@@ -118,7 +118,7 @@ docker compose up --build
 - **言語**: Python 3.10+
 - **主要ライブラリ**: PyMuPDF, FastAPI, Anthropic Claude API
 - **WebUI**: Next.js 15 + Tailwind CSS
-- **テスト**: 715件のテストが全PASS（モックモードでAPIキー不要）
+- **テスト**: 718件のテストが全PASS（モックモードでAPIキー不要）
 - **ライセンス**: MIT
 
 法令データはYAMLで管理されており、現在以下をカバーしています。
