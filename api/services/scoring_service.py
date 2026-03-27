@@ -57,26 +57,6 @@ TIER_UME_MIN: int = 60   # 梅ライン（法令必須をすべてカバー）
 TIER_TAKE_MIN: int = 80  # 竹ライン（推奨項目もカバー）
 TIER_MATSU_MIN: int = 95 # 松ライン（任意項目もほぼ全カバー）
 
-# A6のC07（tier_requirement追加）完了前のモックデータ
-# 必須 10件 + 推奨 5件
-MOCK_LAW_ENTRIES: list[dict] = [
-    {"id": "LAW-001", "title": "人的資本KPI開示（従業員エンゲージメント）", "tier_requirement": "必須"},
-    {"id": "LAW-002", "title": "人的資本KPI開示（女性管理職比率）", "tier_requirement": "必須"},
-    {"id": "LAW-003", "title": "人的資本KPI開示（男性育休取得率）", "tier_requirement": "必須"},
-    {"id": "LAW-004", "title": "人的資本KPI開示（研修時間・研修費用）", "tier_requirement": "必須"},
-    {"id": "LAW-005", "title": "人的資本KPI開示（離職率）", "tier_requirement": "必須"},
-    {"id": "LAW-006", "title": "有価証券報告書・サステナビリティ情報の記載", "tier_requirement": "必須"},
-    {"id": "LAW-007", "title": "コーポレートガバナンス報告書との整合性", "tier_requirement": "必須"},
-    {"id": "LAW-008", "title": "SSBJ基準に基づく気候変動リスク開示", "tier_requirement": "必須"},
-    {"id": "LAW-009", "title": "GHG排出量（Scope1・Scope2）の開示", "tier_requirement": "必須"},
-    {"id": "LAW-010", "title": "サプライチェーン人権リスク対応の開示", "tier_requirement": "必須"},
-    {"id": "LAW-011", "title": "SSBJ早期適用宣言", "tier_requirement": "推奨"},
-    {"id": "LAW-012", "title": "Scope3排出量の開示", "tier_requirement": "推奨"},
-    {"id": "LAW-013", "title": "人的資本投資ROIの定量開示", "tier_requirement": "推奨"},
-    {"id": "LAW-014", "title": "気候変動シナリオ分析（1.5℃/4℃）の詳細開示", "tier_requirement": "推奨"},
-    {"id": "LAW-015", "title": "TNFD（自然関連財務情報）への対応状況", "tier_requirement": "推奨"},
-]
-
 # 各ティア到達に必要な代表的開示項目
 _UPGRADE_ITEMS: dict[str, list[str]] = {
     "梅": [
