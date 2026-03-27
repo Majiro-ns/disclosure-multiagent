@@ -1156,6 +1156,79 @@ class TestPwCExtendedProfiles(unittest.TestCase):
         print(f"  [PASS] PEP-03 source_confirmed=true & profile_name='pwc' 全エントリ ✓")
 
 
+class TestIndustryIntegratedProfiles(unittest.TestCase):
+    """
+    AUTO-DIS-C05: 業種別統合プロファイル（banking/manufacturing/IT）検証テスト
+
+    テスト:
+      IIP-01: industry/banking.yaml が 5 エントリ以上かつ IBANK- プレフィックス確認
+      IIP-02: industry/manufacturing.yaml が 5 エントリ以上かつ IMFG- プレフィックス確認
+      IIP-03: industry/it.yaml が 5 エントリ以上かつ IIT- プレフィックス確認
+      IIP-04: 全エントリに big4_framework フィールドと tier_requirement が存在する
+    """
+
+    _INDUSTRY_DIR = Path(__file__).parent.parent / "profiles" / "industry"
+    _BANKING_YAML = _INDUSTRY_DIR / "banking.yaml"
+    _MFG_YAML = _INDUSTRY_DIR / "manufacturing.yaml"
+    _IT_YAML = _INDUSTRY_DIR / "it.yaml"
+
+    @staticmethod
+    def _load_raw_entries(path: Path) -> list:
+        if not path.exists():
+            return []
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return data.get("entries", [])
+
+    def test_iip01_banking_integrated_entries(self):
+        """IIP-01: industry/banking.yaml が 5 エントリ以上（IBANK- プレフィックス）"""
+        if not self._BANKING_YAML.exists():
+            self.skipTest(f"industry/banking.yaml が存在しません: {self._BANKING_YAML}")
+        entries = self._load_raw_entries(self._BANKING_YAML)
+        ibank_entries = [e for e in entries if str(e.get("id", "")).startswith("IBANK-")]
+        self.assertGreaterEqual(len(ibank_entries), 5,
+                                f"industry/banking.yaml のIBANK-エントリ数が不足: {len(ibank_entries)}件")
+        print(f"  [PASS] IIP-01 industry/banking.yaml: {len(ibank_entries)}件（IBANK-）≥5 ✓")
+
+    def test_iip02_manufacturing_integrated_entries(self):
+        """IIP-02: industry/manufacturing.yaml が 5 エントリ以上（IMFG- プレフィックス）"""
+        if not self._MFG_YAML.exists():
+            self.skipTest(f"industry/manufacturing.yaml が存在しません: {self._MFG_YAML}")
+        entries = self._load_raw_entries(self._MFG_YAML)
+        imfg_entries = [e for e in entries if str(e.get("id", "")).startswith("IMFG-")]
+        self.assertGreaterEqual(len(imfg_entries), 5,
+                                f"industry/manufacturing.yaml のIMFG-エントリ数が不足: {len(imfg_entries)}件")
+        print(f"  [PASS] IIP-02 industry/manufacturing.yaml: {len(imfg_entries)}件（IMFG-）≥5 ✓")
+
+    def test_iip03_it_integrated_entries(self):
+        """IIP-03: industry/it.yaml が 5 エントリ以上（IIT- プレフィックス）"""
+        if not self._IT_YAML.exists():
+            self.skipTest(f"industry/it.yaml が存在しません: {self._IT_YAML}")
+        entries = self._load_raw_entries(self._IT_YAML)
+        iit_entries = [e for e in entries if str(e.get("id", "")).startswith("IIT-")]
+        self.assertGreaterEqual(len(iit_entries), 5,
+                                f"industry/it.yaml のIIT-エントリ数が不足: {len(iit_entries)}件")
+        print(f"  [PASS] IIP-03 industry/it.yaml: {len(iit_entries)}件（IIT-）≥5 ✓")
+
+    def test_iip04_big4_framework_and_tier_requirement(self):
+        """IIP-04: 全エントリに big4_framework フィールドと tier_requirement が存在する"""
+        for yaml_path in [self._BANKING_YAML, self._MFG_YAML, self._IT_YAML]:
+            if not yaml_path.exists():
+                continue
+            entries = self._load_raw_entries(yaml_path)
+            for e in entries:
+                eid = e.get("id", "?")
+                self.assertIn(
+                    "big4_framework", e,
+                    f"{yaml_path.name} エントリ {eid}: big4_framework フィールドが存在しない"
+                )
+                self.assertIn(
+                    "tier_requirement", e,
+                    f"{yaml_path.name} エントリ {eid}: tier_requirement フィールドが存在しない"
+                )
+        print(f"  [PASS] IIP-04 big4_framework & tier_requirement 全エントリ存在 ✓")
+
+
 if __name__ == "__main__":
     import os
     loader = unittest.TestLoader()
@@ -1171,6 +1244,7 @@ if __name__ == "__main__":
         TestIndustryProfiles,
         TestBigFourProfilesPhaseC,
         TestPwCExtendedProfiles,
+        TestIndustryIntegratedProfiles,
     ]:
         suite.addTests(loader.loadTestsFromTestCase(cls))
 
