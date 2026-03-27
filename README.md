@@ -171,7 +171,7 @@ disclosure-multiagent/
 │   ├── m7_edinet_client.py  # EDINET PDF取得
 │   ├── m8_multiyear.py      # 複数年比較
 │   ├── m9_document_exporter.py   # Word/Excel出力
-│   └── test_*.py            # テスト（723件）
+│   └── test_*.py            # テスト（735件）
 ├── tests/                   # 追加テスト（A2A等）
 │   └── test_a2a.py          # A2Aプロトコルテスト
 ├── laws/                    # 法令マスターYAML
