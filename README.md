@@ -169,7 +169,7 @@ disclosure-multiagent/
 │   ├── m5_report_agent.py   # Markdownレポート出力
 │   ├── m6_law_url_collector.py   # 法令URL自動収集
 │   ├── m7_edinet_client.py  # EDINET PDF取得
-│   ├── m8_multiyear.py      # 複数年比較
+│   ├── m8_multiyear_agent.py # 複数年比較
 │   ├── m9_document_exporter.py   # Word/Excel出力
 │   └── test_*.py            # テスト（735件）
 ├── tests/                   # 追加テスト（A2A等）

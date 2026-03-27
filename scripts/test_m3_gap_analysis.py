@@ -46,6 +46,7 @@ from m3_gap_analysis_agent import (
     SSBJ_KEYWORDS,
     BANKING_KEYWORDS,
     ALL_RELEVANCE_KEYWORDS,
+    EXCLUDE_SECTION_KEYWORDS,
     is_relevant_section,
 )
 
@@ -632,6 +633,81 @@ class TestBankingKeywords(unittest.TestCase):
                 f"エントリID '{entry_id}' が 'bk-2025-' で始まっていない"
             )
         print(f"  [PASS] banking_2025.yaml: 全{len(data['amendments'])}件のIDが 'bk-2025-' プレフィックス ✓")
+
+
+# ═══════════════════════════════════════════════════════════════
+# TEST 8: CRIT-02 is_relevant_section() ブラックリスト方式テスト
+# ═══════════════════════════════════════════════════════════════
+
+class TestIsRelevantSectionBlacklist(unittest.TestCase):
+    """TEST 8: CRIT-02 is_relevant_section() ブラックリスト方式の動作検証"""
+
+    def test_manufacturing_section_passes(self):
+        """製造業有報の一般セクションは True（分析対象）になる（CRIT-02修正確認）"""
+        sections = [
+            SectionData(section_id="S-001", heading="1【事業の概要】", text="耐火物の製造販売"),
+            SectionData(section_id="S-002", heading="2【経営方針】", text="中期経営計画"),
+            SectionData(section_id="S-003", heading="3【リスク情報】", text="原材料価格変動リスク"),
+            SectionData(section_id="S-004", heading="4【財政状態】", text="連結財政状態の説明"),
+        ]
+        for s in sections:
+            self.assertTrue(
+                is_relevant_section(s),
+                f"製造業セクション「{s.heading}」が除外されてしまった（CRIT-02回帰）",
+            )
+        print("  [PASS] is_relevant_section: 製造業セクション4件全て True ✓")
+
+    def test_blacklisted_headings_are_excluded(self):
+        """EXCLUDE_SECTION_KEYWORDS に一致する見出しは False（除外）になる"""
+        exclude_cases = [
+            SectionData(section_id="X-001", heading="表紙", text=""),
+            SectionData(section_id="X-002", heading="目次", text=""),
+            SectionData(section_id="X-003", heading="添付書類", text=""),
+            SectionData(section_id="X-004", heading="添付資料", text=""),
+            SectionData(section_id="X-005", heading="監査報告書", text=""),
+        ]
+        for s in exclude_cases:
+            self.assertFalse(
+                is_relevant_section(s),
+                f"除外対象セクション「{s.heading}」が True になってしまった",
+            )
+        print("  [PASS] is_relevant_section: 除外対象5件全て False ✓")
+
+    def test_human_capital_section_still_passes(self):
+        """人的資本系セクションは引き続き True（後退なし）"""
+        section = SectionData(
+            section_id="HC-001",
+            heading="人的資本に関する取組",
+            text="人材育成方針を記載します。",
+        )
+        self.assertTrue(is_relevant_section(section))
+        print("  [PASS] is_relevant_section: 人的資本セクション → True ✓")
+
+    def test_ssbj_section_still_passes(self):
+        """SSBJ系セクションは引き続き True（後退なし）"""
+        section = SectionData(
+            section_id="S-001",
+            heading="気候変動対応",
+            text="GHG排出量削減計画を記載します。",
+        )
+        self.assertTrue(is_relevant_section(section))
+        print("  [PASS] is_relevant_section: SSBJ/気候変動セクション → True ✓")
+
+    def test_exclude_section_keywords_constant_exists(self):
+        """EXCLUDE_SECTION_KEYWORDS 定数が存在し、必須キーワードを含む"""
+        for kw in ("表紙", "目次", "添付書類"):
+            self.assertIn(
+                kw,
+                EXCLUDE_SECTION_KEYWORDS,
+                f"EXCLUDE_SECTION_KEYWORDS に「{kw}」が含まれていない",
+            )
+        print(f"  [PASS] EXCLUDE_SECTION_KEYWORDS: {len(EXCLUDE_SECTION_KEYWORDS)}件 ✓")
+
+    def test_section_with_no_heading_passes(self):
+        """見出しが空のセクションは除外されない（デフォルトTrue）"""
+        section = SectionData(section_id="S-001", heading="", text="本文テキスト")
+        self.assertTrue(is_relevant_section(section))
+        print("  [PASS] is_relevant_section: 見出し空セクション → True ✓")
 
 
 def run_all_tests():

@@ -32,6 +32,7 @@ from m1_pdf_agent import (
     HEADING_PATTERNS,
     SHOSHU_SECTION_KEYWORDS,
     SHOSHU_HEADING_PATTERNS,
+    DOC_TYPE_KEYWORDS,
     MAX_SECTION_CHARS,
     split_sections_from_text,
     get_human_capital_sections,
@@ -40,6 +41,7 @@ from m1_pdf_agent import (
     _is_heading_line,
     _infer_heading_level,
     _is_heading_line_for_doc_type,
+    detect_doc_type,
 )
 from m3_gap_analysis_agent import (
     StructuredReport,
@@ -921,6 +923,52 @@ class TestShoshuDocType(unittest.TestCase):
                 SHOSHU_SECTION_KEYWORDS,
                 f"キーワード「{kw}」が SHOSHU_SECTION_KEYWORDS に見つからない"
             )
+
+
+# ═══════════════════════════════════════════════════════════════
+# TEST 8: CRIT-01 detect_doc_type 書類種別自動判定
+# ═══════════════════════════════════════════════════════════════
+
+class TestDetectDocType(unittest.TestCase):
+    """TEST 8: CRIT-01 detect_doc_type() の定数と動作検証（PDFなし）"""
+
+    def test_doc_type_keywords_has_required_keys(self):
+        """DOC_TYPE_KEYWORDS に kessan / quarterly / shoshu の3種別が存在する"""
+        for key in ("kessan", "quarterly", "shoshu"):
+            self.assertIn(
+                key,
+                DOC_TYPE_KEYWORDS,
+                f"DOC_TYPE_KEYWORDS にキー「{key}」が見つからない",
+            )
+
+    def test_kessan_keywords_present(self):
+        """決算短信判定キーワードが DOC_TYPE_KEYWORDS に含まれる"""
+        self.assertIn("決算短信", DOC_TYPE_KEYWORDS["kessan"])
+
+    def test_quarterly_keywords_present(self):
+        """四半期報告書判定キーワードが DOC_TYPE_KEYWORDS に含まれる"""
+        self.assertIn("四半期報告書", DOC_TYPE_KEYWORDS["quarterly"])
+
+    def test_shoshu_keywords_present(self):
+        """招集通知判定キーワードが DOC_TYPE_KEYWORDS に含まれる"""
+        self.assertIn("招集通知", DOC_TYPE_KEYWORDS["shoshu"])
+
+    def test_detect_doc_type_raises_without_fitz(self):
+        """PyMuPDF 不可環境では RuntimeError が発生する"""
+        import unittest.mock as mock
+        import m1_pdf_agent as m1
+        with mock.patch.object(m1, "_FITZ_AVAILABLE", False):
+            with self.assertRaises(RuntimeError):
+                detect_doc_type("dummy.pdf")
+
+    def test_detect_doc_type_returns_yuho_on_open_error(self):
+        """PDF開封エラー時は RuntimeError を発生させず "yuho" を返す"""
+        import unittest.mock as mock
+        import m1_pdf_agent as m1
+        with mock.patch.object(m1, "_FITZ_AVAILABLE", True):
+            with mock.patch("fitz.open", side_effect=Exception("open error")):
+                result = detect_doc_type("dummy.pdf")
+        self.assertEqual(result, "yuho")
 
 
 # ═══════════════════════════════════════════════════════════════

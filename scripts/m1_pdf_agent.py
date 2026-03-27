@@ -99,6 +99,13 @@ SHOSHU_HEADING_PATTERNS: list[re.Pattern] = [
 # セクションテキストの最大文字数（チャンク処理で使用）
 MAX_SECTION_CHARS = 8000
 
+# 書類種別自動判定キーワード（CRIT-01修正: 先頭3ページで判定）
+DOC_TYPE_KEYWORDS: dict[str, list[str]] = {
+    "kessan":    ["決算短信", "業績の概要", "配当の状況（未定）", "決算短信〔"],
+    "quarterly": ["四半期報告書", "第1四半期", "第2四半期", "第3四半期"],
+    "shoshu":    ["招集通知", "招集ご通知", "株主総会招集", "定時株主総会"],
+}
+
 # PyMuPDF利用可否フラグ（importを遅延させてテストを可能にする）
 _FITZ_AVAILABLE: Optional[bool] = None
 
@@ -249,6 +256,50 @@ def _extract_tables_from_page(page) -> list[TableData]:
     except Exception as e:
         logging.getLogger(__name__).debug("テーブル抽出スキップ: %s", e)
     return tables
+
+
+# ─────────────────────────────────────────────────────────
+# M1-3: 書類種別自動判定（CRIT-01修正）
+# ─────────────────────────────────────────────────────────
+
+def detect_doc_type(pdf_path: str) -> str:
+    """
+    PDFファイルの先頭3ページを解析して書類種別を自動判定する（CRIT-01修正）。
+
+    判定優先順:
+      1. "決算短信" 等 → "kessan"
+      2. "四半期報告書" 等 → "quarterly"
+      3. "招集通知" 等 → "shoshu"
+      4. それ以外 → "yuho"（有価証券報告書、デフォルト）
+
+    Args:
+        pdf_path: 判定対象のPDFファイルパス
+
+    Returns:
+        書類種別文字列: "yuho" | "shoshu" | "kessan" | "quarterly"
+
+    Raises:
+        RuntimeError: PyMuPDFが利用不可の場合
+    """
+    if not _check_fitz():
+        raise RuntimeError(
+            "PyMuPDF (fitz) が利用できません。"
+            "'pip install pymupdf' を実行してください。"
+        )
+    import fitz
+    try:
+        doc = fitz.open(pdf_path)
+        # 先頭3ページのテキストを結合（表紙は1〜2ページ目に存在）
+        page_count = min(3, len(doc))
+        text = "".join(doc[i].get_text() for i in range(page_count))
+        doc.close()
+    except Exception:
+        return "yuho"
+
+    for doc_type, keywords in DOC_TYPE_KEYWORDS.items():
+        if any(kw in text for kw in keywords):
+            return doc_type
+    return "yuho"
 
 
 # ─────────────────────────────────────────────────────────

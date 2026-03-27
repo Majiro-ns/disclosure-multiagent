@@ -44,7 +44,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 # 各エージェントのインポート（改変禁止: importのみ）
 # ─────────────────────────────────────────────────────────
 
-from m1_pdf_agent import extract_report  # noqa: E402
+from m1_pdf_agent import extract_report, detect_doc_type  # noqa: E402
 from m2_law_agent import load_law_context  # noqa: E402
 from m3_gap_analysis_agent import (  # noqa: E402
     analyze_gaps,
@@ -71,6 +71,7 @@ def run_pipeline(
     fiscal_year: int = 2025,
     fiscal_month_end: int = 3,
     level: str = "竹",
+    doc_type: str = "auto",
 ) -> str:
     """
     M1→M2→M3→M4→M5 のE2Eパイプラインを実行してMarkdownレポートを返す。
@@ -81,22 +82,36 @@ def run_pipeline(
         fiscal_year:       対象事業年度（例: 2025）
         fiscal_month_end:  決算月（デフォルト: 3月）
         level:             提案レベル（"松" / "竹" / "梅"）
+        doc_type:          書類種別（"auto" | "yuho" | "shoshu" | "kessan" | "quarterly"）。
+                           "auto" の場合は detect_doc_type() で自動判定（CRIT-01修正）。
 
     Returns:
         str: Markdown形式のレポート
 
     Raises:
         FileNotFoundError: PDFファイルが存在しない場合
+        ValueError: 未対応の書類種別（kessan / quarterly）が指定された場合
     """
     logger = logging.getLogger(__name__)
 
+    # ── STEP 0: 書類種別自動判定（CRIT-01修正） ─────────
+    if doc_type == "auto":
+        doc_type = detect_doc_type(pdf_path)
+        logger.info("[M0] 書類種別自動判定: %s", doc_type)
+    if doc_type in ("kessan", "quarterly"):
+        raise ValueError(
+            f"未対応の書類種別: {doc_type}（現在は有報/招集通知のみ対応）。"
+            "有報PDFを指定するか --doc-type yuho を明示してください。"
+        )
+
     # ── STEP 1: M1 PDF解析 ──────────────────────────────
-    logger.info("[M1] PDF解析開始: %s", pdf_path)
+    logger.info("[M1] PDF解析開始: %s (doc_type=%s)", pdf_path, doc_type)
     structured_report = extract_report(
         pdf_path=pdf_path,
         company_name=company_name,
         fiscal_year=fiscal_year,
         fiscal_month_end=fiscal_month_end,
+        doc_type=doc_type,
     )
     company_display = structured_report.company_name or company_name or "分析対象企業"
     logger.info(
@@ -340,6 +355,12 @@ def main() -> int:
         help="標準出力にMarkdownを表示（ファイル保存と併用可）",
     )
     parser.add_argument(
+        "--doc-type",
+        default="auto",
+        choices=["auto", "yuho", "shoshu"],
+        help="書類種別 (デフォルト: auto=自動判定)。決算短信・四半期報告書は未対応。",
+    )
+    parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
@@ -419,13 +440,17 @@ def main() -> int:
             fiscal_year=args.fiscal_year,
             fiscal_month_end=args.fiscal_month_end,
             level=args.level,
+            doc_type=args.doc_type,
         )
     except FileNotFoundError as e:
         logger.error("PDFファイルが見つかりません: %s", e)
         return 1
+    except ValueError as e:
+        logger.error("未対応の書類種別: %s", e)
+        return 2
     except RuntimeError as e:
         logger.error("パイプライン実行エラー: %s", e)
-        return 2
+        return 3
     except Exception as e:
         logger.error("予期しないエラー: %s", e, exc_info=True)
         return 3

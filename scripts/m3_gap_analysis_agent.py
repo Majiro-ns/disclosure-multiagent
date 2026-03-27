@@ -658,12 +658,41 @@ def attach_reference_url(gap_result: dict, law_entry: LawEntry) -> dict:
 # セクション関連性フィルタ
 # ─────────────────────────────────────────────────────────
 
+# 除外するセクション見出しのキーワード（目次・表紙・添付書類等）
+# CRIT-02修正: ホワイトリスト方式 → ブラックリスト方式に変更
+# 理由: 製造業・小売業等ではHUMAN_CAPITAL/SSBJ/BANKINGキーワードが
+#      ほぼ登場せず、96%超のセクションが除外される問題が発生していた
+EXCLUDE_SECTION_KEYWORDS: list[str] = [
+    "表紙",
+    "目次",
+    "索引",
+    "添付書類",
+    "添付資料",
+    "監査報告書",
+    "独立監査人",
+    "署名欄",
+    "（白紙）",
+]
+
+
 def is_relevant_section(section: SectionData) -> bool:
-    """セクションが人的資本またはSSBJ関連かどうかを判定する（設計書 Section 5-1）"""
-    heading_lower = section.heading
-    text_lower = section.text[:200]  # 先頭200文字で判定
-    combined = heading_lower + text_lower
-    return any(kw in combined for kw in ALL_RELEVANCE_KEYWORDS)
+    """
+    セクションをギャップ分析の対象とするか判定する（CRIT-02修正）。
+
+    ブラックリスト方式: 明らかに分析不要なセクション（表紙/目次/添付書類等）
+    のみを除外し、それ以外は全てTrue（分析対象）を返す。
+
+    旧動作（ホワイトリスト方式）では製造業・小売業等の有報で96%超の
+    セクションが除外される問題があったため、方式を変更した。
+
+    Args:
+        section: 判定対象のSectionData
+
+    Returns:
+        True: 分析対象（EXCLUDE_SECTION_KEYWORDSに一致しない）
+        False: 分析不要（EXCLUDE_SECTION_KEYWORDSに一致）
+    """
+    return not any(kw in section.heading for kw in EXCLUDE_SECTION_KEYWORDS)
 
 
 # ─────────────────────────────────────────────────────────
