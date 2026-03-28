@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### PhaseC: Big4 Enhanced Profiles
+#### PhaseC: 拡張プロファイル機能（開示品質強化）
 
-- **Big4 プロファイル拡張** (`profiles/deloitte/`, `profiles/kpmg/`, `profiles/pwc/`, `profiles/ey/`): Big4監査法人のベスト・イン・クラス開示事例をYAMLプロファイルとして収録。各社17件以上。
-  - `PhaseC-02`: EY / PwC プロファイル強化（各+3エントリ）— `TestBigFourProfilesPhaseCEY`, `TestBigFourProfilesPhaseCPwC`
+- **拡張プロファイル追加** (`profiles/deloitte/`, `profiles/kpmg/`, `profiles/pwc/`, `profiles/ey/`): 大手監査法人の開示観点に対応した拡張YAMLプロファイル。各プロファイル17件以上（デフォルト非同梱）。
+  - `PhaseC-02`: 拡張プロファイル強化（各+3エントリ）— `TestBigFourProfilesPhaseCEY`, `TestBigFourProfilesPhaseCPwC`
   - `PhaseC-05`: 業界別プロファイル3種（金融・製造・IT）— `TestIndustryProfiles`
-  - `PhaseC-06`: Deloitte / KPMG / PwC 各+3エントリ（各社17件到達）— `TestBigFourProfilesPhaseC` (BPC-01〜03)
-  - `PhaseC-07`: EY リスク管理・内部統制拡張プロファイル（`profiles/ey/ey_risk_control_profile.yaml`）20件 — IC/DX/SC/NR/AQ 5カテゴリ — `TestBigFourProfilesPhaseCEYRiskControl`
+  - `PhaseC-06`: 拡張プロファイル各+3エントリ（各17件到達）— `TestBigFourProfilesPhaseC` (BPC-01〜03)
+  - `PhaseC-07`: リスク管理・内部統制拡張プロファイル（`profiles/ey/ey_risk_control_profile.yaml`）20件 — IC/DX/SC/NR/AQ 5カテゴリ — `TestBigFourProfilesPhaseCEYRiskControl`
 - **テスト拡充**: 637 → 735 件 (+98)
 
 #### OSS公開品質整備
