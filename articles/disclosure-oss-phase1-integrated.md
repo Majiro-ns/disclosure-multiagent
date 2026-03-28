@@ -516,10 +516,12 @@ disclosure-check your_report.pdf --level 竹
 - [EDINET（金融庁電子開示システム）](https://disclosure2.edinet-fsa.go.jp/)
 - [「止まれないAI」が本当の脅威だ ― 経理判断を守るStop-first設計](https://zenn.dev/majiro_ns/articles/asset-agentic-stop-first) — 同じ著者による固定資産判定AIの設計記事
 
-### シリーズ記事
+### 関連OSS
 
-1. 有価証券報告書をAIに解析させたら何が起きたか — disclosure-multiagent 開発実録
-2. PythonプロジェクトをOSS公開するまでにやった6つのこと — セキュリティ・テスト・pyproject.toml編
-3. 有報AIを作ったら637テストになった話 — disclosure-multiagentの設計と実装
+| OSS | 説明 | 状態 |
+|-----|------|------|
+| 固定資産台帳AI解析（償却計算・異常検知） | 準備中 |
+| XBRL財務データAI解析（EDINETデータ構造化） | 準備中 |
+| 年末調整AI支援スキルパッケージ | 準備中 |
 
 *作成: 2026-03-28*
