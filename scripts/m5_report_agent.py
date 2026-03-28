@@ -370,6 +370,13 @@ def generate_report(
             lines.append("（内容変更セクションなし）")
         lines.append("")
 
+    lines.append("---")
+    lines.append("")
+    lines.append(
+        "出典: EDINET閲覧サイト（金融庁）https://disclosure.edinet-fsa.go.jp/"
+    )
+    lines.append("")
+
     return "\n".join(lines)
 
 

@@ -263,6 +263,16 @@ pdf_path = client.download_latest_yuho("E02142")  # トヨタ自動車
 
 ---
 
+## EDINET利用について
+
+本ツールはEDINET（金融庁）のAPIを利用しています。
+
+- 出典: EDINET閲覧サイト https://disclosure.edinet-fsa.go.jp/
+- EDINET利用規約（PDL1.0準拠）を遵守してください。
+- 本ツールの利用者はEDINETの利用規約に同意したものとみなします。
+
+---
+
 ## 関連OSS
 
 同作者が開発する財務・AI品質系 OSS のエコシステムです。
@@ -273,6 +283,17 @@ pdf_path = client.download_latest_yuho("E02142")  # トヨタ自動車
 | [agent-quality-gate](https://github.com/Majiro-ns/agent-quality-gate) | AIエージェント品質ゲート（自信度・クロスレビュー検証） | 公開中 |
 | [xbrl-ai-analyzer](https://github.com/Majiro-ns/xbrl-ai-analyzer) | XBRL財務データAI解析（EDINETデータ構造化） | 準備中 |
 | [nencho](https://github.com/Majiro-ns/nencho) | 年末調整AI支援スキルパッケージ | 公開中 |
+
+---
+
+## フィードバックお待ちしています
+
+本ツールを使ってみた感想・バグ報告・機能要望は
+[GitHub Issues](https://github.com/Majiro-ns/disclosure-multiagent/issues) からお願いします。
+
+- 🐛 バグ報告
+- ✨ 機能要望
+- 💬 感想・フィードバック
 
 ---
 
