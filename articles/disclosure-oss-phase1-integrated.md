@@ -1,5 +1,5 @@
 ---
-title: "OSSで有報の開示漏れを自動検出する — 10点満点中3点の低評価を超える試み"
+title: "OSSで有報の開示漏れを自動検出する — 10点満点中3点の低評価からのスタート"
 emoji: "📋"
 type: "tech"
 topics: ["disclosure", "LLM", "securities_report", "quality_assurance", "Python"]
