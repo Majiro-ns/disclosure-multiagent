@@ -71,7 +71,7 @@ reviews/
 10_Research/
 !10_Research/samples/
 !10_Research/samples/.gitkeep
-articles/
+# articles/ — Zenn記事は公開対象のため除外しない
 00_Charter.md
 21_*.md
 22_*.md
