@@ -68,7 +68,7 @@ poetry install
 **最小限インストール（コアパイプラインのみ）:**
 
 ```bash
-pip install pymupdf pyyaml
+pip install pdfplumber pyyaml
 ```
 
 **本番LLM対応（Claude API）:**

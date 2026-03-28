@@ -771,7 +771,7 @@ git clone https://github.com/Majiro-ns/disclosure-multiagent.git
 cd disclosure-multiagent
 
 # 依存パッケージ
-pip install pymupdf pyyaml anthropic streamlit
+pip install pdfplumber pyyaml anthropic streamlit
 
 # モックモードで動作確認（APIキー不要）
 cd scripts
