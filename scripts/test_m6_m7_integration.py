@@ -132,10 +132,10 @@ class TestM7ToM1Pipeline(unittest.TestCase):
         )
 
     def test_tc1b_m7_pdf_to_m1_extract_if_available(self):
-        """TC-1b: M7-1 download_pdf(mock) → M1 extract_report（PDFとfitz両方が必要）
-        CI環境スキップ: company_a.pdf 非存在時またはfitz未インストール時"""
+        """TC-1b: M7-1 download_pdf(mock) → M1 extract_report（PDFとpdfplumber両方が必要）
+        CI環境スキップ: company_a.pdf 非存在時またはpdfplumber未インストール時"""
         from m7_edinet_client import download_pdf
-        from m1_pdf_agent import _check_fitz
+        from m1_pdf_agent import _check_pdfplumber
 
         # M7 モックモードで PDF パスを取得
         try:
@@ -143,8 +143,8 @@ class TestM7ToM1Pipeline(unittest.TestCase):
         except FileNotFoundError:
             self.skipTest("M7 モック用 company_a.pdf が見つからないためスキップ")
 
-        if not _check_fitz():
-            self.skipTest("PyMuPDF (fitz) が利用できないためスキップ")
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         from m1_pdf_agent import extract_report
         report = extract_report(
@@ -325,9 +325,9 @@ class TestPdfPocCompanies(unittest.TestCase):
 
     def test_tc5_poc_companies_m1_compatible(self):
         """TC-5: PoC対象4社 PDF のうち存在するものが M1 extract_report で解析可能
-        根拠: PDF_PoC_Result.md — PyMuPDF で全4社のセクション抽出成功実績あり
+        根拠: PDF_PoC_Result.md — pdfplumber で全4社のセクション抽出成功実績あり
         """
-        from m1_pdf_agent import _check_fitz
+        from m1_pdf_agent import _check_pdfplumber
 
         available_pdfs = [
             (_SAMPLES_DIR / fname, company, doc_id)
@@ -338,8 +338,8 @@ class TestPdfPocCompanies(unittest.TestCase):
         if not available_pdfs:
             self.skipTest("サンプルPDFが見つからないためスキップ（CI環境では正常）")
 
-        if not _check_fitz():
-            self.skipTest("PyMuPDF が利用できないためスキップ")
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         from m1_pdf_agent import extract_report
 
@@ -355,7 +355,7 @@ class TestPdfPocCompanies(unittest.TestCase):
 
     def test_tc5b_poc_company_a_split_sections_with_text(self):
         """TC-5b: company_a.pdf から抽出したテキストを split_sections_from_text でセクション分割
-        PDF非依存版（fitz不要）: 有報典型テキストで M1 互換性を確認
+        PDF非依存版（PDF実ファイル不要）: 有報典型テキストで M1 互換性を確認
         根拠: PDF_PoC_Result.md — company_a.pdf 121ページから122,356文字を抽出
         """
         from m1_pdf_agent import split_sections_from_text

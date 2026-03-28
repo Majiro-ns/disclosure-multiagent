@@ -10,7 +10,7 @@ disclosure-multiagent Phase 1-M5-3: E2Eパイプライン統合テスト
   TEST 1: pipeline_mock() がエラーなく完走し、Markdownを返す
   TEST 2: run_e2e.py の run_pipeline()（モックデータ）がエラーなく完走する
   TEST 3: company_a.pdf が存在する場合、extract_report() で StructuredReport が返る
-          （PyMuPDF必要）
+          （pdfplumber必要）
   TEST 4: 出力MarkdownのセクションヘッダーをアサートするCHECK-8テスト
 
 USE_MOCK_LLM=true 必須（実LLM APIキー不要）。
@@ -191,22 +191,22 @@ class TestRunPipelineMock(unittest.TestCase):
 class TestExtractReportRealPdf(unittest.TestCase):
     """
     TEST 3: company_a.pdf が存在する場合、extract_report() で StructuredReport が返る。
-    PyMuPDF (fitz) が必要。
+    pdfplumber が必要。
     """
 
     def test_extract_report_returns_structured_report(self):
         """company_a.pdf → StructuredReport が返り、基本フィールドが設定されている
 
         CI環境スキップ注意: company_a.pdf 非存在時は自動スキップ。
-        PyMuPDF (fitz) が未インストールの場合もスキップ（pip install pymupdf で解決）。
+        pdfplumber が未インストールの場合もスキップ（pip install pdfplumber で解決）。
         """
         # NOTE: CI環境では company_a.pdf が存在しないためスキップされる（設計上の正常動作）。
         if not COMPANY_A_PDF.exists():
             self.skipTest(f"company_a.pdf が見つからないためスキップ: {COMPANY_A_PDF}")
 
-        from m1_pdf_agent import extract_report, _check_fitz
-        if not _check_fitz():
-            self.skipTest("PyMuPDF (fitz) が利用できないためスキップ")
+        from m1_pdf_agent import extract_report, _check_pdfplumber
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         report = extract_report(
             pdf_path=str(COMPANY_A_PDF),
@@ -225,9 +225,9 @@ class TestExtractReportRealPdf(unittest.TestCase):
         if not COMPANY_A_PDF.exists():
             self.skipTest("company_a.pdf が見つからないためスキップ")
 
-        from m1_pdf_agent import extract_report, _check_fitz
-        if not _check_fitz():
-            self.skipTest("PyMuPDF が利用できないためスキップ")
+        from m1_pdf_agent import extract_report, _check_pdfplumber
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         report = extract_report(str(COMPANY_A_PDF), fiscal_year=2025)
         self.assertGreater(
@@ -240,9 +240,9 @@ class TestExtractReportRealPdf(unittest.TestCase):
         if not COMPANY_A_PDF.exists():
             self.skipTest("company_a.pdf が見つからないためスキップ")
 
-        from m1_pdf_agent import extract_report, _check_fitz
-        if not _check_fitz():
-            self.skipTest("PyMuPDF が利用できないためスキップ")
+        from m1_pdf_agent import extract_report, _check_pdfplumber
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         report = extract_report(
             str(COMPANY_A_PDF),
@@ -323,7 +323,7 @@ class TestOutputMarkdownStructure(unittest.TestCase):
         self.assertIn("## 4.", self.mock_md, "「## 4.」法令一覧セクションが見つからない")
 
     def test_real_pdf_e2e_check8(self):
-        """company_a.pdfを使ったE2EのCHECK-8確認（PyMuPDF必要）
+        """company_a.pdfを使ったE2EのCHECK-8確認（pdfplumber必要）
 
         CI環境スキップ注意: company_a.pdf 非存在時は自動スキップ。
         このテストが通る場合、USE_MOCK_LLMモードでも実PDFのM1解析が行われる。
@@ -333,9 +333,9 @@ class TestOutputMarkdownStructure(unittest.TestCase):
         if not COMPANY_A_PDF.exists():
             self.skipTest("company_a.pdf が見つからないためスキップ")
 
-        from m1_pdf_agent import _check_fitz
-        if not _check_fitz():
-            self.skipTest("PyMuPDF が利用できないためスキップ")
+        from m1_pdf_agent import _check_pdfplumber
+        if not _check_pdfplumber():
+            self.skipTest("pdfplumber が利用できないためスキップ")
 
         from run_e2e import run_pipeline
         result = run_pipeline(
@@ -368,11 +368,11 @@ if __name__ == "__main__":
     print()
 
     try:
-        from m1_pdf_agent import _check_fitz
-        fitz_ok = _check_fitz()
-        print(f"PyMuPDF (fitz): {'利用可能' if fitz_ok else '未インストール（TEST 3スキップ）'}")
+        from m1_pdf_agent import _check_pdfplumber
+        plumber_ok = _check_pdfplumber()
+        print(f"pdfplumber: {'利用可能' if plumber_ok else '未インストール（TEST 3スキップ）'}")
     except Exception:
-        print("PyMuPDF (fitz): 確認エラー")
+        print("pdfplumber: 確認エラー")
     print()
 
     unittest.main(verbosity=2)

@@ -4,7 +4,6 @@ python-multipart>=0.0.12
 sse-starlette>=2.0.0
 pydantic>=2.0.0
 # 既存scripts/の依存
-pymupdf>=1.23.0
 pdfplumber>=0.10.0
 anthropic>=0.40.0
 pyyaml>=6.0

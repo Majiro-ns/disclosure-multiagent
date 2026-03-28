@@ -131,7 +131,7 @@ class StructuredReport:
     fiscal_year: int
     fiscal_month_end: int
     sections: list[SectionData]
-    extraction_library: str = "PyMuPDF"
+    extraction_library: str = "pdfplumber"
     extracted_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 

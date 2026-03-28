@@ -327,7 +327,7 @@ def render_upload() -> None:
     except FileNotFoundError as exc:
         st.error(f"ファイルが見つかりません: {exc}")
     except RuntimeError as exc:
-        st.error(f"処理エラー（PyMuPDF等の依存ライブラリを確認してください）: {exc}")
+        st.error(f"処理エラー（pdfplumber等の依存ライブラリを確認してください）: {exc}")
     except Exception as exc:  # noqa: BLE001
         st.error(f"処理中にエラーが発生しました: {exc}")
     finally:

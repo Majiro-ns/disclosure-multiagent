@@ -1,5 +1,4 @@
 # PDF解析 PoC 用
-pymupdf>=1.23.0
 pdfplumber>=0.10.0
 # LLM API（M3 ギャップ分析・M4 松竹梅提案エージェント用）
 anthropic>=0.40.0

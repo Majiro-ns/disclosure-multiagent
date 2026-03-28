@@ -12,7 +12,7 @@ PoC参考: pdf_poc_extract.py（足軽2 subtask_063a2）
     # 実PDFで実行
     python3 m1_pdf_agent.py /path/to/yuho.pdf
 
-    # PyMuPDFなし環境のテスト確認
+    # pdfplumber未インストール環境のテスト確認
     python3 m1_pdf_agent.py --test
 """
 
@@ -106,19 +106,19 @@ DOC_TYPE_KEYWORDS: dict[str, list[str]] = {
     "shoshu":    ["招集通知", "招集ご通知", "株主総会招集", "定時株主総会"],
 }
 
-# PyMuPDF利用可否フラグ（importを遅延させてテストを可能にする）
-_FITZ_AVAILABLE: Optional[bool] = None
+# pdfplumber利用可否フラグ（importを遅延させてテストを可能にする）
+_PDFPLUMBER_AVAILABLE: Optional[bool] = None
 
 
-def _check_fitz() -> bool:
-    global _FITZ_AVAILABLE
-    if _FITZ_AVAILABLE is None:
+def _check_pdfplumber() -> bool:
+    global _PDFPLUMBER_AVAILABLE
+    if _PDFPLUMBER_AVAILABLE is None:
         try:
-            import fitz  # noqa: F401
-            _FITZ_AVAILABLE = True
+            import pdfplumber  # noqa: F401
+            _PDFPLUMBER_AVAILABLE = True
         except ImportError:
-            _FITZ_AVAILABLE = False
-    return _FITZ_AVAILABLE
+            _PDFPLUMBER_AVAILABLE = False
+    return _PDFPLUMBER_AVAILABLE
 
 
 # ─────────────────────────────────────────────────────────
@@ -227,20 +227,18 @@ def _infer_heading_level(heading: str) -> int:
 
 
 # ─────────────────────────────────────────────────────────
-# テーブル抽出（PyMuPDF依存部分）
+# テーブル抽出（pdfplumber依存部分）
 # ─────────────────────────────────────────────────────────
 
 def _extract_tables_from_page(page) -> list[TableData]:
     """
-    PyMuPDFページオブジェクトからテーブルを抽出する。
+    pdfplumberページオブジェクトからテーブルを抽出する。
     テーブル検出に失敗した場合は空リストを返す（エラーで停止しない）。
     """
     tables: list[TableData] = []
     try:
-        # PyMuPDF 1.23+ では find_tables() が利用可能
-        tab = page.find_tables()
-        for t in tab.tables:
-            extracted = t.extract()
+        tables_data = page.extract_tables() or []
+        for extracted in tables_data:
             if not extracted:
                 continue
             # 1行目をキャプション候補として使用（なければ「テーブル」）
@@ -250,9 +248,6 @@ def _extract_tables_from_page(page) -> list[TableData]:
                 for row in extracted
             ]
             tables.append(TableData(caption=str(caption)[:80], rows=rows))
-    except AttributeError:
-        # find_tables() が古いバージョンで利用不可 → スキップ
-        pass
     except Exception as e:
         logging.getLogger(__name__).debug("テーブル抽出スキップ: %s", e)
     return tables
@@ -279,20 +274,19 @@ def detect_doc_type(pdf_path: str) -> str:
         書類種別文字列: "yuho" | "shoshu" | "kessan" | "quarterly"
 
     Raises:
-        RuntimeError: PyMuPDFが利用不可の場合
+        RuntimeError: pdfplumberが利用不可の場合
     """
-    if not _check_fitz():
+    if not _check_pdfplumber():
         raise RuntimeError(
-            "PyMuPDF (fitz) が利用できません。"
-            "'pip install pymupdf' を実行してください。"
+            "pdfplumber が利用できません。"
+            "'pip install pdfplumber' を実行してください。"
         )
-    import fitz
+    import pdfplumber
     try:
-        doc = fitz.open(pdf_path)
-        # 先頭3ページのテキストを結合（表紙は1〜2ページ目に存在）
-        page_count = min(3, len(doc))
-        text = "".join(doc[i].get_text() for i in range(page_count))
-        doc.close()
+        with pdfplumber.open(pdf_path) as pdf:
+            # 先頭3ページのテキストを結合（表紙は1〜2ページ目に存在）
+            page_count = min(3, len(pdf.pages))
+            text = "".join(page.extract_text() or "" for page in pdf.pages[:page_count])
     except Exception:
         return "yuho"
 
@@ -319,7 +313,7 @@ def extract_report(
 
     処理フロー:
       1. PDFファイルの存在確認
-      2. PyMuPDF で全ページテキストを抽出
+      2. pdfplumber で全ページテキストを抽出
       3. split_sections_from_text() でセクション分割
       4. 各ページのテーブルをSectionDataに付与（ベストエフォート）
          ※ extract_tables=False の場合はテーブル抽出をスキップ（処理時間短縮）
@@ -342,7 +336,7 @@ def extract_report(
 
     Raises:
         FileNotFoundError: PDFファイルが存在しない場合
-        RuntimeError: PyMuPDFが利用不可の場合
+        RuntimeError: pdfplumberが利用不可の場合
     """
     logger = logging.getLogger(__name__)
     path = Path(pdf_path)
@@ -354,18 +348,27 @@ def extract_report(
             f"正しいパスを指定してください。"
         )
 
-    if not _check_fitz():
+    if not _check_pdfplumber():
         raise RuntimeError(
-            "PyMuPDF (fitz) が利用できません。"
-            "'pip install pymupdf' を実行してください。"
+            "pdfplumber が利用できません。"
+            "'pip install pdfplumber' を実行してください。"
         )
 
-    import fitz
+    import pdfplumber
 
     # ── STEP 2: PDFテキスト抽出 ──
     logger.info("PDF解析開始: %s", path.name)
+    page_texts: list[str] = []
+    page_tables: dict[int, list[TableData]] = {}  # page_num → tables
     try:
-        doc = fitz.open(str(path))
+        with pdfplumber.open(str(path)) as pdf:
+            # ── STEP 3: 全ページテキスト収集 + テーブル収集 ──
+            for page_num, page in enumerate(pdf.pages):
+                text = page.extract_text() or ""
+                page_texts.append(text)
+                tables = _extract_tables_from_page(page) if extract_tables else []
+                if tables:
+                    page_tables[page_num] = tables
     except Exception as e:
         logger.warning("PDF開封エラー（空sectionsで継続）: %s", e)
         return StructuredReport(
@@ -374,21 +377,9 @@ def extract_report(
             fiscal_year=fiscal_year or 0,
             fiscal_month_end=fiscal_month_end,
             sections=[],
-            extraction_library="PyMuPDF",
+            extraction_library="pdfplumber",
         )
 
-    # ── STEP 3: 全ページテキスト収集 + テーブル収集 ──
-    page_texts: list[str] = []
-    page_tables: dict[int, list[TableData]] = {}  # page_num → tables
-
-    for page_num, page in enumerate(doc):
-        text = page.get_text()
-        page_texts.append(text)
-        tables = _extract_tables_from_page(page) if extract_tables else []
-        if tables:
-            page_tables[page_num] = tables
-
-    doc.close()
     full_text = "\n".join(page_texts)
     logger.info("テキスト抽出完了: %d文字 %dページ", len(full_text), len(page_texts))
 
@@ -422,7 +413,7 @@ def extract_report(
         fiscal_year=fiscal_year,
         fiscal_month_end=fiscal_month_end,
         sections=sections,
-        extraction_library="PyMuPDF",
+        extraction_library="pdfplumber",
         extracted_at=datetime.now().isoformat(),
     )
 
@@ -560,7 +551,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     if "--test" in sys.argv:
-        # PyMuPDFなし環境でのモックテスト
+        # pdfplumberなし環境でのモックテスト
         print("=== m1_pdf_agent モックテスト ===")
         mock_text = """第一部 企業情報
 1【事業の概要】

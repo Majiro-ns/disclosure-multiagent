@@ -583,22 +583,24 @@ class TestExtractTablesFlag(unittest.TestCase):
         いずれも同じ動作（ファイル存在チェックはextract_tables引数より先に実行）✓
     """
 
-    def _build_fitz_mocks(self):
-        """テスト用の fitz モジュール + ドキュメント + ページのモックを生成する"""
+    def _build_pdfplumber_mocks(self):
+        """テスト用の pdfplumber モジュール + PDF + ページのモックを生成する"""
         from unittest.mock import MagicMock
 
         mock_page = MagicMock()
-        mock_page.get_text.return_value = (
+        mock_page.extract_text.return_value = (
             "第一部 企業情報\n人材戦略について記載します。\n"
         )
 
-        mock_doc = MagicMock()
-        mock_doc.__iter__ = MagicMock(return_value=iter([mock_page]))
+        mock_pdf = MagicMock()
+        mock_pdf.pages = [mock_page]
+        mock_pdf.__enter__ = MagicMock(return_value=mock_pdf)
+        mock_pdf.__exit__ = MagicMock(return_value=False)
 
-        mock_fitz = MagicMock()
-        mock_fitz.open.return_value = mock_doc
+        mock_pdfplumber = MagicMock()
+        mock_pdfplumber.open.return_value = mock_pdf
 
-        return mock_fitz, mock_doc, mock_page
+        return mock_pdfplumber, mock_pdf, mock_page
 
     def test_tc1_extract_tables_true_calls_extract_function(self):
         """
@@ -612,13 +614,13 @@ class TestExtractTablesFlag(unittest.TestCase):
         """
         from unittest.mock import MagicMock, patch, patch as mock_patch
 
-        mock_fitz, mock_doc, mock_page = self._build_fitz_mocks()
+        mock_pdfplumber, mock_pdf, mock_page = self._build_pdfplumber_mocks()
 
         import m1_pdf_agent
         from m1_pdf_agent import extract_report
 
-        with patch.dict(sys.modules, {'fitz': mock_fitz}), \
-             patch('m1_pdf_agent._check_fitz', return_value=True), \
+        with patch.dict(sys.modules, {'pdfplumber': mock_pdfplumber}), \
+             patch('m1_pdf_agent._check_pdfplumber', return_value=True), \
              patch('pathlib.Path.exists', return_value=True), \
              patch('m1_pdf_agent._extract_tables_from_page', return_value=[]) as mock_ext:
             # extract_tables=True（デフォルト）で呼び出し
@@ -643,14 +645,14 @@ class TestExtractTablesFlag(unittest.TestCase):
         """
         from unittest.mock import MagicMock, patch
 
-        mock_fitz, mock_doc, mock_page = self._build_fitz_mocks()
+        mock_pdfplumber, mock_pdf, mock_page = self._build_pdfplumber_mocks()
 
         import m1_pdf_agent
         from m1_pdf_agent import extract_report
         from m3_gap_analysis_agent import StructuredReport as SR
 
-        with patch.dict(sys.modules, {'fitz': mock_fitz}), \
-             patch('m1_pdf_agent._check_fitz', return_value=True), \
+        with patch.dict(sys.modules, {'pdfplumber': mock_pdfplumber}), \
+             patch('m1_pdf_agent._check_pdfplumber', return_value=True), \
              patch('pathlib.Path.exists', return_value=True), \
              patch('m1_pdf_agent._extract_tables_from_page', return_value=[]) as mock_ext:
             # extract_tables=False で呼び出し
@@ -953,11 +955,11 @@ class TestDetectDocType(unittest.TestCase):
         """招集通知判定キーワードが DOC_TYPE_KEYWORDS に含まれる"""
         self.assertIn("招集通知", DOC_TYPE_KEYWORDS["shoshu"])
 
-    def test_detect_doc_type_raises_without_fitz(self):
-        """PyMuPDF 不可環境では RuntimeError が発生する"""
+    def test_detect_doc_type_raises_without_pdfplumber(self):
+        """pdfplumber 不可環境では RuntimeError が発生する"""
         import unittest.mock as mock
         import m1_pdf_agent as m1
-        with mock.patch.object(m1, "_FITZ_AVAILABLE", False):
+        with mock.patch.object(m1, "_PDFPLUMBER_AVAILABLE", False):
             with self.assertRaises(RuntimeError):
                 detect_doc_type("dummy.pdf")
 
@@ -965,8 +967,8 @@ class TestDetectDocType(unittest.TestCase):
         """PDF開封エラー時は RuntimeError を発生させず "yuho" を返す"""
         import unittest.mock as mock
         import m1_pdf_agent as m1
-        with mock.patch.object(m1, "_FITZ_AVAILABLE", True):
-            with mock.patch("fitz.open", side_effect=Exception("open error")):
+        with mock.patch.object(m1, "_PDFPLUMBER_AVAILABLE", True):
+            with mock.patch("pdfplumber.open", side_effect=Exception("open error")):
                 result = detect_doc_type("dummy.pdf")
         self.assertEqual(result, "yuho")
 

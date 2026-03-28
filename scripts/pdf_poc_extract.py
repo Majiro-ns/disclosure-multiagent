@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PDF解析 PoC (v2): PyMuPDF / pdfplumber / pymupdf4llm で有報PDFのテキスト抽出を比較する。
+PDF解析 PoC (v2): pdfplumber で有報PDFのテキスト抽出を行う。
 
 Usage:
   python scripts/pdf_poc_extract.py <samples_dir>
@@ -130,16 +130,17 @@ def has_jinji_shihon(text: str) -> bool:
 # 抽出関数
 # ─────────────────────────────────────────
 
-def extract_pymupdf(pdf_path: Path) -> tuple[str, float]:
-    """PyMuPDF (fitz) でテキスト抽出。(text, elapsed_sec) を返す"""
+def extract_pdfplumber_v1(pdf_path: Path) -> tuple[str, float]:
+    """pdfplumber でテキスト抽出（後方互換関数名）。(text, elapsed_sec) を返す"""
     try:
-        import fitz
+        import pdfplumber
         t0 = time.perf_counter()
-        doc = fitz.open(pdf_path)
         text_parts = []
-        for page in doc:
-            text_parts.append(page.get_text())
-        doc.close()
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_parts.append(t)
         return "\n".join(text_parts), time.perf_counter() - t0
     except Exception as e:
         return f"[ERROR] {e}", 0.0
@@ -161,78 +162,51 @@ def extract_pdfplumber(pdf_path: Path) -> tuple[str, float]:
         return f"[ERROR] {e}", 0.0
 
 
-def extract_pymupdf4llm(pdf_path: Path) -> tuple[str, float]:
-    """pymupdf4llm でMarkdown変換抽出。(text, elapsed_sec) を返す"""
+def extract_pdfplumber_md(pdf_path: Path) -> tuple[str, float]:
+    """pdfplumber でMarkdown風テキスト抽出（後方互換関数名・AGPL排除済み）。(text, elapsed_sec) を返す"""
     try:
-        import pymupdf4llm
+        import pdfplumber
         t0 = time.perf_counter()
-        md_text = pymupdf4llm.to_markdown(str(pdf_path))
-        return md_text, time.perf_counter() - t0
+        text_parts = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_parts.append(t)
+        return "\n".join(text_parts), time.perf_counter() - t0
     except Exception as e:
         return f"[ERROR] {e}", 0.0
 
 
 # ─────────────────────────────────────────
-# B. セクション境界の精緻化（PyMuPDF専用）
+# B. セクション境界の精緻化（pdfplumber + パターンマッチング）
 # ─────────────────────────────────────────
 
-def detect_headings_pymupdf(pdf_path: Path) -> list[dict]:
+def detect_headings_pdfplumber(pdf_path: Path) -> list[dict]:
     """
-    PyMuPDFのフォント情報と見出しパターンで見出しを検出。
+    pdfplumberと見出しパターンで見出しを検出。
+    フォントサイズ情報は取得不可のため size=0.0 固定。
     [{page, size, text, is_pattern_heading}, ...] を返す。
     """
-    import fitz
-    doc = fitz.open(pdf_path)
+    import pdfplumber
     headings = []
 
-    # ページごとの最大フォントサイズを収集
-    for page_num, page in enumerate(doc):
-        blocks = page.get_text("dict")["blocks"]
-        page_max_size = 0.0
-
-        # まずこのページの最大サイズを把握
-        for block in blocks:
-            if block.get("type") != 0:
-                continue
-            for line in block.get("lines", []):
-                for span in line.get("spans", []):
-                    sz = span.get("size", 0)
-                    if sz > page_max_size:
-                        page_max_size = sz
-
-        # 見出し候補を収集
-        for block in blocks:
-            if block.get("type") != 0:
-                continue
-            for line in block.get("lines", []):
-                line_text = "".join(s.get("text", "") for s in line.get("spans", []))
-                line_text_stripped = line_text.strip()
-                if not line_text_stripped:
+    with pdfplumber.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf.pages):
+            text = page.extract_text() or ""
+            for line in text.splitlines():
+                line_stripped = line.strip()
+                if not line_stripped:
                     continue
+                is_pattern = any(p.search(line_stripped) for p in HEADING_PATTERNS)
+                if is_pattern:
+                    headings.append({
+                        "page": page_num + 1,
+                        "size": 0.0,
+                        "text": line_stripped[:80],
+                        "is_pattern_heading": True,
+                    })
 
-                # 各spanのサイズを確認
-                for span in line.get("spans", []):
-                    sz = span.get("size", 0)
-                    span_text = span.get("text", "").strip()
-                    if not span_text:
-                        continue
-
-                    # 見出し判定条件:
-                    # 1. 相対的に大きいフォント（ページ内最大の90%以上）
-                    # 2. または有報パターンにマッチ
-                    is_large_font = page_max_size > 0 and sz >= page_max_size * 0.90 and sz >= 10.0
-                    is_pattern = any(p.search(line_text_stripped) for p in HEADING_PATTERNS)
-
-                    if is_large_font or is_pattern:
-                        headings.append({
-                            "page": page_num + 1,
-                            "size": round(sz, 1),
-                            "text": line_text_stripped[:80],
-                            "is_pattern_heading": is_pattern,
-                        })
-                    break  # 1行につき1件
-
-    doc.close()
     # 重複除去（同ページ同テキスト）
     seen = set()
     unique_headings = []
@@ -253,7 +227,7 @@ def extract_sections(
     keywords: list[str] = None,
 ) -> list[dict]:
     """
-    PyMuPDFで人的資本関連セクションを構造化抽出。
+    pdfplumberで人的資本関連セクションを構造化抽出。
     [{title, page_start, text, chars, matched_keyword}, ...] を返す。
 
     Args:
@@ -263,17 +237,16 @@ def extract_sections(
     if keywords is None:
         keywords = JINJI_SECTION_KEYWORDS
 
-    import fitz
-    doc = fitz.open(pdf_path)
+    import pdfplumber
 
     # ページ単位でテキストを収集
     pages = []
-    for page_num, page in enumerate(doc):
-        pages.append({
-            "page": page_num + 1,
-            "text": page.get_text(),
-        })
-    doc.close()
+    with pdfplumber.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf.pages):
+            pages.append({
+                "page": page_num + 1,
+                "text": page.extract_text() or "",
+            })
 
     sections = []
     for i, page_data in enumerate(pages):
@@ -338,18 +311,18 @@ def analyze_pdf(pdf_path: Path) -> dict:
     """1ファイルを3ライブラリで解析し、結果を返す"""
     result = {"name": pdf_path.name, "libs": {}, "sections": [], "is_fund": False}
 
-    # PyMuPDF でまずフル抽出（ファンド判定・構造化抽出に使用）
-    pymupdf_text, _ = extract_pymupdf(pdf_path)
-    result["is_fund"] = is_fund_report(pymupdf_text)
+    # pdfplumber でまずフル抽出（ファンド判定・構造化抽出に使用）
+    pdf_text, _ = extract_pdfplumber_v1(pdf_path)
+    result["is_fund"] = is_fund_report(pdf_text)
 
-    # 構造化セクション抽出（PyMuPDF専用）
+    # 構造化セクション抽出
     result["sections"] = extract_sections(pdf_path)
 
-    # 3ライブラリ比較
+    # 3抽出関数比較（全pdfplumber実装）
     for lib_name, extract_fn in [
-        ("PyMuPDF", extract_pymupdf),
+        ("pdfplumber-v1", extract_pdfplumber_v1),
         ("pdfplumber", extract_pdfplumber),
-        ("pymupdf4llm", extract_pymupdf4llm),
+        ("pdfplumber-md", extract_pdfplumber_md),
     ]:
         text, elapsed = extract_fn(pdf_path)
         is_error = text.startswith("[ERROR]")
@@ -374,7 +347,7 @@ def print_report(results: list[dict], show_sections: bool = True) -> None:
     print("PDF解析 PoC 結果レポート (v2: セクション抽出精緻化版)")
     print("=" * 80)
 
-    lib_names = ["PyMuPDF", "pdfplumber", "pymupdf4llm"]
+    lib_names = ["pdfplumber-v1", "pdfplumber", "pdfplumber-md"]
 
     for r in results:
         fund_label = " [ファンド型]" if r["is_fund"] else ""
@@ -401,9 +374,9 @@ def print_report(results: list[dict], show_sections: bool = True) -> None:
             print(f"    p{sec['page_start']:>3} '{sec['matched_keyword']}' → {sec['title'][:40]} ({sec['chars']}chars)")
 
         # 人的資本キーワード出現数
-        print("\n  [人的資本キーワード (PyMuPDF top-5)]")
-        pymupdf_kw = r["libs"].get("PyMuPDF", {}).get("jinji_keywords", {})
-        for kw, cnt in sorted(pymupdf_kw.items(), key=lambda x: -x[1])[:5]:
+        print("\n  [人的資本キーワード (pdfplumber top-5)]")
+        pdf_kw = r["libs"].get("pdfplumber", {}).get("jinji_keywords", {})
+        for kw, cnt in sorted(pdf_kw.items(), key=lambda x: -x[1])[:5]:
             print(f"    '{kw}': {cnt}回")
 
     # サマリ
@@ -486,7 +459,7 @@ def main():
                         "elapsed_sec": r["libs"][lib]["elapsed_sec"],
                         "has_jinji": r["libs"][lib]["has_jinji"],
                     }
-                    for lib in ["PyMuPDF", "pdfplumber", "pymupdf4llm"]
+                    for lib in ["pdfplumber-v1", "pdfplumber", "pdfplumber-md"]
                 },
             })
         print(json.dumps(output, ensure_ascii=False, indent=2))
