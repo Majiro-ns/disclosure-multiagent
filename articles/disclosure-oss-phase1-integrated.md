@@ -1,5 +1,5 @@
 ---
-title: "AIで有報の開示漏れを自動検出する — 7件発見、そして実データで3点だった"
+title: "OSSで有報の開示漏れを自動検出する — 7件発見、そして実データで3点だった"
 emoji: "📋"
 type: "tech"
 topics: ["disclosure", "LLM", "securities_report", "quality_assurance", "Python"]
