@@ -7,6 +7,16 @@
 [![Mock Mode](https://img.shields.io/badge/mock%20mode-APIキー不要-orange)](docs/)
 
 EDINETから有価証券報告書を取得し、大手監査法人の開示観点でAI開示チェックを行うOSSツール。
+**APIキー不要のモックモード対応** — クローン直後から即実行。法令YAML追加で規制対応を拡張できます。
+
+## 30秒デモ（APIキーなし）
+
+```bash
+git clone https://github.com/Majiro-ns/disclosure-multiagent.git
+cd disclosure-multiagent
+pip install -e ".[dev]"
+USE_MOCK_LLM=true disclosure-check sample.pdf --level 竹
+```
 
 > 「**松の事例は国も教えてくれるが、竹や梅は決して教えてくれない。**」
 >
